@@ -190,11 +190,11 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
   return (
     <div className="flex flex-col h-full relative">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex w-full px-2 py-4 max-w-full last:border-b-0 h-fit flex-col gap-2 md:flex-row md:gap-4 md:px-4 border-b border-gray-200`}
+            className={`flex w-full px-2 py-3 sm:py-4 max-w-full last:border-b-0 h-fit flex-col gap-2 md:flex-row md:gap-4 md:px-4 border-b border-gray-200`}
           >
             <div className="flex items-center md:items-start gap-2 md:gap-4">
               <div className="hidden md:flex items-center justify-center w-6 h-6 md:w-10 md:h-10 rounded-full bg-gray-100 border border-gray-200">
@@ -215,14 +215,14 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
             </div>
             <div className="pt-2 w-full max-w-full md:flex-1 md:w-0 overflow-hidden flex flex-col gap-2">
               <div className="prose break-words prose-p:leading-relaxed prose-pre:p-0 flex flex-col gap-4">
-                <p className="text-sm md:text-base">{message.content}</p>
+                <p className="text-sm md:text-base whitespace-pre-wrap">{message.content}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
-      <div className="flex flex-col gap-1 w-full p-2 mt-auto absolute bottom-0">
-        <form className="w-full rounded-md flex flex-col overflow-hidden transition-colors duration-200 ease-in-out border border-transparent shadow-none bg-gray-100 focus-within:border-blue-500">
+      <div className="flex flex-col gap-1 w-full p-2 mt-auto absolute bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <form className="w-full rounded-md flex flex-col overflow-hidden transition-colors duration-200 ease-in-out border border-transparent shadow-none bg-gray-100 dark:bg-gray-800 focus-within:border-blue-500">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -233,23 +233,10 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
               }
             }}
             placeholder="Ask MaraiX anything..."
-            className="w-full max-h-60 resize-none bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none"
+            className="w-full max-h-60 resize-none bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none"
             style={{ height: '36px !important' }}
             disabled={isLoading}
           />
-          <div className="flex items-center justify-end px-2 pb-2">
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-8 w-8 hover:bg-gray-200/50"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-gray-600">
-                <polyline points="15 10 20 15 15 20"></polyline>
-                <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
-              </svg>
-              <span className="sr-only">Send message</span>
-            </button>
-          </div>
         </form>
       </div>
     </div>
