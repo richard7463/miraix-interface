@@ -67,7 +67,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     // 1. Show thinking message
     const thinkingMessage: ChatMessage = {
       role: 'assistant',
-      content: 'MaraiX is thinking...'
+      content: 'MiraiX is thinking...'
     };
     const messagesWithThinking = [...messages, thinkingMessage];
     setMessages(messagesWithThinking);
@@ -141,7 +141,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     // 2. Show thinking message
     const thinkingMessage: ChatMessage = {
       role: 'assistant',
-      content: 'MaraiX is thinking...'
+      content: 'MiraiX is thinking...'
     };
     const messagesWithThinking = [...updatedMessages, thinkingMessage];
     setMessages(messagesWithThinking);
@@ -210,7 +210,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                 )}
               </div>
               <p className="text-sm font-semibold md:hidden text-gray-900">
-                {message.role === 'user' ? 'You' : 'MaraiX'}
+                {message.role === 'user' ? 'You' : 'MiraiX'}
               </p>
             </div>
             <div className="pt-2 w-full max-w-full md:flex-1 md:w-0 overflow-hidden flex flex-col gap-2">
@@ -232,7 +232,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                 handleSend();
               }
             }}
-            placeholder="Ask MaraiX anything..."
+            placeholder="Ask MiraiX anything..."
             className="w-full max-h-60 resize-none bg-transparent px-3 py-2 text-sm placeholder:text-gray-600 dark:placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none"
             style={{ height: '36px !important' }}
             disabled={isLoading}

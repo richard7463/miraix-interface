@@ -25,7 +25,7 @@ export default function ChatIdPage({ chatId }: { chatId: string }) {
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         w-64 lg:w-64
       `}>
-        <ChatSideBar />
+      <ChatSideBar />
       </div>
 
       {/* Main content */}

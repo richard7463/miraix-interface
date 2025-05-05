@@ -72,9 +72,9 @@ export const Header = () => {
         <Box className={cs('chat-header', { show: toggleSidebar })} style={{ backgroundColor: theme === 'light' ? '#F8F9FB' : '#111217' }}>
             <Flex className="p-2 h-full overflow-hidden w-64" direction="column" gap="3" style={{ backgroundColor: theme === 'light' ? '#F8F9FB' : '#111217', flex: 1, minHeight: 0 }}>
                 <Flex direction="column" justify="between" className="p-2">
-                    <Text size="4" weight="bold" className="text-gray-900 dark:text-gray-100 mb-4">
-                        ChatGPT Lite
-                    </Text>
+                    <div className="flex items-center gap-2">
+                        <span className="text-lg font-semibold">MiraiX</span>
+                    </div>
                     <div className="flex flex-col gap-2">
                         <button
                             onClick={() => setIsPanelOpen(true)}
