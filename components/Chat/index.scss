@@ -1,0 +1,93 @@
+.chat-textarea {
+  border-radius: 40px;
+  display: flex;
+  width: 70vw;
+  max-width: 700px;
+  padding: 12px 18px;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 22px;
+  height: auto;
+  box-sizing: border-box;
+
+  .rt-TextAreaInput {
+    border-radius: 40px;
+    background: #FFF;
+    border: 1px solid #e0e0e6;
+
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 0;
+    width: 100%;
+    min-height: 22px;
+    height: 50px;
+    resize: none;
+    box-sizing: border-box;
+    font-size: 16px;
+    line-height: 1;
+    /* Remove vertical padding to ensure caret is centered */
+    /* If needed, adjust line-height for perfect centering */
+
+    img {
+      max-width: 100%;
+    }
+    table {
+      table-layout: fixed;
+      width: 100%;
+    }
+  }
+}
+
+
+.chat-side-bar {
+  @apply overflow-hidden w-64 z-10;
+
+  background-color: var(--color-background);
+  transition: 0.5s;
+
+  @apply max-md:absolute max-md:top-0 max-md:bottom-0   max-md:border-none max-md:w-0;
+
+  .rt-ScrollAreaViewport > div {
+    display: block;
+    width: 100%;
+  }
+
+  > div {
+    border-right: 1px solid var(--gray-a4);
+  }
+
+  &.show {
+    @apply w-64;
+  }
+}
+
+.bg-token-surface-primary {
+  @apply flex gap-2 select-none items-center rounded-2xl px-3 py-2 duration-100;
+  background-color: var(--accent-a2);
+
+  &:hover {
+    background-color: var(--accent-a3);
+  }
+}
+
+.bg-token-surface {
+  @apply flex gap-2 select-none items-center rounded-2xl px-3 py-2 duration-100 justify-between;
+
+  &.active {
+    background-color: var(--accent-a4);
+  }
+
+  &:hover {
+    background-color: var(--accent-a3);
+  }
+}
+
+.userMessage {
+  table {
+    @apply border-collapse border  border-slate-400;
+    th,
+    td {
+      @apply border  border-slate-300;
+    }
+  }
+}
