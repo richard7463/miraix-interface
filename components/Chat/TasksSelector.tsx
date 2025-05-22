@@ -44,15 +44,15 @@ export const TasksSelector: React.FC<TasksSelectorProps> = ({
                     <span className="text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors font-medium tracking-wide hover:tracking-wider">Tasks</span>
                 </span>
                 <div className="flex items-center gap-1">
-                    <button
-                        className="p-1 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-all duration-200 ease-in-out transform hover:scale-110 hover:rotate-90"
+                    <div
+                        className="p-1 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md transition-all duration-200 ease-in-out transform hover:scale-110 hover:rotate-90 cursor-pointer"
                         onClick={(e) => {
                             e.stopPropagation()
                             onCreateTask?.()
                         }}
                     >
                         <FiPlus className="text-sm text-green-500 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 transition-colors" />
-                    </button>
+                    </div>
                     <span className={`text-xs text-green-500 dark:text-green-400 group-hover:text-green-600 dark:group-hover:text-green-300 transition-all duration-200 ease-in-out ${isOpen ? 'rotate-180' : ''}`}>
                         ▼
                     </span>

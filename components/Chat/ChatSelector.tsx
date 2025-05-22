@@ -5,85 +5,131 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Text } from '@radix-ui/themes'
 import { BiMessageDetail } from 'react-icons/bi'
 import { FiPlus } from 'react-icons/fi'
+import { useRouter } from 'next/navigation'
+import { RiRobot2Line } from 'react-icons/ri'
+import { ImSpinner8 } from 'react-icons/im'
 
 interface ChatSelectorProps {
   chatList: any[]
   currentChatId?: string
   onChangeChat: (chat: any) => void
-  onCreateChat?: () => void
+  onCreateChat: () => void
+  onOpenChange?: (isOpen: boolean) => void
+  isLoading?: boolean
 }
 
 export const ChatSelector: React.FC<ChatSelectorProps> = ({
   chatList,
   currentChatId,
   onChangeChat,
-  onCreateChat
+  onCreateChat,
+  onOpenChange,
+  isLoading = false
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
+  // 移除点击外部关闭的逻辑
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+  //       setIsOpen(false)
+  //       onOpenChange?.(false)
+  //     }
+  //   }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  //   document.addEventListener('mousedown', handleClickOutside)
+  //   return () => document.removeEventListener('mousedown', handleClickOutside)
+  // }, [onOpenChange])
+
+  const handleToggle = () => {
+    const newIsOpen = !isOpen
+    setIsOpen(newIsOpen)
+    onOpenChange?.(newIsOpen)
+  }
+
+  // 处理聊天选择
+  const handleChatSelect = (chat: any) => {
+    // onChangeChat(chat);
+    // 跳转到对应的聊天页面
+    router.push(`/chat/${chat.id}`);
+    // 保持列表展开状态
+  }
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className="w-full border border-neutral-200 dark:border-neutral-800 rounded-md">
       <button
-        className="w-full flex items-center justify-between rounded-lg px-3 py-1.5 text-sm font-medium bg-white dark:bg-[#1d1e29] text-black dark:text-white border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md focus:outline-none group"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
+        className="peer/menu-button gap-2 overflow-hidden rounded-md p-2 text-left outline-none duration-300 ease-in-out focus-visible:ring-2 active:text-sidebar-foreground-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:font-medium data-[active=true]:text-sidebar-active data-[state=open]:hover:bg-neutral-100 dark:data-[state=open]:hover:bg-neutral-800 data-[state=open]:hover:text-sidebar-active group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-sidebar-active h-8 text-sm flex items-center font-medium transition-all group justify-between w-full"
+        type="button"
+        aria-controls="chat-list"
+        aria-expanded={isOpen}
+        data-state={isOpen ? 'open' : 'closed'}
       >
-        <span className="truncate flex items-center gap-2">
-          <BiMessageDetail className="text-sm text-blue-500 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors" />
-          <span className="text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors font-medium tracking-wide hover:tracking-wider">ChatLists</span>
-        </span>
-        <div className="flex items-center gap-1">
-          <button
-            className="p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-all duration-200 ease-in-out transform hover:scale-110 hover:rotate-90"
-            onClick={(e) => {
-              e.stopPropagation()
-              onCreateChat?.()
-            }}
-          >
-            <FiPlus className="text-sm text-blue-500 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors" />
-          </button>
-          <span className={`text-xs text-blue-500 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-all duration-200 ease-in-out ${isOpen ? 'rotate-180' : ''}`}>
-            ▼
-          </span>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <BiMessageDetail className="h-4 w-4" />
+            <h1 className="text-sm font-semibold">Chats</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <div 
+              className="h-fit w-fit p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-md transition-colors duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCreateChat();
+              }}
+            >
+              <FiPlus className="w-4 h-4" />
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`h-[14px] w-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} text-neutral-500 dark:text-neutral-500`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
         </div>
       </button>
 
       <div
-        className={`absolute z-50 w-full mt-1 bg-white dark:bg-[#1d1e29] rounded-lg shadow-lg border border-blue-200 dark:border-blue-800 transition-all duration-200 ease-in-out transform origin-top ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-          }`}
+        id="chat-list"
+        className={`data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden transition-all duration-200 ease-in-out ${
+          isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+        data-state={isOpen ? 'open' : 'closed'}
       >
-        <div className="py-1 max-h-60 overflow-y-auto">
-          {chatList.map((chat) => (
-            <button
-              key={chat.id}
-              className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-all duration-150 ease-in-out ${chat.id === currentChatId
-                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                : 'hover:bg-blue-50/50 dark:hover:bg-blue-900/10 text-gray-700 dark:text-gray-300'
+        <div className="mt-2 space-y-1 p-1">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-2">
+              <ImSpinner8 className="w-4 h-4 animate-spin text-neutral-500" />
+            </div>
+          ) : (
+            chatList.map((chat) => (
+              <button
+                key={chat.id}
+                onClick={() => handleChatSelect(chat)}
+                className={`w-full text-left px-2 py-1.5 text-sm rounded-md transition-colors duration-200 ${
+                  chat.id === currentChatId
+                    ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
+                    : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
                 }`}
-              onClick={() => {
-                onChangeChat(chat)
-                setIsOpen(false)
-              }}
-            >
-              <BiMessageDetail className={`text-sm ${chat.id === currentChatId ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`} />
-              <Text className="truncate font-medium tracking-wide hover:tracking-wider">{chat.title || chat.persona?.name}</Text>
-              {chat.id === currentChatId && (
-                <span className="ml-auto text-blue-500 dark:text-blue-400 text-sm animate-pulse">•</span>
-              )}
-            </button>
-          ))}
+              >
+                <div className="flex items-center gap-2">
+                  <RiRobot2Line className="h-4 w-4" />
+                  <span className="truncate">{chat.name || 'New Chat'}</span>
+                </div>
+              </button>
+            ))
+          )}
         </div>
       </div>
     </div>

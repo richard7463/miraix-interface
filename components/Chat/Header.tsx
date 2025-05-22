@@ -4,10 +4,10 @@ import { Box, Flex, IconButton, Text } from '@radix-ui/themes'
 import cs from 'classnames'
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { BiMessageDetail } from 'react-icons/bi'
-import { FiPlus, FiCheckSquare } from 'react-icons/fi'
+import { FiPlus, FiCheckSquare, FiMenu, FiSettings } from 'react-icons/fi'
 import { RiRobot2Line } from 'react-icons/ri'
 import { useTheme } from '../Themes'
-import ChatContext from './chatContext'
+import { ChatContext } from './useChatHook'
 import SidePanel from './SidePanel'
 
 import './index.scss'
@@ -73,6 +73,11 @@ export const Header = () => {
             <Flex className="p-2 h-full overflow-hidden w-64" direction="column" gap="3" style={{ backgroundColor: theme === 'light' ? '#F8F9FB' : '#111217', flex: 1, minHeight: 0 }}>
                 <Flex direction="column" justify="between" className="p-2">
                     <div className="flex items-center gap-2">
+                        <img 
+                            src="/favicon.png" 
+                            alt="MiraiX Logo" 
+                            className="w-6 h-6 rounded-lg"
+                        />
                         <span className="text-lg font-semibold">MiraiX</span>
                     </div>
                     <div className="flex flex-col gap-2">

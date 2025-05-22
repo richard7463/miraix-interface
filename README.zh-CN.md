@@ -1,14 +1,14 @@
-# ChatGPT Lite
+# MiraiX
 
 [English](./README.md) | 简体中文
 
 ## 演示
 
-访问 [ChatGPT Lite 演示网站](https://bit.ly/chatgpt-lite)
+访问 [MiraiX 演示网站](https://bit.ly/chatgpt-lite)
 
 ## 功能
 
-ChatGPT Lite是一个基于Next.js和[OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)的网站程序，兼容OpenAI和Azure OpenAI账户。
+MiraiX是一个基于Next.js和[OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)的网站程序，兼容OpenAI和Azure OpenAI账户。
 
 - 部署个性化ChatGPT程序，支持Markdown显示，提示词商店，多角色对话等。
 - 创建供朋友使用的ChatGPT程序，无需共享API密钥。

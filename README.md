@@ -1,14 +1,14 @@
-# ChatGPT Lite
+# MiraiX
 
 English | [简体中文](./README.zh-CN.md)
 
 ## Demo
 
-Visit the [ChatGPT Lite Demo Site](https://bit.ly/chatgpt-lite)
+Visit the [MiraiX Demo Site](https://bit.ly/chatgpt-lite)
 
-## Features
+## About
 
-ChatGPT Lite is a lightweight ChatGPT web interface developed using Next.js and the [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat). It's compatible with both OpenAI and Azure OpenAI accounts.
+MiraiX is a lightweight AI web interface developed using Next.js and the [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat). It's compatible with both OpenAI and Azure OpenAI accounts.
 
 - Deploy a custom ChatGPT web interface that supports markdown, prompt storage, and multi-person chats.
 - Create a private, web-based ChatGPT for use among friends without sharing your API key.

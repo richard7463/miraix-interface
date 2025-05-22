@@ -8,9 +8,9 @@ export default function GradientHero() {
         <span className="inline-block mx-2 align-middle bg-gradient-to-r from-[#C471F5] to-[#3F51B5] text-transparent bg-clip-text">
           Your AI-Powered DeFi Partner
         </span>
-        <span className="block text-3xl bg-gradient-to-r from-[#3F51B5] to-[#00C6FB] text-transparent bg-clip-text">
+        {/* <span className="block text-3xl bg-gradient-to-r from-[#3F51B5] to-[#00C6FB] text-transparent bg-clip-text">
           Building Autonomous Financial Future
-        </span>
+        </span> */}
       </h1>
     </div>
   );

@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client'
 
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { Box, Flex, IconButton, ScrollArea, Text } from '@radix-ui/themes'
 import cs from 'classnames'
 import { AiOutlineCloseCircle } from 'react-icons/ai'
@@ -9,12 +9,13 @@ import { BiMessageDetail } from 'react-icons/bi'
 import { FiPlus, FiCheckSquare } from 'react-icons/fi'
 import { RiRobot2Line } from 'react-icons/ri'
 import { useTheme } from '../Themes'
-import ChatContext from './chatContext'
+import { ChatContext } from './useChatHook'
 import './index.scss'
 import { ChatSelector } from './ChatSelector'
 import SidePanel from './SidePanel'
-import { StrategiesSelector } from './StrategiesSelector'
-import { TasksSelector } from './TasksSelector'
+// import { StrategiesSelector } from './StrategiesSelector'
+// import { TasksSelector } from './TasksSelector'
+import { usePrivyAuth } from './usePrivyAuth'
 
 export const ChatSideBar = () => {
   const {
@@ -35,24 +36,54 @@ export const ChatSideBar = () => {
 
   const [isPanelOpen, setIsPanelOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false) // Add login state
+  const [localChatList, setLocalChatList] = useState([])
+  const [isChatSelectorOpen, setIsChatSelectorOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { getUserChats } = usePrivyAuth()
 
-  // If chatList is null or empty, assign mock data for display
-  let displayChatList = chatList
-  if (!Array.isArray(chatList) || chatList.length === 0) {
-    displayChatList = [
-      {
-        id: 'mock-1',
-        name: 'Mock Chat 1',
-        persona: { id: 'mock-persona-1', name: 'Mock Persona', role: 'system', prompt: 'Mock prompt' },
-        messages: []
-      },
-      {
-        id: 'mock-2',
-        name: 'Mock Chat 2',
-        persona: { id: 'mock-persona-2', name: 'Mock Persona 2', role: 'system', prompt: 'Mock prompt 2' },
-        messages: []
-      }
-    ]
+  // 获取聊天列表的函数
+  const displayChatList = async () => {
+    console.log('displayChatList called, isChatSelectorOpen:', isChatSelectorOpen)
+    try {
+      setIsLoading(true)
+      console.log('Fetching chats from API...')
+      const { chats: userChats } = await getUserChats()
+      console.log('Fetched chats:', userChats)
+      setLocalChatList(userChats || [])
+      return userChats || []
+    } catch (error) {
+      console.error('Error fetching chats:', error)
+      setLocalChatList([])
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // 当 ChatSelector 打开时获取聊天列表
+  useEffect(() => {
+    console.log('useEffect triggered, isChatSelectorOpen:', isChatSelectorOpen)
+    if (isChatSelectorOpen) {
+      console.log('ChatSelector is open, fetching chats...')
+      displayChatList()
+    }
+  }, [isChatSelectorOpen])
+
+  // 处理 ChatSelector 打开状态变化
+  const handleChatSelectorOpenChange = (isOpen: boolean) => {
+    console.log('ChatSelector open state changed:', isOpen)
+    // 只在打开时设置状态，关闭时不处理
+    if (isOpen) {
+      setIsChatSelectorOpen(true)
+      displayChatList()
+    }
+  }
+
+  // 处理聊天选择
+  const handleChatChange = (chat: any) => {
+    onChangeChat(chat)
+    // 保持列表展开状态
+    setIsChatSelectorOpen(true)
   }
 
   // Mock data for tasks and strategies
@@ -99,23 +130,25 @@ export const ChatSideBar = () => {
         <ScrollArea className="flex-1" style={{ width: '100%' }} type="auto">
           <Flex direction="column" gap="3" className="px-2">
             <ChatSelector
-              chatList={displayChatList}
+              chatList={localChatList}
               currentChatId={currentChatRef?.current?.id}
-              onChangeChat={onChangeChat}
+              onChangeChat={handleChatChange}
               onCreateChat={handleCreateChat}
+              onOpenChange={handleChatSelectorOpenChange}
+              isLoading={isLoading}
             />
-            <TasksSelector
+            {/* <TasksSelector
               taskList={mockTasks}
               currentTaskId={mockTasks[0].id}
               onChangeTask={(task) => console.log('Task selected:', task)}
               onCreateTask={handleCreateTask}
-            />
-            <StrategiesSelector
+            /> */}
+            {/* <StrategiesSelector
               strategyList={mockStrategies}
               currentStrategyId={mockStrategies[0].id}
               onChangeStrategy={(strategy) => console.log('Strategy selected:', strategy)}
               onCreateStrategy={handleCreateStrategy}
-            />
+            /> */}
           </Flex>
         </ScrollArea>
 

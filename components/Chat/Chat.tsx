@@ -17,11 +17,14 @@ import ContentEditable from 'react-contenteditable'
 import toast from 'react-hot-toast'
 import { AiOutlineClear, AiOutlineLoading3Quarters, AiOutlineUnorderedList } from 'react-icons/ai'
 import { FiSend } from 'react-icons/fi'
-import ChatContext from './chatContext'
 import type { Chat, ChatMessage } from './interface'
 import Message from './Message'
 import SwapBridgeStakeActionButtons from './SwapBridgeStakeActionButtons';
 import WelcomeSection from './WelcomeSection';
+import { API_ENDPOINTS } from '@/lib/config'
+import { useChatStore } from '@/store/chatStore'
+import { DefaultPersonas } from './interface'
+// const { user, ready, authenticated } = usePrivy();
 
 import './index.scss'
 
@@ -70,93 +73,123 @@ const postChatOrQuestion = async (chat: Chat, messages: any[], input: string) =>
 
 
 const Chat = (props: ChatProps, ref: any) => {
-  // 组件顶层获取 context，避免 hooks 错误
-  const context = useContext(ChatContext);
-  // debug, setIsLoading, setCurrentMessage 如未用到，前面加下划线防止 ESLint 警告
-  const { debug: _debug, currentChatRef, saveMessages, onToggleSidebar, forceUpdate, onCreateChat, DefaultPersonas } = context;
   const router = useRouter();
-
-  // 只保留一份 state/ref 声明
-  const [isLoading, _setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [currentMessage, _setCurrentMessage] = useState<string>('');
-  const conversation = useRef<ChatMessage[]>([]);
+  const [currentMessage, setCurrentMessage] = useState<string>('');
   const textAreaRef = useRef<HTMLElement>(null);
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
-  // --- 自动加载当前 chatId 的历史消息 ---
+  const {
+    currentChat,
+    chatList,
+    setCurrentChat,
+    updateChatStatus,
+    setMessages,
+    getMessages,
+    setChatList
+  } = useChatStore();
+
+  // 初始化聊天
   useEffect(() => {
-    const chatId = props.chatId || currentChatRef?.current?.id;
-    if (chatId) {
-      // const local = localStorage.getItem(`ms_${chatId}`);
-      // let messages: ChatMessage[] = [];
-      // if (local) {
-      //   try { messages = JSON.parse(local) || []; } catch {}
-      // }
-      // conversation.current = messages;
-      // forceUpdate?.();
-    }
-  }, [props.chatId, currentChatRef?.current?.id]);
+    const initializeChat = async () => {
+      if (!currentChat) {
+        console.log('[Chat] Initializing new chat');
+        // 创建新的聊天
+        const newChat = {
+          id: crypto.randomUUID(),
+          isNew: false,
+          persona: DefaultPersonas[0],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        // 更新状态
+        setCurrentChat(newChat);
+        setChatList([...chatList, newChat]);
+        console.log('[Chat] Created new chat:', newChat);
+      }
+    };
+
+    // initializeChat();
+  }, [currentChat, chatList, setCurrentChat, setChatList]);
+
 
   // Test proxy by requesting baidu.com and qq.com
 
   const sendMessage = useCallback(
     async () => {
-      console.log('[sendMessage] called', { isLoading, message, currentChatId: currentChatRef?.current?.id });
-      if (isLoading) return;
-      const input = message.trim();
-      if (!input) {
-        toast.error('Please type a message to continue.');
-        return;
-      }
-      _setIsLoading(true);
-      try {
-        let chatId = currentChatRef?.current?.id;
-        let chat = currentChatRef?.current;
+      console.log('[sendMessage] called', { isLoading, message, currentChatId: currentChat?.id });
+      if (isLoading || !message.trim()) return;
 
-        console.log('[sendMessage] chatId click', chatId, chat, DefaultPersonas);
-        console.log('[sendMessage] 当前 props.chatId:', props.chatId, 'currentChatRef.current?.id:', currentChatRef?.current?.id, 'chatId:', chatId);
-        // 只要在 /chat 页面点击发送，就强制新建会话并跳转
-        if (!props.chatId && onCreateChat && DefaultPersonas && DefaultPersonas[0]) {
-          console.log('[sendMessage] 强制新建会话！');
-          if (currentChatRef?.current) {
-            currentChatRef.current = undefined; // 重置当前会话
-          }
-          onCreateChat(DefaultPersonas[0]);
-          setMessage('');
-          return;
-        } else if (chatId) {
-          console.log('[sendMessage] 往已有会话追加消息:', chatId);
-          // Existing chat: add user message, call API, add assistant reply
-          conversation.current.push({ content: input, role: 'user' });
-          saveMessages?.(conversation.current);
-          setMessage('');
-          forceUpdate?.();
-          // POST to external API (like langgraph-defi-interface)
-          const response = await axios.post('https://langgraph-defai.vercel.app/api/chat', {
-            message: input,
-            timestamp: new Date().toISOString()
-          }, {
-            headers: { 'Content-Type': 'application/json' }
+      try {
+        setIsLoading(true);
+        const input = message.trim();
+        setMessage('');
+
+        // 使用当前聊天，而不是创建新的
+        const newChat = {
+          id: crypto.randomUUID(),
+          isNew: true,
+          persona: DefaultPersonas[0],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        // 设置新的聊天
+        setCurrentChat(newChat);
+        
+        // 使用 getState() 获取最新状态
+        const currentState = useChatStore.getState();
+        const latestChat = currentState.currentChat;
+        
+        // 如果是新聊天，先创建聊天会话
+        console.log('[sendMessage] Using current chat:', {
+          chatId: latestChat?.id,
+          isNew: latestChat?.isNew
+        });
+
+        console.log('[sendMessage] Creating new chat session for first message', latestChat, input);
+          const response = await fetch(API_ENDPOINTS.CREATE_CHAT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+            'message': `Create chat ${latestChat?.id}`,
+              'address': '0x1234567890123456789012345678901234567890'
+            },
+            body: JSON.stringify({
+            chatId: latestChat?.id,
+            persona: latestChat?.persona,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              message: input,
+              timestamp: new Date().toISOString()
+            })
           });
-          const data = response.data;
-          if (data && data.result) {
-            conversation.current.push({ content: data.result, role: 'assistant' });
-            saveMessages?.(conversation.current);
-            forceUpdate?.();
-          } else {
-            toast.error(data?.error || 'No reply from AI');
+
+          if (!response.ok) {
+            throw new Error('Failed to create chat session');
           }
-        }
-      } catch (error: any) {
-        console.error(error);
-        toast.error(error.message || 'Failed to send message');
+
+          // 更新聊天状态
+        updateChatStatus(latestChat?.id!, true);
+          
+          // 添加用户消息到对话
+        const messages = [{ content: input, role: 'user' }];
+        setMessages(latestChat?.id!, messages);
+        
+        // 跳转到对应的聊天页面
+        router.push(`/chat/${latestChat?.id}`);
+      } catch (error) {
+        console.error('Error sending message:', error);
+        toast.error('Failed to send message');
       } finally {
-        _setIsLoading(false);
+        setIsLoading(false);
       }
     },
-    [isLoading, message, forceUpdate, currentChatRef, saveMessages, onCreateChat, DefaultPersonas, router]
-  )
+    [isLoading, message, setMessages, getMessages, router, updateChatStatus]
+  );
 
   const handleKeypress = useCallback(
     (e: any) => {
@@ -169,8 +202,8 @@ const Chat = (props: ChatProps, ref: any) => {
   )
 
   const clearMessages = () => {
-    conversation.current = []
-    forceUpdate?.()
+    // conversation.current = []
+    // forceUpdate?.()
   }
 
   useEffect(() => {
@@ -184,15 +217,7 @@ const Chat = (props: ChatProps, ref: any) => {
     if (bottomOfChatRef.current) {
       bottomOfChatRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [conversation, currentMessage])
-
-  useEffect(() => {
-    // conversationRef.current = conversation.current; // 已无 conversationRef
-    if (currentChatRef?.current?.id) {
-      saveMessages?.(conversation.current);
-    }
-    // 不要依赖 conversation.current，防止死循环
-  }, [currentChatRef?.current?.id, saveMessages]);
+  }, [currentMessage])
 
   useEffect(() => {
     if (!isLoading) {
@@ -203,11 +228,11 @@ const Chat = (props: ChatProps, ref: any) => {
   useImperativeHandle(ref, () => {
     return {
       setConversation(messages: ChatMessage[]) {
-        conversation.current = messages
-        forceUpdate?.()
+        // conversation.current = messages
+        // forceUpdate?.()
       },
       getConversation() {
-        return conversation.current // 修正：已无 conversationRef
+        return getMessages(currentChat?.id) // 修正：已无 conversationRef
       },
       focus: () => {
         textAreaRef.current?.focus()
@@ -215,14 +240,12 @@ const Chat = (props: ChatProps, ref: any) => {
     }
   })
 
-  // 自动发送事件监听（保留）
+  // 移除自动发送事件监听
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      let pendingInput: string | null = null;
       const handler = (e: any) => {
         if (typeof e.detail === 'string') {
           setMessage(e.detail);
-          pendingInput = e.detail;
         }
       };
       window.addEventListener('autoSendInput', handler);
@@ -230,19 +253,17 @@ const Chat = (props: ChatProps, ref: any) => {
     }
   }, []);
 
-  // 监听 message 变化，自动发送
+  // 移除自动发送逻辑
   useEffect(() => {
     if (message && typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       const inputParam = url.searchParams.get('input');
       if (inputParam && inputParam === message) {
-        // 清除参数，避免重复发送
+        // 只清除参数，不自动发送
         url.searchParams.delete('input');
         window.history.replaceState({}, '', url.pathname + url.search);
-        sendMessage();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message]);
 
   return (
@@ -360,4 +381,42 @@ const Chat = (props: ChatProps, ref: any) => {
   );
 }
 
-export default forwardRef<ChatGPInstance, ChatProps>(Chat)
+interface ChatContextType {
+  debug?: boolean;
+  personaPanelType: string;
+  DefaultPersonas: Persona[];
+  currentChatRef?: MutableRefObject<Chat | undefined>;
+  chatList: Chat[];
+  personas: Persona[];
+  isOpenPersonaModal?: boolean;
+  editPersona?: Persona;
+  personaModalLoading?: boolean;
+  openPersonaPanel?: boolean;
+  toggleSidebar?: boolean;
+  onOpenPersonaModal?: () => void;
+  onClosePersonaModal?: () => void;
+  setCurrentChat?: (chat: Chat) => void;
+  onCreatePersona?: (persona: Persona) => void;
+  onDeleteChat?: (chat: Chat) => void;
+  onDeletePersona?: (persona: Persona) => void;
+  onEditPersona?: (persona: Persona) => void;
+  onCreateChat?: (persona: Persona) => void;
+  onChangeChat?: (chat: Chat) => void;
+  saveMessages?: (messages: ChatMessage[]) => void;
+  onOpenPersonaPanel?: (type?: string) => void;
+  onClosePersonaPanel?: () => void;
+  onToggleSidebar?: () => void;
+  forceUpdate?: () => void;
+  messagesMap?: MutableRefObject<Map<string, ChatMessage[]>>;
+  updateChatStatus?: (chatId: string, isNew: boolean) => void;
+}
+
+export const useChat = (): ChatContextType => {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error('useChat must be used within a ChatProvider');
+  }
+  return context;
+};
+
+export default Chat;
