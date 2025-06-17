@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { ChevronDown, AlertCircle, ArrowDownUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { FaExchangeAlt } from 'react-icons/fa';
+import { SelectTokenModal, TokenInfo } from './SelectTokenModal';
 
 interface Token {
   symbol: string;
@@ -12,48 +12,220 @@ interface Token {
   address: string;
   balance?: number;
   price?: number;
+  decimals: number;
 }
 
-interface SwapProps {
+interface RoutePlan {
+  swapInfo: {
+    ammKey: string;
+    label: string;
+    inputMint: string;
+    outputMint: string;
+    inAmount: string;
+    outAmount: string;
+    feeAmount: string;
+    feeMint: string;
+  };
+  percent: number;
+}
+
+interface Quote {
+  inputMint: string;
+  inAmount: string;
+  outputMint: string;
+  outAmount: string;
+  otherAmountThreshold: string;
+  swapMode: string;
+  slippageBps: number;
+  platformFee: any;
+  priceImpactPct: string;
+  routePlan: RoutePlan[];
+  contextSlot: number;
+  timeTaken: number;
+  swapUsdValue: string;
+  simplerRouteUsed: boolean;
+  inputMintLogo?: string;
+  outputMintLogo?: string;
+}
+
+// 定义 chat-new 响应的数据结构
+interface ResponseData {
+  success: boolean;
+  message: string;
+  data?: {
+    intent: string;
+    entities: {
+      amount: number;
+      fromToken: string;
+      toToken: string;
+      network: string;
+      sourceChain: string | null;
+      destinationChain: string | null;
+    };
+    missingInfo: any;
+    response: string;
+    workflowId: string;
+  };
+  thoughts?: string[];
+  quote?: Quote;
+}
+
+interface NewSwapProps {
+  fromToken?: Token;
+  toToken?: Token;
+  fromAmount?: string;
+  slippage?: number;
   className?: string;
+  quote?: Quote;
+  thoughts?: string[];
+  responseData?: ResponseData;
 }
-
-const SOLANA_CHAIN_LOGO = "https://firebasestorage.googleapis.com/v0/b/sphereone-testing.appspot.com/o/images%2Fchainlogos%2FSolanaLogo64x64.png?alt=media&token=2de76040-d7b3-435d-85a0-0a973e6e2cf5";
 
 const USDT_TOKEN: Token = {
   symbol: "USDT",
   name: "Tether USD",
-  logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png",
+  logo: "",
   chain: "SOLANA",
-  chainLogo: SOLANA_CHAIN_LOGO,
+  chainLogo: "",
   address: "es9vmfrzacermjfrf4h2fyd4kconky11mcce8benwnyb",
   balance: 0,
-  price: 1
+  price: 1,
+  decimals: 6
 };
 
 const SOL_TOKEN: Token = {
   symbol: "SOL",
   name: "Solana",
-  logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png",
+  logo: "",
   chain: "SOLANA",
-  chainLogo: SOLANA_CHAIN_LOGO,
+  chainLogo: "",
   address: "so11111111111111111111111111111111111111112",
   balance: 0,
-  price: 167.82
+  price: 167.82,
+  decimals: 9
 };
 
-export default function NewSwap({ className = '' }: SwapProps) {
-  const [fromAmount, setFromAmount] = useState<string>("5");
-  const [toAmount, setToAmount] = useState<string>("0.029804");
-  const [fromToken, setFromToken] = useState<Token>(USDT_TOKEN);
-  const [toToken, setToToken] = useState<Token>(SOL_TOKEN);
-  const [slippage, setSlippage] = useState<number>(50);
+const DECIMALS = 6;
+
+export default function NewSwap({
+  fromToken: fromTokenProp,
+  toToken: toTokenProp,
+  fromAmount: fromAmountProp,
+  slippage: slippageProp = 50,
+  className = '',
+  quote,
+  thoughts,
+  responseData
+}: NewSwapProps) {
+  console.log("NewSwap props:", { quote, thoughts, responseData });
+  
+  // Extract quote from responseData if available
+  const actualQuote = quote || (responseData?.quote);
+  const actualThoughts = thoughts || (responseData?.thoughts || []);
+  
+  console.log("Actual quote:", actualQuote);
+  console.log("Quote input logo:", actualQuote?.inputMintLogo);
+  console.log("Quote output logo:", actualQuote?.outputMintLogo);
+
+  const [fromAmount, setFromAmount] = useState<string>(fromAmountProp || "1");
+  const [toAmount, setToAmount] = useState<string>("0");
+  const [fromToken, setFromToken] = useState<Token>(fromTokenProp || SOL_TOKEN);
+  const [toToken, setToToken] = useState<Token>(toTokenProp || {
+    symbol: "BONK",
+    name: "Bonk",
+    logo: "",
+    chain: "SOLANA",
+    chainLogo: "",
+    address: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    balance: 0,
+    price: 0.000001,
+    decimals: 9
+  });
+  const [slippage, setSlippage] = useState<number>(slippageProp);
+  const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'from' | 'to'>('from');
+  const [showThoughts, setShowThoughts] = useState<boolean>(true);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  useEffect(() => {
+    if (fromTokenProp) setFromToken(fromTokenProp);
+  }, [fromTokenProp]);
+  useEffect(() => {
+    if (toTokenProp) setToToken(toTokenProp);
+  }, [toTokenProp]);
+  useEffect(() => {
+    if (fromAmountProp !== undefined) setFromAmount(fromAmountProp);
+  }, [fromAmountProp]);
+  useEffect(() => {
+    if (slippageProp !== undefined) setSlippage(slippageProp);
+  }, [slippageProp]);
+
+  // Handle quote data
+  useEffect(() => {
+    if (actualQuote) {
+      console.log("Processing quote in useEffect:", actualQuote);
+      
+      // Update token information
+      if (actualQuote.inputMint) {
+        setFromToken(prev => ({
+          ...prev,
+          address: actualQuote.inputMint,
+          logo: actualQuote.inputMintLogo || prev.logo,
+          decimals: prev.decimals || 9
+        }));
+      }
+      
+      if (actualQuote.outputMint) {
+        setToToken(prev => ({
+          ...prev,
+          address: actualQuote.outputMint,
+          logo: actualQuote.outputMintLogo || prev.logo,
+          decimals: prev.decimals || 6
+        }));
+      }
+
+      // Update amounts with proper decimal handling
+      if (actualQuote.inAmount) {
+        const inputDecimals = fromToken.decimals || 9;
+        const normalizedAmount = (parseInt(actualQuote.inAmount) / Math.pow(10, inputDecimals)).toString();
+        setFromAmount(normalizedAmount);
+      }
+      
+      if (actualQuote.outAmount) {
+        const outputDecimals = toToken.decimals || 6;
+        const normalizedAmount = (parseInt(actualQuote.outAmount) / Math.pow(10, outputDecimals)).toString();
+        setToAmount(normalizedAmount);
+      }
+
+      if (actualQuote.slippageBps !== undefined) {
+        setSlippage(actualQuote.slippageBps);
+      }
+    }
+  }, [actualQuote]);
 
   const handleAmountChange = (value: string) => {
-    setFromAmount(value);
-    // 这里可以添加价格计算逻辑
-    const calculatedAmount = (parseFloat(value) / SOL_TOKEN.price!).toFixed(6);
-    setToAmount(calculatedAmount);
+    if (!value) {
+      setFromAmount("0");
+      setToAmount("0");
+      return;
+    }
+    
+    let val = value.replace(/[^0-9.]/g, '');
+    val = val.replace(/^([^.]*\.)|\./g, '$1');
+    if (val.includes('.')) {
+      const [int, dec] = val.split('.');
+      val = int + '.' + dec.slice(0, fromToken.decimals);
+    }
+    setFromAmount(val);
+    
+    // 确保toAmount的计算正确
+    if (val && !isNaN(parseFloat(val))) {
+      const calculatedAmount = (parseFloat(val) * (toToken.price || 1)).toFixed(toToken.decimals);
+      setToAmount(calculatedAmount);
+    } else {
+      setToAmount("0");
+    }
   };
 
   const formatAddress = (address: string) => {
@@ -61,199 +233,290 @@ export default function NewSwap({ className = '' }: SwapProps) {
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
 
+  const handleTokenSelect = (token: TokenInfo) => {
+    const fullToken: Token = {
+      symbol: token.symbol,
+      name: token.name,
+      logo: token.image || '',
+      chain: fromToken.chain || 'SOLANA',
+      chainLogo: '',
+      address: token.mint || '',
+      balance: token.balance || 0,
+      price: 0,
+      decimals: 9
+    };
+    if (modalType === 'from') setFromToken(fullToken);
+    else setToToken(fullToken);
+  };
+
+  async function fetchTokenInfoByAddress(address: string): Promise<TokenInfo | null> {
+    // mock: you can replace with real API
+    if (address.toLowerCase() === 'so11111111111111111111111111111111111111112') {
+      return {
+        symbol: 'SOL',
+        name: 'Solana',
+        logo: '',
+        address,
+        chain: 'SOLANA',
+        mint: address,
+        decimals: 9,
+        image: '',
+        balance: 0
+      } as any;
+    }
+    if (address.toLowerCase() === 'dezxaz8z7pnrnjjz3wxborgixca6xjnb7yab1ppb263') {
+      return {
+        symbol: 'BONK',
+        name: 'Bonk',
+        logo: '',
+        address,
+        chain: 'SOLANA',
+        mint: address,
+        decimals: 9,
+        image: '',
+        balance: 0
+      } as any;
+    }
+    if (address.toLowerCase() === 'es9vmfrzacermjfrf4h2fyd4kconky11mcce8benwnyb') {
+      return {
+        symbol: 'USDT',
+        name: 'Tether USD',
+        logo: '',
+        address,
+        chain: 'SOLANA',
+        mint: address,
+        decimals: 6,
+        image: '',
+        balance: 0
+      } as any;
+    }
+    return null;
+  }
+
+  // Debug output for logos
+  const fromLogoUrl = (actualQuote && actualQuote.inputMintLogo) ? actualQuote.inputMintLogo : (fromToken.logo || '/token-placeholder.svg');
+  const toLogoUrl = (actualQuote && actualQuote.outputMintLogo) ? actualQuote.outputMintLogo : (toToken.logo || '/token-placeholder.svg');
+  
+  console.log("From logo URL:", fromLogoUrl);
+  console.log("To logo URL:", toLogoUrl);
+
+  const handleConfirm = async () => {
+    if (isConfirming) return;
+    
+    try {
+      setIsConfirming(true);
+      const workflowId = responseData?.data?.workflowId || '';
+      
+      const response = await fetch('/api/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workflowId,
+          operationType: 'swap'
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Handle successful confirmation
+        console.log('Confirmation successful:', result);
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
   return (
-    <div className={`text-card-foreground bg-background/95 backdrop-blur-sm border border-border/40 shadow-xl rounded-2xl mt-4 flex flex-col items-center gap-4 max-w-[550px] mb-6 ${className}`}>
-      {/* Header with enhanced gradient */}
-      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-b border-border/40 rounded-t-2xl p-4 flex flex-row justify-between items-center gap-4 w-full">
-        <div className="flex-1 w-full space-y-4">
-          {/* From Token */}
-          <motion.div 
-            whileHover={{ scale: 1.01 }}
-            className="flex flex-row bg-background/80 backdrop-blur-sm border border-border/40 shadow-lg items-start w-full p-4 rounded-xl transition-all duration-300 hover:shadow-xl hover:border-primary/20"
-          >
-            <div className="flex flex-col w-full justify-center gap-4">
-              <p className="text-sm sm:text-lg text-left font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">From</p>
-              <div className="flex w-full justify-between relative">
-                <div className="flex w-1/2 items-center relative">
-                  <div className="w-12 h-12 relative">
-                    <Image
-                      src={fromToken.logo}
-                      alt={fromToken.symbol}
-                      width={48}
-                      height={48}
-                      className="w-full h-full rounded-full border border-border/40 object-cover shadow-sm"
-                    />
-                    <Image
-                      src={fromToken.chainLogo}
-                      alt={fromToken.chain}
-                      width={20}
-                      height={20}
-                      className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full object-cover border-2 border-background shadow-sm"
-                    />
-                  </div>
-                </div>
-                <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background/50 hover:bg-background/80 transition-colors duration-200">
-                  <span className="text-xs text-muted-foreground">{fromToken.chain}</span>
-                  <span className="font-semibold text-base tracking-tight">{fromToken.symbol}</span>
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </div>
-              <div className="flex w-full flex-row items-center justify-between flex-nowrap">
-                <div className="relative group w-24 flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={fromAmount}
-                    onChange={(e) => handleAmountChange(e.target.value)}
-                    className="flex h-9 w-full border-input py-1 shadow-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-50 font-medium text-base bg-transparent border-0 border-b border-border/40 rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary transition-all hover:border-primary/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-primary/60 group-hover:w-full transition-all duration-300"></div>
-                </div>
-                <span className="text-base text-right min-w-16 font-medium text-muted-foreground">
-                  ${(parseFloat(fromAmount) * (fromToken.price || 1)).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Swap Arrow with animation */}
-          <motion.div 
-            whileHover={{ scale: 1.1, rotate: 180 }}
-            className="flex items-center justify-center cursor-pointer my-2"
-          >
-            <div className="p-2 rounded-full bg-background/80 border border-border/40 shadow-md hover:shadow-lg transition-all duration-300">
-              <ArrowDownUp className="w-5 h-5 text-primary" />
-            </div>
-          </motion.div>
-
-          {/* To Token */}
-          <motion.div 
-            whileHover={{ scale: 1.01 }}
-            className="flex flex-row bg-background/80 backdrop-blur-sm border border-border/40 shadow-lg items-start w-full p-4 rounded-xl transition-all duration-300 hover:shadow-xl hover:border-primary/20"
-          >
-            <div className="flex flex-col w-full justify-center gap-4">
-              <p className="text-sm sm:text-lg text-left font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">To</p>
-              <div className="flex w-full justify-between relative">
-                <div className="flex w-1/2 items-center relative">
-                  <div className="w-12 h-12 relative">
-                    <Image
-                      src={toToken.logo}
-                      alt={toToken.symbol}
-                      width={48}
-                      height={48}
-                      className="w-full h-full rounded-full border border-border/40 object-cover shadow-sm"
-                    />
-                    <Image
-                      src={toToken.chainLogo}
-                      alt={toToken.chain}
-                      width={20}
-                      height={20}
-                      className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full object-cover border-2 border-background shadow-sm"
-                    />
-                  </div>
-                </div>
-                <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background/50 hover:bg-background/80 transition-colors duration-200">
-                  <span className="text-xs text-muted-foreground">{toToken.chain}</span>
-                  <span className="font-semibold text-base tracking-tight">{toToken.symbol}</span>
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </div>
-              <div className="flex w-full flex-row items-center justify-between flex-nowrap">
-                <span className="font-medium text-base w-24">{toAmount}</span>
-                <span className="text-base text-right min-w-16 font-medium text-muted-foreground">
-                  ${(parseFloat(toAmount) * (toToken.price || 1)).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </motion.div>
+    <>
+      {/* Debug info */}
+      {/* {process.env.NODE_ENV === 'development' && (
+        <div className="bg-gray-100 p-2 text-xs rounded mb-2 overflow-auto max-h-40">
+          <p>Debug Info:</p>
+          <pre>Quote: {JSON.stringify(actualQuote, null, 2)}</pre>
         </div>
-      </div>
-
-      {/* Details Section with improved styling */}
-      <div className="flex w-full p-4 pt-0 flex-col gap-3">
-        <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-background/50 border border-border/40">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">From Token Address</span>
-            <a 
-              href={`https://solscan.io/token/${fromToken.address}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-medium hover:text-primary transition-colors duration-200"
-            >
-              {formatAddress(fromToken.address)}
-            </a>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">To Token Address</span>
-            <a 
-              href={`https://solscan.io/token/${toToken.address}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-medium hover:text-primary transition-colors duration-200"
-            >
-              {formatAddress(toToken.address)}
-            </a>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-background/50 border border-border/40">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/10">
-              <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Estimated Time</span>
-              <span className="text-sm font-medium">0.00 min</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/10">
-              <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeWidth="2" d="M20 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6h-2m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4"></path>
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Slippage</span>
-              <span className="text-sm font-medium">{slippage}%</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-background/50 border border-border/40">
-          <div className="p-1.5 rounded-lg bg-primary/10">
-            <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 12v4m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM8 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 0v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V8m0 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"></path>
-            </svg>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">Exchange</span>
-            <span className="text-sm font-medium">Jupiter Exchange</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Button with enhanced styling */}
-      <div className="items-center flex w-full p-4 pt-0 flex-col">
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-xl h-12 px-6 py-2 w-full"
-          disabled={!fromToken.balance}
+      )} */}
+    
+      {actualThoughts && actualThoughts.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className={`border shadow-lg rounded-2xl mt-2 flex flex-col items-center gap-4 max-w-[480px] mb-3 p-0 w-full text-gray-900 bg-white/90 backdrop-blur-md hover:shadow-xl transition-all duration-200 ${className}`}
+          style={{ minWidth: 0 }}
         >
-          Confirm Swap
-        </motion.button>
-        {!fromToken.balance && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 text-destructive text-sm mt-3 p-2 rounded-lg bg-destructive/10"
+          <div className="flex justify-between items-center w-full px-4 py-2 border-b border-gray-100 bg-gradient-to-t from-primary/10 to-white rounded-t-2xl">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="font-medium text-sm">MiraiX Thoughts</span>
+            </div>
+            <button 
+              onClick={() => setShowThoughts(!showThoughts)} 
+              className="text-gray-500 hover:text-gray-700"
+            >
+              {showThoughts ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              )}
+            </button>
+          </div>
+          {showThoughts && (
+            <div className="w-full p-4 text-sm">
+              <ul className="list-disc pl-5 space-y-1">
+                {actualThoughts.map((thought: string, index: number) => (
+                  <li key={index} className="text-gray-700">{thought}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </motion.div>
+      )}
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className={`border shadow-lg rounded-2xl mt-2 flex flex-col items-center gap-4 max-w-[480px] mb-3 p-0 w-full text-gray-900 bg-white/90 backdrop-blur-md hover:shadow-xl transition-all duration-200 ${className}`}
+        style={{ minWidth: 0 }}
+      >
+        {/* Header with Icon */}
+        <div className="flex flex-row items-center gap-1.5 w-full px-3 py-1.5 border-b border-gray-100 bg-gradient-to-t from-primary/10 to-white rounded-t-2xl">
+          <div className="bg-gradient-to-tr from-blue-400 to-cyan-400 rounded-full p-1.5 shadow-md flex items-center justify-center">
+            <FaExchangeAlt className="text-white w-3.5 h-3.5" />
+          </div>
+          <span className="font-bold text-primary text-xs tracking-wide">Swap</span>
+        </div>
+        {/* Swap Main Block */}
+        <div className="flex flex-col w-full gap-2 p-4 bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e0e7ef] rounded-2xl mx-4 mt-2 shadow-sm">
+          <p className="text-sm text-left font-bold text-primary">From</p>
+          <div className="flex w-full justify-between relative mb-1">
+            <div className="flex w-1/2 items-center gap-3 relative">
+              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shadow">
+                <img 
+                  src={fromLogoUrl} 
+                  alt={fromToken.symbol} 
+                  className="w-5 h-5" 
+                />
+              </div>
+              <span className="font-bold text-sm text-blue-600">{fromToken.symbol}</span>
+            </div>
+            <div className="flex flex-col items-end text-right">
+              <span className="text-xs text-right font-normal text-gray-500">{fromToken.chain}</span>
+              <button className="flex font-semibold text-sm tracking-tight hover:text-primary transition-colors items-center gap-1" onClick={() => { setModalType('from'); setModalOpen(true); }}>
+                {fromToken.symbol}
+                <svg className="w-2.5 h-2.5 ml-1 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+              </button>
+            </div>
+          </div>
+          <div className="flex w-full flex-row items-center justify-between flex-nowrap">
+            <div className="relative group w-36 h-10 flex items-center gap-2 bg-white/80 border border-gray-200 rounded-lg px-3 shadow-inner">
+              <input
+                type="number"
+                value={fromAmount}
+                readOnly
+                className="flex w-full bg-transparent border-0 outline-none font-semibold text-sm placeholder:text-gray-400 focus:ring-0"
+                placeholder="Amount"
+              />
+            </div>
+            <span className="text-sm text-right min-w-20 font-semibold text-gray-900 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
+              ${(parseFloat(fromAmount) * (fromToken.price || 1)).toFixed(2)}
+            </span>
+          </div>
+        </div>
+        {/* Arrow */}
+        <div className="flex items-center justify-center cursor-pointer hover:opacity-80 rotate-90">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-up-down"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
+        </div>
+        {/* To Block */}
+        <div className="flex flex-col w-full gap-2 p-4 bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e0e7ef] rounded-2xl mx-4 mb-2 shadow-sm">
+          <p className="text-sm text-left font-bold text-primary">To</p>
+          <div className="flex w-full justify-between relative mb-1">
+            <div className="flex w-1/2 items-center gap-3 relative">
+              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shadow">
+                <img 
+                  src={toLogoUrl} 
+                  alt={toToken.symbol} 
+                  className="w-5 h-5" 
+                />
+              </div>
+              <span className="font-bold text-sm text-blue-600">{toToken.symbol}</span>
+            </div>
+            <div className="flex flex-col items-end text-right">
+              <span className="text-xs text-right font-normal text-gray-500">{toToken.chain}</span>
+              <button className="flex font-semibold text-sm tracking-tight hover:text-primary transition-colors items-center gap-1" onClick={() => { setModalType('to'); setModalOpen(true); }}>
+                {toToken.symbol}
+                <svg className="w-2.5 h-2.5 ml-1 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+              </button>
+            </div>
+          </div>
+          <div className="flex w-full flex-row items-center justify-between flex-nowrap">
+            <div className="relative group w-36 h-10 flex items-center gap-2 bg-white/80 border border-gray-200 rounded-lg px-3 shadow-inner">
+              <span className="font-semibold text-sm w-full h-8 flex items-center">
+                {toAmount && !isNaN(parseFloat(toAmount)) ? Number(toAmount).toFixed(toToken.decimals) : "0"}
+              </span>
+            </div>
+            <span className="text-sm text-right min-w-20 font-semibold text-gray-900 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
+              ${(parseFloat(toAmount) * (toToken.price || 1)).toFixed(2)}
+            </span>
+          </div>
+        </div>
+        
+        {/* Divider */}
+        <div className="w-full h-[1px] bg-gradient-to-r from-blue-200 via-cyan-200 to-transparent my-1 rounded-full" />
+        {/* Details Section */}
+        <div className="flex w-full p-4 pt-0 flex-col gap-3">
+          <div className="flex flex-col items-center w-full">
+            <div className="flex flex-row items-center w-full">
+              <label className="text-xs text-gray-500 min-w-[80px]">Slippage:</label>
+              <span className="text-xs text-gray-500 leading-6 ml-auto">{(slippage / 100).toFixed(2)} %</span>
+            </div>
+            {actualQuote && (
+              <div className="flex flex-row items-center w-full">
+                <label className="text-xs text-gray-500 min-w-[80px]">Price Impact:</label>
+                <span className="text-xs text-gray-500 leading-6 ml-auto">
+                  {actualQuote.priceImpactPct === "0" ? "< 0.01%" : `${parseFloat(actualQuote.priceImpactPct).toFixed(2)}%`}
+                </span>
+              </div>
+            )}
+            {actualQuote && actualQuote.swapUsdValue && (
+              <div className="flex flex-row items-center w-full">
+                <label className="text-xs text-gray-500 min-w-[80px]">Swap Value:</label>
+                <span className="text-xs text-gray-500 leading-6 ml-auto">${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD</span>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Action Button and Error */}
+        <div className="items-center flex w-full p-4 pt-0 flex-col">
+          <button
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 h-10 px-4 py-1.5 w-full shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={!fromToken.balance || isConfirming}
+            onClick={handleConfirm}
           >
-            <AlertCircle className="w-4 h-4" />
-            You don't have any balance for {fromToken.symbol} on {fromToken.chain}.
-          </motion.div>
-        )}
-      </div>
-    </div>
+            {isConfirming ? 'Confirming...' : 'Confirm'}
+          </button>
+          {error && (
+            <div className="flex items-center gap-2 text-destructive text-xs mt-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-destructive"></span>
+              <span>{error}</span>
+            </div>
+          )}
+        </div>
+      </motion.div>
+      <SelectTokenModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSelect={handleTokenSelect}
+      />
+    </>
   );
 } 

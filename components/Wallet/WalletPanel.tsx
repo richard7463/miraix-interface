@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
-import { useWallets } from '@privy-io/react-auth';
-import { useSolanaWallets } from '@privy-io/react-auth';
+import { useWallets, useFundWallet as useEvmFundWallet, usePrivy } from '@privy-io/react-auth';
+import { useSolanaWallets, useFundWallet as useSolanaFundWallet } from '@privy-io/react-auth/solana';
 import { createPortal } from 'react-dom';
 import { useTheme } from '../Themes';
+import { queryTokenListByAddress } from '../../src/utils/public';
+import { Toast } from '../Toast';
 
 interface WalletPanelProps {
     isOpen: boolean;
     onClose: () => void;
+}
+
+interface Token {
+    mint: string;
+    balance: number;
+    name: string;
+    image: string;
+    symbol: string;
+    decimals: number;
 }
 
 export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => {
@@ -17,10 +28,20 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [activeTab, setActiveTab] = useState<'tokens' | 'transactions'>('tokens');
+    const [evmTokens, setEvmTokens] = useState<Token[]>([]);
+    const [solanaTokens, setSolanaTokens] = useState<Token[]>([]);
+    const [totalBalance, setTotalBalance] = useState<number>(0);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
 
     // Get embedded wallets
     const { wallets: evmWallets } = useWallets();
     const { wallets: solanaWallets } = useSolanaWallets();
+    const { exportWallet: exportEvmWallet, logout } = usePrivy();
+    const { exportWallet: exportSolWallet } = useSolanaWallets();
+    const { fundWallet: fundEvmWallet } = useEvmFundWallet();
+    const { fundWallet: fundSolanaWallet } = useSolanaFundWallet();
 
     // Filter for embedded wallets only
     const embeddedEvmWallets = evmWallets?.filter(wallet => wallet.walletClientType === 'privy') || [];
@@ -50,76 +71,54 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
     console.log('[WalletPanel] Final Wallet Options:', walletOptions);
 
-    // Mock data for tokens - in real app, this would come from blockchain
-    const mockTokens = {
-        evm: [
-            { symbol: 'ETH', balance: '0.5', value: '$1,500', change: '+2.5%' },
-            { symbol: 'USDC', balance: '500', value: '$500', change: '0%' },
-        ],
-        solana: [
-            { symbol: 'SOL', balance: '10', value: '$1,000', change: '-1.2%' },
-            { symbol: 'USDC', balance: '200', value: '$200', change: '0%' },
-        ]
-    };
+    // 获取钱包余额
+    useEffect(() => {
+        const fetchBalances = async () => {
+            if (embeddedEvmWallets.length > 0) {
+                await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
+                    setEvmTokens(tokens as Token[]);
+                });
+            }
+            if (embeddedSolanaWallets.length > 0) {
+                await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
+                    setSolanaTokens(tokens as Token[]);
+                });
+            }
+        };
 
-    // Mock data for transactions - in real app, this would come from blockchain
-    const mockTransactions = {
-        evm: [
-            { type: 'send', amount: '0.1 ETH', to: '0x1234...5678', time: '2h ago', status: 'completed' },
-            { type: 'swap', amount: '100 USDC → 0.05 ETH', time: '1d ago', status: 'completed' },
-        ],
-        solana: [
-            { type: 'receive', amount: '5 SOL', from: 'F21d...7zp', time: '5h ago', status: 'completed' },
-            { type: 'send', amount: '50 USDC', to: 'F21d...7zp', time: '1d ago', status: 'completed' },
-        ]
-    };
+        fetchBalances();
+    }, [embeddedEvmWallets, embeddedSolanaWallets]);
 
-    // Calculate total balance
-    const calculateTotalBalance = () => {
+    // 计算总余额
+    useEffect(() => {
+        const calculateTotal = () => {
         let total = 0;
-        if (selectedWallet === 'all') {
-            // Sum up all EVM and Solana balances
-            mockTokens.evm.forEach(token => {
-                total += parseFloat(token.value.replace('$', '').replace(',', ''));
+            
+            // 计算 EVM 钱包余额
+            evmTokens.forEach(token => {
+                if (token.symbol === 'ETH') {
+                    // 这里需要添加 ETH 价格获取逻辑
+                    total += token.balance * 2000; // 假设 ETH 价格为 2000 USD
+                } else if (token.symbol === 'USDC' || token.symbol === 'USDT') {
+                    total += token.balance;
+                }
             });
-            mockTokens.solana.forEach(token => {
-                total += parseFloat(token.value.replace('$', '').replace(',', ''));
-            });
-        } else if (selectedWallet.startsWith('evm-')) {
-            mockTokens.evm.forEach(token => {
-                total += parseFloat(token.value.replace('$', '').replace(',', ''));
-            });
-        } else if (selectedWallet.startsWith('solana-')) {
-            mockTokens.solana.forEach(token => {
-                total += parseFloat(token.value.replace('$', '').replace(',', ''));
-            });
-        }
-        return total.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-    };
 
-    // Get filtered tokens based on selected wallet
-    const getFilteredTokens = () => {
-        if (selectedWallet === 'all') {
-            return [...mockTokens.evm, ...mockTokens.solana];
-        } else if (selectedWallet.startsWith('evm-')) {
-            return mockTokens.evm;
-        } else if (selectedWallet.startsWith('solana-')) {
-            return mockTokens.solana;
-        }
-        return [];
-    };
+            // 计算 Solana 钱包余额
+            solanaTokens.forEach(token => {
+                if (token.symbol === 'SOL') {
+                    // 这里需要添加 SOL 价格获取逻辑
+                    total += token.balance * 100; // 假设 SOL 价格为 100 USD
+                } else if (token.symbol === 'USDC' || token.symbol === 'USDT') {
+                    total += token.balance;
+                }
+            });
 
-    // Get filtered transactions based on selected wallet
-    const getFilteredTransactions = () => {
-        if (selectedWallet === 'all') {
-            return [...mockTransactions.evm, ...mockTransactions.solana];
-        } else if (selectedWallet.startsWith('evm-')) {
-            return mockTransactions.evm;
-        } else if (selectedWallet.startsWith('solana-')) {
-            return mockTransactions.solana;
-        }
-        return [];
-    };
+            setTotalBalance(total);
+        };
+
+        calculateTotal();
+    }, [evmTokens, solanaTokens]);
 
     // Log state changes
     useEffect(() => {
@@ -144,24 +143,76 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     console.log('[WalletPanel] Selected EVM Wallet:', evmWallet);
     console.log('[WalletPanel] Selected Solana Wallet:', solanaWallet);
 
-    const handleCopyAddress = (address: string) => {
-        console.log('[WalletPanel] handleCopyAddress:', address);
+    const handleCopy = (address: string, type: 'EVM' | 'Solana') => {
         navigator.clipboard.writeText(address);
+        setToastMessage(`${type} address copied to clipboard`);
+        setToastType('success');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
     };
 
     const handleExportWallet = async (type: 'evm' | 'solana') => {
-        console.log('[WalletPanel] handleExportWallet:', type);
-        // Implementation for wallet export
+        try {
+            if (type === 'evm' && evmWallet) {
+                await exportEvmWallet({ address: evmWallet.address });
+            } else if (type === 'solana' && solanaWallet) {
+                await exportSolWallet({ address: solanaWallet.address });
+            }
+            setToastMessage('Wallet exported successfully');
+            setToastType('success');
+            setShowToast(true);
+        } catch (error) {
+            console.error('Error exporting wallet:', error);
+            setToastMessage('Failed to export wallet');
+            setToastType('error');
+            setShowToast(true);
+        }
     };
 
-    const handleFundWallet = (type: 'evm' | 'solana') => {
-        console.log('[WalletPanel] handleFundWallet:', type);
-        // Implementation for funding wallet
+    const handleFundWallet = async (type: 'evm' | 'solana') => {
+        try {
+            if (type === 'evm' && evmWallet) {
+                await fundEvmWallet(evmWallet.address);
+                setToastMessage('Fund wallet opened successfully');
+                setToastType('success');
+            } else if (type === 'solana' && solanaWallet) {
+                await fundSolanaWallet(solanaWallet.address, {
+                    cluster: { name: 'mainnet-beta' },
+                    amount: '0.1' // 默认充值 0.1 SOL
+                });
+                setToastMessage('Fund wallet opened successfully');
+                setToastType('success');
+            }
+            setShowToast(true);
+        } catch (error) {
+            console.error('Error funding wallet:', error);
+            setToastMessage('Failed to open fund wallet');
+            setToastType('error');
+            setShowToast(true);
+        }
     };
 
     const handleEnableWallet = (type: 'evm' | 'solana') => {
         console.log('[WalletPanel] handleEnableWallet:', type);
         // Implementation for enabling wallet
+    };
+
+    const handleLogout = async () => {
+        console.log('[WalletPanel] handleLogout called');
+        try {
+            console.log('[WalletPanel] Calling logout()...');
+            await logout();
+            console.log('[WalletPanel] logout() completed successfully');
+            setToastMessage('Successfully logged out');
+            setToastType('success');
+            setShowToast(true);
+            onClose(); // 关闭面板
+        } catch (error) {
+            console.error('[WalletPanel] Error logging out:', error);
+            setToastMessage('Failed to log out');
+            setToastType('error');
+            setShowToast(true);
+        }
     };
 
     if (!isOpen || !mounted) return null;
@@ -246,11 +297,13 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
                                 <div className="p-6 pt-0 space-y-4">
                                     <div className="mt-4">
-                                        <div className="flex flex-col text-3xl font-bold">{calculateTotalBalance()}</div>
+                                        <div className="flex flex-col text-3xl font-bold">
+                                            ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </div>
                                     </div>
 
                                     <div className="flex w-full">
-                                        <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-violet-50 h-10 px-4 py-2 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600 shadow-md hover:shadow-lg cursor-pointer">
+                                        {/* <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-violet-50 h-10 px-4 py-2 bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-700 hover:to-violet-600 shadow-md hover:shadow-lg cursor-pointer">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles mr-2 h-4 w-4 text-violet-50">
                                                 <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
                                                 <path d="M20 3v4" />
@@ -259,7 +312,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                 <path d="M5 18H3" />
                                             </svg>
                                             Fund Wallet
-                                        </button>
+                                        </button> */}
                                     </div>
 
                                     <div className="mt-4">
@@ -289,7 +342,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
                                     {activeTab === 'tokens' ? (
                                         <div className="space-y-3">
-                                            {getFilteredTokens().map((token, index) => (
+                                            {evmTokens.map((token, index) => (
                                                 <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -297,35 +350,31 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                         </div>
                                                         <div>
                                                             <div className="font-medium">{token.balance} {token.symbol}</div>
-                                                            <div className="text-sm text-gray-500">{token.value}</div>
+                                                            <div className="text-sm text-gray-500">{token.name}</div>
                                                         </div>
                                                     </div>
-                                                    <div className={`text-sm ${token.change.startsWith('+') ? 'text-green-500' : token.change.startsWith('-') ? 'text-red-500' : 'text-gray-500'}`}>
-                                                        {token.change}
+                                                    <div className={`text-sm ${token.balance > 0 ? 'text-green-500' : token.balance < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                                                        {token.balance}
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            {getFilteredTransactions().map((tx, index) => (
+                                            {solanaTokens.map((token, index) => (
                                                 <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.type === 'send' ? 'bg-red-100' :
-                                                            tx.type === 'receive' ? 'bg-green-100' :
-                                                                'bg-blue-100'
-                                                            }`}>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-up-right h-4 w-4">
-                                                                <path d="M7 7h10v10" />
-                                                                <path d="M7 17 17 7" />
-                                                            </svg>
+                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${token.symbol === 'SOL' ? 'bg-yellow-100' : 'bg-blue-100'}`}>
+                                                            <span className="text-sm font-medium">{token.symbol}</span>
                                                         </div>
                                                         <div>
-                                                            <div className="font-medium">{tx.amount}</div>
-                                                            <div className="text-sm text-gray-500">{tx.time}</div>
+                                                            <div className="font-medium">{token.balance} {token.symbol}</div>
+                                                            <div className="text-sm text-gray-500">{token.name}</div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-sm text-gray-500">{tx.status}</div>
+                                                    <div className={`text-sm ${token.balance > 0 ? 'text-green-500' : token.balance < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                                                        {token.balance}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -335,29 +384,6 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                 {isSettingsOpen && (
                                     <div className="absolute top-20 right-4 z-50 rounded-md border bg-white p-4 text-popover-foreground shadow-md outline-none w-80 transform transition-all duration-300">
                                         <div className="space-y-4">
-                                            <h4 className="font-medium text-sm">Settings</h4>
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-sm">Theme</span>
-                                                <div className="flex items-center gap-2">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sun h-[1.2rem] w-[1.2rem]">
-                                                        <circle cx="12" cy="12" r="4" />
-                                                        <path d="M12 2v2" />
-                                                        <path d="M12 20v2" />
-                                                        <path d="m4.93 4.93 1.41 1.41" />
-                                                        <path d="m17.66 17.66 1.41 1.41" />
-                                                        <path d="M2 12h2" />
-                                                        <path d="M20 12h2" />
-                                                        <path d="m6.34 17.66-1.41 1.41" />
-                                                        <path d="m19.07 4.93-1.41 1.41" />
-                                                    </svg>
-                                                    <button className="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=unchecked]:bg-input data-[state=checked]:bg-primary">
-                                                        <span className="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform" />
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="border-t my-2" />
-
                                             <h4 className="font-medium text-sm">AI Wallet Settings</h4>
 
                                             <div className="space-y-2">
@@ -368,14 +394,20 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
-                                                    <button onClick={() => handleCopyAddress(evmWallet.address)} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => handleCopy(evmWallet.address, 'EVM')} 
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy h-3 w-3 mr-1">
                                                             <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
                                                             <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                                                         </svg>
                                                         Copy
                                                     </button>
-                                                    <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => window.open(`https://etherscan.io/address/${evmWallet.address}`, '_blank')}
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square-arrow-out-up-right h-3 w-3 mr-1">
                                                             <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
                                                             <path d="m21 3-9 9" />
@@ -383,14 +415,17 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                         </svg>
                                                         Explorer
                                                     </button>
-                                                    <button onClick={() => handleExportWallet('evm')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => handleExportWallet('evm')} 
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         Export
                                                     </button>
-                                                    <button onClick={() => handleFundWallet('evm')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => handleFundWallet('evm')} 
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         Fund
-                                                    </button>
-                                                    <button onClick={() => handleEnableWallet('evm')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3">
-                                                        Enable
                                                     </button>
                                                 </div>
                                             </div>
@@ -403,14 +438,20 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
-                                                    <button onClick={() => handleCopyAddress(solanaWallet.address)} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => handleCopy(solanaWallet.address, 'Solana')}
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy h-3 w-3 mr-1">
                                                             <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
                                                             <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                                                         </svg>
                                                         Copy
                                                     </button>
-                                                    <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => window.open(`https://solscan.io/account/${solanaWallet.address}`, '_blank')}
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square-arrow-out-up-right h-3 w-3 mr-1">
                                                             <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
                                                             <path d="m21 3-9 9" />
@@ -418,20 +459,26 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                         </svg>
                                                         Explorer
                                                     </button>
-                                                    <button onClick={() => handleExportWallet('solana')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => handleExportWallet('solana')} 
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         Export
                                                     </button>
-                                                    <button onClick={() => handleFundWallet('solana')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3">
+                                                    <button 
+                                                        onClick={() => handleFundWallet('solana')} 
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                    >
                                                         Fund
-                                                    </button>
-                                                    <button onClick={() => handleEnableWallet('solana')} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3">
-                                                        Enable
                                                     </button>
                                                 </div>
                                             </div>
 
                                             <div className="mt-4 border-t pt-4">
-                                                <button onClick={onClose} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-9 rounded-md px-3 w-full">
+                                                <button 
+                                                    onClick={handleLogout} 
+                                                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 h-9 rounded-md px-3 w-full transform hover:scale-105 active:scale-95"
+                                                >
                                                     Log Out
                                                 </button>
                                             </div>
@@ -443,6 +490,12 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     </div>
                 </div>
             </div>
+            <Toast
+                isVisible={showToast}
+                message={toastMessage}
+                type={toastType}
+                onClose={() => setShowToast(false)}
+            />
         </div>,
         document.body
     );

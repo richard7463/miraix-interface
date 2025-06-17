@@ -24,6 +24,8 @@ import WelcomeSection from './WelcomeSection';
 import { API_ENDPOINTS } from '@/lib/config'
 import { useChatStore } from '@/store/chatStore'
 import { DefaultPersonas } from './interface'
+import { usePrivy, useSolanaWallets } from '@privy-io/react-auth'
+import { Toast } from '../Toast'
 // const { user, ready, authenticated } = usePrivy();
 
 import './index.scss'
@@ -79,6 +81,11 @@ const Chat = (props: ChatProps, ref: any) => {
   const [currentMessage, setCurrentMessage] = useState<string>('');
   const textAreaRef = useRef<HTMLElement>(null);
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
+  const { ready, authenticated } = usePrivy();
+  const { wallets: solanaWallets } = useSolanaWallets();
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'info' | 'success' | 'warning' | 'error'>('info');
 
   const {
     currentChat,
@@ -117,8 +124,31 @@ const Chat = (props: ChatProps, ref: any) => {
 
   // Test proxy by requesting baidu.com and qq.com
 
+  const checkWalletConnection = () => {
+    if (!ready || !authenticated) {
+      setToastMessage('Please login to your wallet first');
+      setToastType('warning');
+      setShowToast(true);
+      return false;
+    }
+
+    const hasSolanaWallet = solanaWallets && solanaWallets.length > 0;
+    if (!hasSolanaWallet) {
+      setToastMessage('Please connect your Solana wallet first');
+      setToastType('warning');
+      setShowToast(true);
+      return false;
+    }
+
+    return true;
+  };
+
   const sendMessage = useCallback(
     async () => {
+      if (!checkWalletConnection()) {
+        return;
+      }
+
       console.log('[sendMessage] called', { isLoading, message, currentChatId: currentChat?.id });
       if (isLoading || !message.trim()) return;
 
@@ -150,7 +180,7 @@ const Chat = (props: ChatProps, ref: any) => {
         });
 
         console.log('[sendMessage] Creating new chat session for first message', latestChat, input);
-          const response = await fetch(API_ENDPOINTS.CREATE_CHAT, {
+          const response = await fetch('http://localhost:3009/api/chat-new', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -267,27 +297,7 @@ const Chat = (props: ChatProps, ref: any) => {
   }, [message]);
 
   return (
-    <Flex direction="column" height="100vh" className="relative" gap="3" style={{ minHeight: '100vh', overflow: 'hidden' }}>
-      <Flex
-        justify="between"
-        align="center"
-        py="3"
-        px="4"
-      >
-        {/* <Flex align="center" gap="3">
-          <Heading size="4">{currentChatRef?.current?.persona?.name || 'None'}</Heading>
-        </Flex> */}
-        {/* <Flex gap="2">
-          <IconButton
-            size="2"
-            variant="ghost"
-            color="gray"
-            onClick={onToggleSidebar}
-          >
-            <AiOutlineUnorderedList />
-          </IconButton>
-        </Flex> */}
-      </Flex>
+    <Flex direction="column" height="100vh" className="relative" style={{ minHeight: '100vh', overflow: 'hidden', flex: 1, paddingTop: '76px' }}>
       <Flex className="flex-1 px-4" style={{}}>
         {/* 仅在没有消息时显示欢迎，否则渲染消息列表 */}
         <WelcomeSection />
@@ -377,6 +387,13 @@ const Chat = (props: ChatProps, ref: any) => {
           </IconButton>
         </div>
       </Flex>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        duration={3000}
+      />
     </Flex>
   );
 }

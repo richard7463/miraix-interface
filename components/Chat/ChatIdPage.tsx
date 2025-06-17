@@ -29,7 +29,7 @@ export default function ChatIdPage({ chatId }: { chatId: string }) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col h-full w-full lg:w-auto" style={{ paddingTop: '76px', height: '100vh' }}>
+      <div className="flex-1 flex flex-col h-full w-full lg:w-auto" style={{ paddingTop: '76px', height: '90vh', overflow: 'auto' }}>
         <div className="absolute top-4 right-4">
           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
             Beta

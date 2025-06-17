@@ -6,13 +6,41 @@
 
 :root {
   @apply h-full;
-  --foreground-rgb: 34, 34, 34; // dark gray for text
-  --background-start-rgb: 214, 219, 220;
+  --foreground-rgb: 34, 34, 34;
+  --background-start-rgb: 248, 249, 251;
   --background-end-rgb: 255, 255, 255;
   --text-color-light: #222;
   --text-color-dark: #e0e0e6;
   --font-sans: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Roboto Mono', Menlo, Monaco, Consolas, monospace;
+  
+  // Typography scale
+  --font-size-xs: 0.75rem;    // 12px
+  --font-size-sm: 0.875rem;   // 14px
+  --font-size-base: 1rem;     // 16px
+  --font-size-lg: 1.125rem;   // 18px
+  --font-size-xl: 1.25rem;    // 20px
+  --font-size-2xl: 1.5rem;    // 24px
+  --font-size-3xl: 1.875rem;  // 30px
+  --font-size-4xl: 2.25rem;   // 36px
+  --font-size-5xl: 3rem;      // 48px
+  
+  // Font weights
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  // Line heights
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  // Letter spacing
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: -0.011em;
+  --letter-spacing-wide: 0.025em;
 }
 
 html, body, #__next, #__next > div {
@@ -90,10 +118,13 @@ body {
 }
 
 .welcome-card {
-  border: 1.5px solid rgba(127, 90, 240, 0.13);
-  box-shadow: 0 2px 16px 0 rgba(127, 90, 240, 0.07), 0 1.5px 6px 0 rgba(0,0,0,0.03);
-  background: rgba(255,255,255,0.82);
-  transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.22s, border-color 0.22s;
+  border: 1px solid rgba(127, 90, 240, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   will-change: transform, box-shadow, border-color;
   display: flex;
@@ -101,16 +132,16 @@ body {
   justify-content: space-between;
 }
 
-.welcome-card:hover, .welcome-card:focus {
-  border-color: #7f5af0;
-  box-shadow: 0 6px 32px 0 rgba(127, 90, 240, 0.13), 0 2px 8px 0 rgba(0,0,0,0.04);
-  transform: translateY(-3px) scale(1.035);
-  background: rgba(255,255,255,0.95);
+.welcome-card:hover {
+  border-color: rgba(127, 90, 240, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.08),
+    0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }
 
 .welcome-card:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 8px 0 rgba(127, 90, 240, 0.09), 0 1.5px 4px 0 rgba(0,0,0,0.02);
+  transform: scale(0.98);
 }
 
 /* Fix unwanted scroll in WelcomeSection */
@@ -179,16 +210,18 @@ body {
 // Typography styles
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-sans);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+  color: var(--text-color-light);
 }
 
-p, span, div {
+p {
   font-family: var(--font-sans);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.5;
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--letter-spacing-normal);
+  line-height: var(--line-height-normal);
+  color: var(--text-color-light);
 }
 
 code, pre {

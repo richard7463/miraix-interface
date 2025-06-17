@@ -16,10 +16,18 @@ export default function Providers({children}: {children: React.ReactNode}) {
           },
           solana: {
             createOnLogin: "all-users",
+            chain: "mainnet-beta"
           }
         },
-        appearance: {walletChainType: 'ethereum-and-solana'},
-        externalWallets: {solana: {connectors: toSolanaWalletConnectors()}}
+        appearance: {
+          walletChainType: 'ethereum-and-solana',
+          theme: 'light'
+        },
+        externalWallets: {
+          solana: {
+            connectors: toSolanaWalletConnectors()
+          }
+        }
       }}
     >
       {children}
