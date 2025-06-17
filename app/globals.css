@@ -100,3 +100,37 @@
 .animate-slide-up {
     animation: slideUp 0.3s ease-out;
 }
+
+/* MCP Server page styles */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Text color utilities */
+.text-sg {
+    color: #6b7280;
+}
+
+/* Background utilities */
+.bg-\[\#1E1E1E88\] {
+    background-color: rgba(30, 30, 30, 0.53);
+}
+
+.bg-\[\#2D2D2D88\] {
+    background-color: rgba(45, 45, 45, 0.53);
+}
+
+/* Border utilities */
+.border-\[\#888888ff\] {
+    border-color: rgba(136, 136, 136, 1);
+}

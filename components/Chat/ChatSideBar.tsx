@@ -6,13 +6,14 @@ import { Box, Flex, IconButton, ScrollArea, Text } from '@radix-ui/themes'
 import cs from 'classnames'
 import { AiOutlineCloseCircle } from 'react-icons/ai'
 import { BiMessageDetail } from 'react-icons/bi'
-import { FiPlus, FiCheckSquare } from 'react-icons/fi'
+import { FiPlus, FiCheckSquare, FiServer } from 'react-icons/fi'
 import { RiRobot2Line } from 'react-icons/ri'
 import { useTheme } from '../Themes'
 import { ChatContext } from './useChatHook'
 import './index.scss'
 import { ChatSelector } from './ChatSelector'
 import SidePanel from './SidePanel'
+import { useRouter } from 'next/navigation'
 // import { StrategiesSelector } from './StrategiesSelector'
 // import { TasksSelector } from './TasksSelector'
 import { usePrivyAuth } from './usePrivyAuth'
@@ -30,6 +31,7 @@ export const ChatSideBar = () => {
   } = useContext(ChatContext)
 
   const { theme } = useTheme()
+  const router = useRouter()
   console.log('theme in chatsidebar', theme)
   // Log the value of chatList
   console.log('chatList in ChatSideBar:', chatList)
@@ -86,6 +88,11 @@ export const ChatSideBar = () => {
     setIsChatSelectorOpen(true)
   }
 
+  // 处理MCP Server导航
+  const handleMCPServerClick = () => {
+    router.push('/mcp-server')
+  }
+
   // Mock data for tasks and strategies
   const mockTasks = [
     { id: 'task-1', title: 'Task 1' },
@@ -137,6 +144,23 @@ export const ChatSideBar = () => {
               onOpenChange={handleChatSelectorOpenChange}
               isLoading={isLoading}
             />
+            
+            {/* MCP Server Tab */}
+            <div className="w-full border border-neutral-200 dark:border-neutral-800 rounded-md">
+              <button
+                onClick={handleMCPServerClick}
+                className="peer/menu-button gap-2 overflow-hidden rounded-md p-2 text-left outline-none duration-300 ease-in-out focus-visible:ring-2 active:text-sidebar-foreground-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:font-medium data-[active=true]:text-sidebar-active data-[state=open]:hover:bg-neutral-100 dark:data-[state=open]:hover:bg-neutral-800 data-[state=open]:hover:text-sidebar-active group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-sidebar-active h-8 text-sm flex items-center font-medium transition-all group justify-between w-full"
+                type="button"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <FiServer className="h-4 w-4" />
+                    <h1 className="text-sm font-semibold">MCP Server</h1>
+                  </div>
+                </div>
+              </button>
+            </div>
+            
             {/* <TasksSelector
               taskList={mockTasks}
               currentTaskId={mockTasks[0].id}
