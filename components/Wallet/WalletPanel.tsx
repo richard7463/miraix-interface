@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { useWallets, useFundWallet as useEvmFundWallet, usePrivy } from '@privy-io/react-auth';
@@ -7,6 +7,8 @@ import { createPortal } from 'react-dom';
 import { useTheme } from '../Themes';
 import { queryTokenListByAddress } from '../../src/utils/public';
 import { Toast } from '../Toast';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { FaArrowRight, FaRegCopy, FaExternalLinkAlt } from 'react-icons/fa';
 
 interface WalletPanelProps {
     isOpen: boolean;
@@ -22,6 +24,30 @@ interface Token {
     decimals: number;
 }
 
+// 获取 SOL 价格的函数
+const getSolPrice = async (): Promise<number> => {
+    try {
+        // 添加超时控制
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+        
+        const response = await fetch('https://sol-wallet-theta.vercel.app/api/sol-price', {
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch SOL price');
+        }
+        const data = await response.json();
+        return data.solPrice || 150.02; // 使用用户提供的价格作为fallback
+    } catch (error) {
+        console.error('Error fetching SOL price:', error);
+        return 150.02; // 使用用户提供的价格作为fallback
+    }
+};
+
 export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => {
     const { theme } = useTheme();
     const [selectedWallet, setSelectedWallet] = useState<string>('all');
@@ -34,6 +60,10 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+    const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+    const [loadingTx, setLoadingTx] = useState(false);
+    const [solPrice, setSolPrice] = useState<number>(0);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Get embedded wallets
     const { wallets: evmWallets } = useWallets();
@@ -44,8 +74,8 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const { fundWallet: fundSolanaWallet } = useSolanaFundWallet();
 
     // Filter for embedded wallets only
-    const embeddedEvmWallets = evmWallets?.filter(wallet => wallet.walletClientType === 'privy') || [];
-    const embeddedSolanaWallets = solanaWallets?.filter(wallet => wallet.walletClientType === 'privy') || [];
+    const embeddedEvmWallets = useMemo(() => evmWallets?.filter(wallet => wallet.walletClientType === 'privy') || [], [evmWallets]);
+    const embeddedSolanaWallets = useMemo(() => solanaWallets?.filter(wallet => wallet.walletClientType === 'privy') || [], [solanaWallets]);
 
     console.log('[WalletPanel] Embedded EVM Wallets:', embeddedEvmWallets);
     console.log('[WalletPanel] Embedded Solana Wallets:', embeddedSolanaWallets);
@@ -71,22 +101,101 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
     console.log('[WalletPanel] Final Wallet Options:', walletOptions);
 
+    // 获取 SOL 价格
+    useEffect(() => {
+        const fetchSolPrice = async () => {
+            const price = await getSolPrice();
+            setSolPrice(price);
+        };
+        fetchSolPrice();
+    }, []);
+
     // 获取钱包余额
     useEffect(() => {
         const fetchBalances = async () => {
-            if (embeddedEvmWallets.length > 0) {
-                await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
-                    setEvmTokens(tokens as Token[]);
-                });
+            // Clear tokens first when wallets are empty (logout case)
+            if (embeddedEvmWallets.length === 0 && embeddedSolanaWallets.length === 0) {
+                setEvmTokens([]);
+                setSolanaTokens([]);
+                return;
             }
-            if (embeddedSolanaWallets.length > 0) {
-                await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
-                    setSolanaTokens(tokens as Token[]);
-                });
+
+            try {
+                if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
+                    console.log('[WalletPanel] Fetching EVM tokens for address:', embeddedEvmWallets[0].address);
+                    await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
+                        console.log('[WalletPanel] Received EVM tokens:', tokens);
+                        const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                        console.log('[WalletPanel] EVM tokens with balance:', tokensWithBalance);
+                        setEvmTokens(tokens as Token[]);
+                    });
+                } else {
+                    setEvmTokens([]);
+                }
+                
+                if (embeddedSolanaWallets.length > 0 && embeddedSolanaWallets[0]?.address) {
+                    console.log('[WalletPanel] Fetching Solana tokens for address:', embeddedSolanaWallets[0].address);
+                    await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
+                        console.log('[WalletPanel] Received Solana tokens:', tokens);
+                        const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                        console.log('[WalletPanel] Solana tokens with balance:', tokensWithBalance);
+                        setSolanaTokens(tokens as Token[]);
+                    });
+                } else {
+                    setSolanaTokens([]);
+                }
+            } catch (error) {
+                console.error('Error fetching token balances:', error);
+                setEvmTokens([]);
+                setSolanaTokens([]);
             }
         };
 
         fetchBalances();
+    }, [embeddedEvmWallets, embeddedSolanaWallets]);
+
+    // 监听交易成功事件，自动刷新余额
+    useEffect(() => {
+        const handleTransactionSuccess = () => {
+            console.log('[WalletPanel] Transaction success detected, refreshing balances...');
+            // 延迟一点时间确保链上数据已更新
+            setTimeout(() => {
+                const fetchBalances = async () => {
+                    try {
+                        if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
+                            console.log('[WalletPanel] Refreshing EVM tokens for address:', embeddedEvmWallets[0].address);
+                            await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
+                                console.log('[WalletPanel] Refreshed EVM tokens:', tokens);
+                                const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                                console.log('[WalletPanel] Refreshed EVM tokens with balance:', tokensWithBalance);
+                                setEvmTokens(tokens as Token[]);
+                            });
+                        }
+                        
+                        if (embeddedSolanaWallets.length > 0 && embeddedSolanaWallets[0]?.address) {
+                            console.log('[WalletPanel] Refreshing Solana tokens for address:', embeddedSolanaWallets[0].address);
+                            await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
+                                console.log('[WalletPanel] Refreshed Solana tokens:', tokens);
+                                const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                                console.log('[WalletPanel] Refreshed Solana tokens with balance:', tokensWithBalance);
+                                setSolanaTokens(tokens as Token[]);
+                            });
+                        }
+                    } catch (error) {
+                        console.error('[WalletPanel] Error refreshing token balances:', error);
+                    }
+                };
+                fetchBalances();
+            }, 2000); // 延迟2秒确保链上数据已更新
+        };
+
+        // 监听自定义事件
+        window.addEventListener('refreshBalance', handleTransactionSuccess);
+        
+        // 清理事件监听器
+        return () => {
+            window.removeEventListener('refreshBalance', handleTransactionSuccess);
+        };
     }, [embeddedEvmWallets, embeddedSolanaWallets]);
 
     // 计算总余额
@@ -94,8 +203,10 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
         const calculateTotal = () => {
         let total = 0;
             
-            // 计算 EVM 钱包余额
-            evmTokens.forEach(token => {
+            // 计算 EVM 钱包余额 - 只计算有余额的 token
+            evmTokens
+                .filter(token => token.balance > 0)
+                .forEach(token => {
                 if (token.symbol === 'ETH') {
                     // 这里需要添加 ETH 价格获取逻辑
                     total += token.balance * 2000; // 假设 ETH 价格为 2000 USD
@@ -104,11 +215,13 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                 }
             });
 
-            // 计算 Solana 钱包余额
-            solanaTokens.forEach(token => {
+            // 计算 Solana 钱包余额 - 只计算有余额的 token
+            solanaTokens
+                .filter(token => token.balance > 0)
+                .forEach(token => {
                 if (token.symbol === 'SOL') {
-                    // 这里需要添加 SOL 价格获取逻辑
-                    total += token.balance * 100; // 假设 SOL 价格为 100 USD
+                    // 使用实时 SOL 价格
+                    total += token.balance * solPrice;
                 } else if (token.symbol === 'USDC' || token.symbol === 'USDT') {
                     total += token.balance;
                 }
@@ -118,7 +231,26 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
         };
 
         calculateTotal();
-    }, [evmTokens, solanaTokens]);
+    }, [evmTokens, solanaTokens, solPrice]);
+
+    // 计算 token 价值的函数
+    const calculateTokenValue = (token: Token): number => {
+        if (token.symbol === 'SOL') {
+            return token.balance * solPrice;
+        } else if (token.symbol === 'USDC' || token.symbol === 'USDT') {
+            return token.balance; // USDC/USDT 1:1 美元
+        } else if (token.symbol === 'ETH') {
+            return token.balance * 2000; // 假设 ETH 价格为 2000 USD
+        }
+        return 0; // 其他 token 暂时不计算价值
+    };
+
+    // 格式化价值的函数
+    const formatValue = (value: number): string => {
+        if (value === 0) return '$0.00';
+        if (value < 0.01) return '<$0.01';
+        return `$${value.toFixed(2)}`;
+    };
 
     // Log state changes
     useEffect(() => {
@@ -215,6 +347,67 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
         }
     };
 
+    // 手动刷新余额
+    const handleRefreshBalances = async () => {
+        setIsRefreshing(true);
+        try {
+            if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
+                console.log('[WalletPanel] Manual refresh EVM tokens for address:', embeddedEvmWallets[0].address);
+                await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
+                    console.log('[WalletPanel] Manual refreshed EVM tokens:', tokens);
+                    const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                    console.log('[WalletPanel] Manual refreshed EVM tokens with balance:', tokensWithBalance);
+                    setEvmTokens(tokens as Token[]);
+                });
+            }
+            
+            if (embeddedSolanaWallets.length > 0 && embeddedSolanaWallets[0]?.address) {
+                console.log('[WalletPanel] Manual refresh Solana tokens for address:', embeddedSolanaWallets[0].address);
+                await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
+                    console.log('[WalletPanel] Manual refreshed Solana tokens:', tokens);
+                    const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                    console.log('[WalletPanel] Manual refreshed Solana tokens with balance:', tokensWithBalance);
+                    setSolanaTokens(tokens as Token[]);
+                });
+            }
+            
+            setToastMessage('Balances refreshed successfully');
+            setToastType('success');
+            setShowToast(true);
+        } catch (error) {
+            console.error('[WalletPanel] Error manually refreshing token balances:', error);
+            setToastMessage('Failed to refresh balances');
+            setToastType('error');
+            setShowToast(true);
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchRecentTransactions = async () => {
+            if (activeTab === 'transactions' && selectedWallet.startsWith('solana-') && solanaWallet) {
+                setLoadingTx(true);
+                try {
+                    const connection = new Connection('https://summer-wider-road.solana-mainnet.quiknode.pro/a2075ac578a82df2b00d14546fd7bb29c15d8ba3/');
+                    const publicKey = new PublicKey(solanaWallet.address);
+                    const signatures = await connection.getSignaturesForAddress(publicKey, { limit: 10 });
+                    const txs = await Promise.all(
+                        signatures.map(sigInfo => connection.getTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 }))
+                    );
+                    setRecentTransactions(txs.filter(Boolean));
+                } catch (e) {
+                    console.error('[WalletPanel] Failed to fetch transactions:', e);
+                    setRecentTransactions([]);
+                }
+                setLoadingTx(false);
+            } else {
+                setRecentTransactions([]);
+            }
+        };
+        fetchRecentTransactions();
+    }, [activeTab, selectedWallet, solanaWallet]);
+
     if (!isOpen || !mounted) return null;
 
     return createPortal(
@@ -297,8 +490,28 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
                                 <div className="p-6 pt-0 space-y-4">
                                     <div className="mt-4">
-                                        <div className="flex flex-col text-3xl font-bold">
-                                            ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col text-3xl font-bold">
+                                                {formatValue(totalBalance)}
+                                            </div>
+                                            <button
+                                                onClick={handleRefreshBalances}
+                                                disabled={isRefreshing}
+                                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-50 h-10 px-3 py-2 shadow-sm hover:shadow-md cursor-pointer disabled:cursor-not-allowed"
+                                                title="Refresh balances"
+                                            >
+                                                {isRefreshing ? (
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw">
+                                                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                                        <path d="M21 3v5h-5"/>
+                                                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                                        <path d="M3 21v-5h5"/>
+                                                    </svg>
+                                                )}
+                                                <span className="hidden sm:inline">Refresh</span>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -342,41 +555,124 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
                                     {activeTab === 'tokens' ? (
                                         <div className="space-y-3">
-                                            {evmTokens.map((token, index) => (
-                                                <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                                            {/* EVM Wallet */}
+                                            {(selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && 
+                                                evmTokens
+                                                    .filter(token => token.balance > 0) // 只显示有余额的 token
+                                                    .sort((a, b) => b.balance - a.balance) // 按余额降序排列
+                                                    .map((token, index) => (
+                                                <div key={`evm-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                            <span className="text-sm font-medium">{token.symbol}</span>
-                                                        </div>
+                                                        <img
+                                                            src={token.image || '/favicon.png'}
+                                                            alt={token.symbol}
+                                                            className="w-8 h-8 rounded-full border border-gray-200 bg-white"
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = '/favicon.png';
+                                                            }}
+                                                        />
                                                         <div>
-                                                            <div className="font-medium">{token.balance} {token.symbol}</div>
+                                                            <div className="font-medium">{token.balance.toFixed(6)}</div>
                                                             <div className="text-sm text-gray-500">{token.name}</div>
                                                         </div>
                                                     </div>
-                                                    <div className={`text-sm ${token.balance > 0 ? 'text-green-500' : token.balance < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                                                        {token.balance}
+                                                    <div className="text-sm text-green-500 font-medium">
+                                                        {formatValue(calculateTokenValue(token))}
                                                     </div>
                                                 </div>
                                             ))}
+                                            {/* Solana Wallet */}
+                                            {(selectedWallet === 'all' || selectedWallet.startsWith('solana-')) && 
+                                                solanaTokens
+                                                    .filter(token => token.balance > 0) // 只显示有余额的 token
+                                                    .sort((a, b) => b.balance - a.balance) // 按余额降序排列
+                                                    .map((token, index) => (
+                                                <div key={`sol-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                                                    <div className="flex items-center gap-3">
+                                                        <img
+                                                            src={token.image || '/favicon.png'}
+                                                            alt={token.symbol}
+                                                            className="w-8 h-8 rounded-full border border-gray-200 bg-white"
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = '/favicon.png';
+                                                            }}
+                                                        />
+                                                        <div>
+                                                            <div className="font-medium">{token.balance.toFixed(6)}</div>
+                                                            <div className="text-sm text-gray-500">{token.name}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-sm text-green-500 font-medium">
+                                                        {formatValue(calculateTokenValue(token))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            
+                                            {/* 如果没有有余额的 token，显示提示信息 */}
+                                            {((selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && evmTokens.filter(token => token.balance > 0).length === 0) &&
+                                             ((selectedWallet === 'all' || selectedWallet.startsWith('solana-')) && solanaTokens.filter(token => token.balance > 0).length === 0) && (
+                                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                    <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                                                    </svg>
+                                                    <p>No tokens with balance found</p>
+                                                    <p className="text-xs mt-1">Try funding your wallet or check another wallet</p>
+                                                </div>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            {solanaTokens.map((token, index) => (
-                                                <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${token.symbol === 'SOL' ? 'bg-yellow-100' : 'bg-blue-100'}`}>
-                                                            <span className="text-sm font-medium">{token.symbol}</span>
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-medium">{token.balance} {token.symbol}</div>
-                                                            <div className="text-sm text-gray-500">{token.name}</div>
-                                                        </div>
+                                            {/* Solana Wallet Recent Transactions */}
+                                            {selectedWallet.startsWith('solana-') ? (
+                                                loadingTx ? (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                        <svg className="animate-spin h-6 w-6 mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                                        Loading recent transactions...
                                                     </div>
-                                                    <div className={`text-sm ${token.balance > 0 ? 'text-green-500' : token.balance < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                                                        {token.balance}
+                                                ) : recentTransactions.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                        <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" /></svg>
+                                                        No recent transactions
                                                     </div>
+                                                ) : (
+                                                    <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white shadow-sm">
+                                                        <table className="min-w-full text-xs text-left">
+                                                            <thead className="bg-gray-50">
+                                                                <tr>
+                                                                    <th className="px-4 py-2 font-semibold text-gray-700">Txn Hash</th>
+                                                                    <th className="px-4 py-2 font-semibold text-gray-700">Time</th>
+                                                                    <th className="px-4 py-2 font-semibold text-gray-700">Amount (SOL)</th>
+                                                                    <th className="px-4 py-2"></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {recentTransactions.map((tx, idx) => {
+                                                                    const hash = tx.transaction.signatures[0];
+                                                                    const time = tx.blockTime ? new Date(tx.blockTime * 1000).toLocaleString() : '';
+                                                                    const amount = tx.meta?.postBalances && tx.meta?.preBalances ? ((tx.meta.postBalances[0] - tx.meta.preBalances[0]) / 1e9) : null;
+                                                                    return (
+                                                                        <tr key={hash || idx} className="hover:bg-gray-50 transition-colors">
+                                                                            <td className="px-4 py-2 max-w-[140px] truncate flex items-center gap-2 group">
+                                                                                <span className="truncate">{hash.slice(0, 8)}...{hash.slice(-6)}</span>
+                                                                                <button title="Copy" onClick={() => navigator.clipboard.writeText(hash)} className="opacity-60 group-hover:opacity-100 transition"><FaRegCopy size={14} /></button>
+                                                                                <a href={`https://solscan.io/tx/${hash}`} target="_blank" rel="noopener noreferrer" title="View on Solscan" className="opacity-60 group-hover:opacity-100 transition"><FaExternalLinkAlt size={14} /></a>
+                                                                            </td>
+                                                                            <td className="px-4 py-2 whitespace-nowrap text-gray-500">{time}</td>
+                                                                            <td className={`px-4 py-2 font-mono ${(amount ?? 0) > 0 ? 'text-green-600' : (amount ?? 0) < 0 ? 'text-red-500' : 'text-gray-500'}`}>{amount !== null && amount !== undefined ? amount.toFixed(6) : '-'}</td>
+                                                                            <td className="px-4 py-2 text-gray-400"><FaArrowRight /></td>
+                                                                        </tr>
+                                                                    );
+                                                                })}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                    <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" /></svg>
+                                                    EVM transaction history is not supported yet
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                     )}
                                 </div>

@@ -319,78 +319,73 @@ export const queryTokenListByAddress = async (
   address: string,
   storeCallback: (tokens: MappedToken[]) => void
 ): Promise<void> => {
+  console.log('Querying token list for address:', address);
+  if (!address) return;
+
   try {
-    // 检查地址类型
-    const isSolanaAddress = address.length === 44 || address.length === 43;
-    
-    if (isSolanaAddress) {
-      // Solana 钱包地址
-      const response = await fetch(`https://api.mainnet-beta.solana.com`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getTokenAccountsByOwner',
-          params: [
-            address,
-            {
-              programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-            },
-            {
-              encoding: 'jsonParsed'
-            }
-          ]
-        })
-      });
+    // Fetch token list from API
+    const response = await fetch(`https://sol-wallet-theta.vercel.app/api/tokens?walletAddress=${address}`);
+    const tokenData: TokenData[] = await response.json();
+    console.log('Raw tokenData for address', address, ':', tokenData);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch Solana tokens');
-      }
+    if (!Array.isArray(tokenData)) {
+      console.error('Token data is not an array:', tokenData);
+      return;
+    }
 
-      const data = await response.json();
-      if (!data.result?.value) {
-        storeCallback([]);
-        return;
-      }
+    // 常用 token 的本地 logo 映射
+    const commonTokenLogos: { [key: string]: string } = {
+      // Solana 主币
+      'So11111111111111111111111111111111111111112': '/tokens/sol.png',
+      // USDC
+      'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': '/tokens/usdc.png',
+      // USDT
+      'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': '/tokens/usdt.png',
+      // BONK
+      'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': '/tokens/bonk.png',
+      // JUP (Jupiter)
+      'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '/tokens/jup.png'
+    };
 
-      const tokens = data.result.value.map((token: any) => ({
-        mint: token.account.data.parsed.info.mint,
-        balance: token.account.data.parsed.info.tokenAmount.uiAmount,
-        name: token.account.data.parsed.info.mint,
-        image: '',
-        symbol: 'SOL',
-        decimals: token.account.data.parsed.info.tokenAmount.decimals
-      }));
+    // 常用 token 的 symbol 映射
+    const commonTokenSymbols: { [key: string]: string } = {
+      // Solana 主币
+      'So11111111111111111111111111111111111111112': 'SOL',
+      // USDC
+      'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+      // USDT
+      'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
+      // BONK
+      'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
+      // JUP (Jupiter)
+      'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': 'JUP'
+    };
 
-      storeCallback(tokens);
-    } else {
-      // EVM 钱包地址
-      const response = await fetch(`https://sol-wallet-theta.vercel.app/api/tokens?walletAddress=${address}`);
-      const tokenData = await response.json();
-      console.log('Raw tokenData for address', address, ':', tokenData);
+    // Create a combined token list with all required data
+    const mappedTokens: MappedToken[] = tokenData.map(token => {
+      // 检查是否有本地 logo
+      const localLogo = commonTokenLogos[token.mintAddress];
+      // 检查是否有预定义的 symbol
+      const predefinedSymbol = commonTokenSymbols[token.mintAddress];
       
-      if (!Array.isArray(tokenData)) {
-        console.error('Token data is not an array:', tokenData);
-        storeCallback([]);
-        return;
-      }
-      
-      const mappedTokens = tokenData.map(token => ({
+      return {
         mint: token.mintAddress,
         balance: token.amount,
-        name: token.name,
-        image: token.metadata?.image || '',
-        symbol: token.metadata?.symbol || 'UNKNOWN',
-        decimals: token.decimals
-      }));
-      
-      storeCallback(mappedTokens);
-    }
+        name: token.metadata?.name || token.name,
+        image: localLogo || token.metadata?.image || '/favicon.png',
+        symbol: predefinedSymbol || token.metadata?.symbol || '',
+        decimals: token.decimals,
+      };
+    });
+
+    console.log('Mapped tokens:', mappedTokens);
+
+    // Update store using the callback
+    storeCallback(mappedTokens);
+
   } catch (error) {
-    console.error('Error fetching tokens:', error);
+    console.error('Failed to fetch token list:', error);
+    // Reset store with empty array on error
     storeCallback([]);
   }
 };
@@ -413,15 +408,48 @@ export const queryTokenListByAddressPromise = async (
       return;
     }
 
+    // 常用 token 的本地 logo 映射
+    const commonTokenLogos: { [key: string]: string } = {
+      // Solana 主币
+      'So11111111111111111111111111111111111111112': '/tokens/sol.png',
+      // USDC
+      'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': '/tokens/usdc.png',
+      // USDT
+      'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': '/tokens/usdt.png',
+      // BONK
+      'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': '/tokens/bonk.png',
+      // JUP (Jupiter)
+      'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '/tokens/jup.png'
+    };
+
+    // 常用 token 的 symbol 映射
+    const commonTokenSymbols: { [key: string]: string } = {
+      // Solana 主币
+      'So11111111111111111111111111111111111111112': 'SOL',
+      // USDC
+      'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+      // USDT
+      'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
+      // BONK
+      'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
+      // JUP (Jupiter)
+      'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': 'JUP'
+    };
+
     // Create a combined token list with all required data
-    const mappedTokens: MappedToken[] = tokenData.map(token => ({
-      mint: token.mintAddress,
-      balance: token.amount,
-      name: token.metadata?.name || token.name,
-      image: token.metadata?.image || '/public/images/sol2.png',
-      symbol: token.metadata?.symbol || '',
-      decimals: token.decimals,
-    }));
+    const mappedTokens: MappedToken[] = tokenData.map(token => {
+      // 检查是否有本地 logo
+      const localLogo = commonTokenLogos[token.mintAddress];
+      
+      return {
+        mint: token.mintAddress,
+        balance: token.amount,
+        name: token.metadata?.name || token.name,
+        image: localLogo || token.metadata?.image || '/favicon.png',
+        symbol: token.metadata?.symbol || '',
+        decimals: token.decimals,
+      };
+    });
 
     console.log('Mapped tokens:', mappedTokens);
 
@@ -436,7 +464,7 @@ export const queryTokenListByAddressPromise = async (
 
 
 // Transaction utility functions
-import { Keypair, Connection, Transaction, PublicKey, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { Keypair, Connection, Transaction, PublicKey, SystemProgram, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
 import bs58 from 'bs58';
 
 export const getPublicKey = (privateKey: string): string => {

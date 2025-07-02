@@ -29,7 +29,7 @@ export const Header = () => {
     >
       <Flex align="center" gap="3">
         <NextLink href="/">
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="2" className="cursor-pointer hover:opacity-80 transition-opacity">
             <Heading
               as="h2"
               size="4"

@@ -9,7 +9,34 @@ import GradientHero from './GradientHero';
 import IconWithLabel from './IconWithLabel';
 import { motion } from 'framer-motion';
 
-export default function WelcomeSection() {
+interface WelcomeSectionProps {
+  setMessage?: (message: string) => void;
+}
+
+export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
+  const handleAskThis = (action: string) => {
+    if (setMessage) {
+      let message = '';
+      switch (action) {
+        case 'swap':
+          message = 'swap 1sol to usdc';
+          break;
+        case 'bridge':
+          message = 'bridge 1sol to usdc in ethereum';
+          break;
+        case 'stake':
+          message = 'stake 1sol in Jupiter';
+          break;
+        case 'knowledge':
+          message = 'show me the documentation for Jupiter protocol';
+          break;
+        default:
+          message = '';
+      }
+      setMessage(message);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center px-4 py-6 sm:py-8 pb-0 w-full">
       <div className="flex flex-col items-center w-full max-w-4xl">
@@ -62,7 +89,10 @@ export default function WelcomeSection() {
               <h3 className="text-sm sm:text-base font-semibold text-foreground">Swap With the Best Route</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Get the best price for your swap with optimized routing.</p>
             </div>
-            <button className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+            <button 
+              onClick={() => handleAskThis('swap')}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            >
               <span>Ask this</span>
               <FiZap className="w-3.5 h-3.5" />
             </button>
@@ -80,7 +110,10 @@ export default function WelcomeSection() {
               <h3 className="text-sm sm:text-base font-semibold text-foreground">Bridge Assets Across Chains</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Move tokens across blockchains with ease and security.</p>
             </div>
-            <button className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+            <button 
+              onClick={() => handleAskThis('bridge')}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            >
               <span>Ask this</span>
               <FiZap className="w-3.5 h-3.5" />
             </button>
@@ -98,7 +131,10 @@ export default function WelcomeSection() {
               <h3 className="text-sm sm:text-base font-semibold text-foreground">Stake SOL for Rewards</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Earn passive income with competitive APY rates.</p>
             </div>
-            <button className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+            <button 
+              onClick={() => handleAskThis('stake')}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            >
               <span>Ask this</span>
               <FiZap className="w-3.5 h-3.5" />
             </button>
@@ -116,7 +152,10 @@ export default function WelcomeSection() {
               <h3 className="text-sm sm:text-base font-semibold text-foreground">Developer Documentation</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">Access comprehensive docs for top DeFi protocols.</p>
             </div>
-            <button className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+            <button 
+              onClick={() => handleAskThis('knowledge')}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            >
               <span>Ask this</span>
               <FiZap className="w-3.5 h-3.5" />
             </button>

@@ -21,7 +21,13 @@ export default function Thoughts({ thoughts, status = 'Processing your request' 
         <div className="flex items-center justify-between">
           <div className="flex items-start space-x-2">
             <div className="min-w-2 min-h-2 bg-primary rounded-full self-start mt-1"></div>
-            <span className="text-sm font-medium cursor-pointer" onClick={() => setIsExpanded((v) => !v)}>{status}</span>
+            <span 
+              className="text-sm font-medium cursor-pointer hover:text-primary transition-colors" 
+              onClick={() => setIsExpanded((v) => !v)}
+              style={{ cursor: 'pointer' }}
+            >
+              {status}
+            </span>
           </div>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -33,8 +39,9 @@ export default function Thoughts({ thoughts, status = 'Processing your request' 
             strokeWidth="2" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
-            className={`lucide lucide-chevron-${isExpanded ? 'up' : 'down'} cursor-pointer w-4 h-4 text-primary transition-transform duration-300`}
+            className={`lucide lucide-chevron-${isExpanded ? 'up' : 'down'} cursor-pointer w-4 h-4 text-primary transition-transform duration-300 hover:scale-110`}
             onClick={() => setIsExpanded((v) => !v)}
+            style={{ cursor: 'pointer' }}
           >
             <path d={isExpanded ? "m18 15-6-6-6 6" : "m6 9 6 6 6-6"}></path>
           </svg>

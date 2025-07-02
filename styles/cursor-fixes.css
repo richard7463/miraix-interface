@@ -1,0 +1,100 @@
+/* Cursor 样式修复文件 */
+
+/* 确保所有可点击元素都有正确的 cursor */
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* 按钮 cursor 样式 */
+button:not(:disabled) {
+  cursor: pointer !important;
+}
+
+button:disabled {
+  cursor: not-allowed !important;
+}
+
+/* 链接 cursor 样式 */
+a {
+  cursor: pointer !important;
+}
+
+/* 有 onClick 事件的元素 */
+[onClick] {
+  cursor: pointer !important;
+}
+
+/* 有 role="button" 的元素 */
+[role="button"] {
+  cursor: pointer !important;
+}
+
+/* 输入框在禁用状态下的 cursor */
+input:disabled,
+textarea:disabled {
+  cursor: not-allowed !important;
+}
+
+/* SVG 图标在可点击容器中的 cursor */
+svg[onClick] {
+  cursor: pointer !important;
+}
+
+/* 确保图标在可点击容器中也能接收鼠标事件 */
+.cursor-pointer svg {
+  pointer-events: auto !important;
+}
+
+/* 修复 Tailwind 可能覆盖的 cursor 样式 */
+.hover\:cursor-pointer:hover {
+  cursor: pointer !important;
+}
+
+/* 确保禁用状态下的样式不被覆盖 */
+.disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed !important;
+}
+
+/* 修复特定组件的 cursor 问题 */
+.welcome-card {
+  cursor: pointer !important;
+}
+
+.welcome-card button {
+  cursor: pointer !important;
+}
+
+/* 修复 NewSwap 组件的 cursor */
+.NewSwap button:not(:disabled) {
+  cursor: pointer !important;
+}
+
+/* 修复 Thoughts 组件的 cursor */
+.Thoughts span[onClick],
+.Thoughts svg[onClick] {
+  cursor: pointer !important;
+}
+
+/* 修复聊天输入框的 cursor */
+.chat-textarea button:not(:disabled) {
+  cursor: pointer !important;
+}
+
+/* 修复交易状态卡片的 cursor */
+.transaction-status a {
+  cursor: pointer !important;
+}
+
+/* 确保所有交互元素在悬停时显示正确的 cursor */
+*:hover {
+  cursor: inherit;
+}
+
+/* 强制应用 cursor 样式 */
+[style*="cursor: pointer"] {
+  cursor: pointer !important;
+}
+
+[style*="cursor: not-allowed"] {
+  cursor: not-allowed !important;
+} 

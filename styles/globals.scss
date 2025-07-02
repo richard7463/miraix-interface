@@ -3,6 +3,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 @import '@radix-ui/themes/styles.css';
+@import './cursor-fixes.css';
 
 :root {
   @apply h-full;
@@ -151,6 +152,33 @@ body {
 
 .header-connect-btn {
   @apply flex flex-col;
+}
+
+/* 确保 cursor pointer 样式生效 */
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* 修复按钮的 cursor 样式 */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+/* 修复链接的 cursor 样式 */
+a {
+  cursor: pointer;
+}
+
+/* 修复可点击元素的 cursor 样式 */
+[onClick], [role="button"] {
+  cursor: pointer;
+}
+
+/* 确保禁用状态下的 cursor 样式 */
+button:disabled,
+input:disabled,
+textarea:disabled {
+  cursor: not-allowed !important;
 }
 
 @keyframes fadeIn {

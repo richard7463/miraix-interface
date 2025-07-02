@@ -15,7 +15,7 @@ interface ChatStore {
   addMessage: (chatId: string, message: any) => void
   setMessages: (chatId: string, messages: any[]) => void
   getMessages: (chatId: string) => any[]
-  saveMessages: (chatId: string, messages: any[]) => Promise<void>
+  saveMessages: (chatId: string, messages: any[], walletAddress?: string) => Promise<void>
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -67,14 +67,15 @@ export const useChatStore = create<ChatStore>()(
         return map.get(chatId) || []
       },
       
-      saveMessages: async (chatId, messages) => {
+      saveMessages: async (chatId, messages, walletAddress?: string) => {
         const state = get()
         const currentChat = state.chatList.find(chat => chat.id === chatId)
 
         console.log('[chatStore] Saving messages:', {
           chatId,
           messages,
-          currentChat
+          currentChat,
+          walletAddress
         })
 
         if (messages.length > 0 && chatId) {
@@ -86,26 +87,39 @@ export const useChatStore = create<ChatStore>()(
               id: msg.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
             }))
 
+            // 使用提供的钱包地址，如果没有则使用测试地址
+            const addressToUse = walletAddress || '0x1234567890123456789012345678901234567890'
+            
+            console.log('[chatStore] Using address for API call:', addressToUse)
+
             const response = await fetch(API_ENDPOINTS.SAVE_MESSAGES(chatId), {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
                 'message': `Save messages for chat ${chatId}`,
-                'address': '0x1234567890123456789012345678901234567890'
+                'address': addressToUse
               },
               body: JSON.stringify({
                 messages: formattedMessages,
                 chatId: chatId,
                 persona: currentChat?.persona,
                 createdAt: currentChat?.createdAt || new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                walletAddress: addressToUse
               })
             })
 
+            console.log('[chatStore] API response status:', response.status)
+            
             if (!response.ok) {
-              throw new Error('Failed to save messages')
+              const errorText = await response.text()
+              console.error('[chatStore] API error response:', errorText)
+              throw new Error(`Failed to save messages: ${response.status} ${errorText}`)
             }
+
+            const responseData = await response.json()
+            console.log('[chatStore] API response data:', responseData)
 
             // 更新本地消息映射
             set((state) => {

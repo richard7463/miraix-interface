@@ -24,7 +24,8 @@ import WelcomeSection from './WelcomeSection';
 import { API_ENDPOINTS } from '@/lib/config'
 import { useChatStore } from '@/store/chatStore'
 import { DefaultPersonas } from './interface'
-import { usePrivy, useSolanaWallets } from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
+import { useSolanaWallets } from '@privy-io/react-auth/solana'
 import { Toast } from '../Toast'
 // const { user, ready, authenticated } = usePrivy();
 
@@ -97,6 +98,20 @@ const Chat = (props: ChatProps, ref: any) => {
     setChatList
   } = useChatStore();
 
+  // 监控钱包状态变化
+  useEffect(() => {
+    console.log('[Chat] Wallet status changed:', {
+      ready,
+      authenticated,
+      solanaWalletsCount: solanaWallets?.length,
+      solanaWallets: solanaWallets?.map(w => ({ 
+        type: w.walletClientType, 
+        address: w.address,
+        connected: w.connected
+      }))
+    });
+  }, [ready, authenticated, solanaWallets]);
+
   // 初始化聊天
   useEffect(() => {
     const initializeChat = async () => {
@@ -124,8 +139,24 @@ const Chat = (props: ChatProps, ref: any) => {
 
   // Test proxy by requesting baidu.com and qq.com
 
-  const checkWalletConnection = () => {
-    if (!ready || !authenticated) {
+  const checkWalletConnection = useCallback(() => {
+    console.log('[checkWalletConnection] Checking wallet status:', { 
+      ready, 
+      authenticated, 
+      solanaWalletsCount: solanaWallets?.length,
+      solanaWallets: solanaWallets?.map(w => ({ type: w.walletClientType, address: w.address }))
+    });
+
+    if (!ready) {
+      console.log('[checkWalletConnection] Privy not ready');
+      setToastMessage('Please wait for wallet to be ready');
+      setToastType('warning');
+      setShowToast(true);
+      return false;
+    }
+
+    if (!authenticated) {
+      console.log('[checkWalletConnection] User not authenticated');
       setToastMessage('Please login to your wallet first');
       setToastType('warning');
       setShowToast(true);
@@ -134,21 +165,28 @@ const Chat = (props: ChatProps, ref: any) => {
 
     const hasSolanaWallet = solanaWallets && solanaWallets.length > 0;
     if (!hasSolanaWallet) {
+      console.log('[checkWalletConnection] No Solana wallet found');
       setToastMessage('Please connect your Solana wallet first');
       setToastType('warning');
       setShowToast(true);
       return false;
     }
 
+    const embeddedWallet = solanaWallets.find(wallet => wallet.walletClientType === 'privy');
+    if (!embeddedWallet) {
+      console.log('[checkWalletConnection] No embedded Solana wallet found');
+      setToastMessage('Please connect your embedded Solana wallet first');
+      setToastType('warning');
+      setShowToast(true);
+      return false;
+    }
+
+    console.log('[checkWalletConnection] Wallet check passed, embedded wallet found:', embeddedWallet.address);
     return true;
-  };
+  }, [ready, authenticated, solanaWallets, setToastMessage, setToastType, setShowToast]);
 
   const sendMessage = useCallback(
     async () => {
-      if (!checkWalletConnection()) {
-        return;
-      }
-
       console.log('[sendMessage] called', { isLoading, message, currentChatId: currentChat?.id });
       if (isLoading || !message.trim()) return;
 
@@ -180,32 +218,46 @@ const Chat = (props: ChatProps, ref: any) => {
         });
 
         console.log('[sendMessage] Creating new chat session for first message', latestChat, input);
-          const response = await fetch('http://localhost:3009/api/chat-new', {
+        
+        // 获取真实的 Solana 钱包地址
+        const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
+        const walletAddress = embeddedWallet?.address || '0x1234567890123456789012345678901234567890';
+        
+        console.log('[sendMessage] Using wallet address:', walletAddress);
+        
+        let response;
+        try {
+          response = await fetch('http://localhost:3009/api/chat-new', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
-            'message': `Create chat ${latestChat?.id}`,
-              'address': '0x1234567890123456789012345678901234567890'
+              'message': `Create chat ${latestChat?.id}`,
+              'address': walletAddress
             },
             body: JSON.stringify({
-            chatId: latestChat?.id,
-            persona: latestChat?.persona,
+              chatId: latestChat?.id,
+              persona: latestChat?.persona,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               message: input,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              walletAddress: walletAddress // 也在 body 中传递钱包地址
             })
           });
+        } catch (fetchError) {
+          console.error('[sendMessage] Fetch error:', fetchError);
+          throw new Error('无法连接到服务器，请检查服务器是否正在运行');
+        }
 
-          if (!response.ok) {
-            throw new Error('Failed to create chat session');
-          }
+        if (!response || !response.ok) {
+          throw new Error('Failed to create chat session');
+        }
 
-          // 更新聊天状态
+        // 更新聊天状态
         updateChatStatus(latestChat?.id!, true);
-          
-          // 添加用户消息到对话
+        
+        // 添加用户消息到对话
         const messages = [{ content: input, role: 'user' }];
         setMessages(latestChat?.id!, messages);
         
@@ -218,17 +270,98 @@ const Chat = (props: ChatProps, ref: any) => {
         setIsLoading(false);
       }
     },
-    [isLoading, message, setMessages, getMessages, router, updateChatStatus]
+    [isLoading, message, setMessages, getMessages, router, updateChatStatus, solanaWallets, setCurrentChat, setChatList]
   );
+
+  // 统一的发送处理函数
+  const handleSend = useCallback(() => {
+    console.log('[handleSend] called with message:', message);
+    console.log('[handleSend] message.trim():', message.trim());
+    console.log('[handleSend] isLoading:', isLoading);
+    
+    if (isLoading || !message.trim()) {
+      console.log('[handleSend] Early return - isLoading:', isLoading, 'message empty:', !message.trim());
+      return;
+    }
+    
+    console.log('[handleSend] Calling sendMessage');
+    sendMessage();
+  }, [message, isLoading, sendMessage]);
 
   const handleKeypress = useCallback(
     (e: any) => {
+      console.log('[handleKeypress] Key pressed:', e.key, 'Shift:', e.shiftKey);
+      
       if (e.key === 'Enter' && !e.shiftKey) {
+        console.log('[handleKeypress] Enter pressed without shift, preventing default and calling handleSend');
         e.preventDefault();
-        sendMessage();
+        
+        // 直接从 ContentEditable 元素获取当前值
+        const currentValue = e.target.value || e.target.textContent || '';
+        console.log('[handleKeypress] Current value from element:', currentValue);
+        
+        if (currentValue.trim() && !isLoading) {
+          console.log('[handleKeypress] Calling sendMessage with current value');
+          const input = currentValue.trim();
+          setMessage(''); // 清空输入框
+          setIsLoading(true); // 设置加载状态
+          
+          // 创建新的聊天
+          const newChat = {
+            id: crypto.randomUUID(),
+            isNew: true,
+            persona: DefaultPersonas[0],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          setCurrentChat(newChat);
+          
+          // 使用 getState() 获取最新状态
+          const currentState = useChatStore.getState();
+          const latestChat = currentState.currentChat;
+          
+          // 获取真实的 Solana 钱包地址
+          const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
+          const walletAddress = embeddedWallet?.address || '0x1234567890123456789012345678901234567890';
+          
+          // 发送消息
+          fetch('http://localhost:3009/api/chat-new', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+              'message': `Create chat ${latestChat?.id}`,
+              'address': walletAddress
+            },
+            body: JSON.stringify({
+              chatId: latestChat?.id,
+              persona: latestChat?.persona,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              message: input,
+              timestamp: new Date().toISOString(),
+              walletAddress: walletAddress
+            })
+          }).then(response => {
+            if (response.ok) {
+              updateChatStatus(latestChat?.id!, true);
+              const messages = [{ content: input, role: 'user' }];
+              setMessages(latestChat?.id!, messages);
+              router.push(`/chat/${latestChat?.id}`);
+            }
+          }).catch(error => {
+            console.error('Error sending message:', error);
+            toast.error('Failed to send message');
+          }).finally(() => {
+            setIsLoading(false); // 清除加载状态
+          });
+        } else {
+          console.log('[handleKeypress] Empty message or already loading, not sending');
+        }
       }
     },
-    [sendMessage]
+    [setCurrentChat, setMessages, updateChatStatus, router, solanaWallets, isLoading]
   )
 
   const clearMessages = () => {
@@ -300,7 +433,7 @@ const Chat = (props: ChatProps, ref: any) => {
     <Flex direction="column" height="100vh" className="relative" style={{ minHeight: '100vh', overflow: 'hidden', flex: 1, paddingTop: '76px' }}>
       <Flex className="flex-1 px-4" style={{}}>
         {/* 仅在没有消息时显示欢迎，否则渲染消息列表 */}
-        <WelcomeSection />
+        <WelcomeSection setMessage={setMessage} />
         <div ref={bottomOfChatRef} />
       </Flex>
       <Flex className="chat-textarea w-full items-end gap-3 fixed bottom-0 inset-x-0 z-30" align="end" style={{
@@ -331,7 +464,7 @@ const Chat = (props: ChatProps, ref: any) => {
               height: '50px',
               display: 'flex',
               alignItems: 'center',
-              color: '#fff',
+              color: '#6b7280',
               pointerEvents: 'none',
               fontSize: 16,
               userSelect: 'none',
@@ -347,40 +480,136 @@ const Chat = (props: ChatProps, ref: any) => {
             innerRef={textAreaRef}
             html={message}
             disabled={isLoading}
-            onChange={e => setMessage(e.target.value.replace(HTML_REGULAR, ''))}
-            onKeyDown={handleKeypress}
+            onChange={e => {
+              console.log('[ContentEditable] onChange triggered');
+              console.log('[ContentEditable] e.target.value:', e.target.value);
+              console.log('[ContentEditable] e.target.innerHTML:', e.target.innerHTML);
+              console.log('[ContentEditable] e.target.textContent:', e.target.textContent);
+              const cleanedValue = e.target.value.replace(HTML_REGULAR, '');
+              console.log('[ContentEditable] cleanedValue:', cleanedValue);
+              setMessage(cleanedValue);
+              console.log('[ContentEditable] setMessage called with:', cleanedValue);
+            }}
+            onKeyDown={(e) => {
+              console.log('[ContentEditable] onKeyDown event:', e.key, e.shiftKey);
+              handleKeypress(e);
+            }}
             className="rt-TextAreaInput flex-1"
-            style={{ paddingRight: '56px', paddingLeft: 20, minHeight: 22, height: 50, lineHeight: '50px', fontSize: 16, background: 'transparent', zIndex: 2 }}
+            style={{ 
+              paddingRight: '56px', 
+              paddingLeft: 20, 
+              minHeight: 22, 
+              height: 50, 
+              lineHeight: '50px', 
+              fontSize: 16, 
+              background: 'transparent', 
+              zIndex: 2,
+              borderRadius: '25px',
+              border: '1px solid #e5e7eb',
+              transition: 'all 0.2s ease-in-out'
+            }}
           />
           <IconButton
             size="3"
             variant="solid"
             color="accent"
             disabled={isLoading}
-            onClick={sendMessage}
+            onClick={() => {
+              console.log('[SendButton] Clicked');
+              
+              // 直接从 ContentEditable 元素获取当前值
+              const currentValue = textAreaRef.current?.value || textAreaRef.current?.textContent || '';
+              console.log('[SendButton] Current value from element:', currentValue);
+              
+              if (currentValue.trim() && !isLoading) {
+                console.log('[SendButton] Calling sendMessage with current value');
+                const input = currentValue.trim();
+                setMessage(''); // 清空输入框
+                setIsLoading(true); // 设置加载状态
+                
+                // 创建新的聊天
+                const newChat = {
+                  id: crypto.randomUUID(),
+                  isNew: true,
+                  persona: DefaultPersonas[0],
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                };
+                
+                setCurrentChat(newChat);
+                
+                // 使用 getState() 获取最新状态
+                const currentState = useChatStore.getState();
+                const latestChat = currentState.currentChat;
+                
+                // 获取真实的 Solana 钱包地址
+                const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
+                const walletAddress = embeddedWallet?.address || '0x1234567890123456789012345678901234567890';
+                
+                // 发送消息
+                fetch('http://localhost:3009/api/chat-new', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+                    'message': `Create chat ${latestChat?.id}`,
+                    'address': walletAddress
+                  },
+                  body: JSON.stringify({
+                    chatId: latestChat?.id,
+                    persona: latestChat?.persona,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    message: input,
+                    timestamp: new Date().toISOString(),
+                    walletAddress: walletAddress
+                  })
+                }).then(response => {
+                  if (response.ok) {
+                    updateChatStatus(latestChat?.id!, true);
+                    const messages = [{ content: input, role: 'user' }];
+                    setMessages(latestChat?.id!, messages);
+                    router.push(`/chat/${latestChat?.id}`);
+                  }
+                }).catch(error => {
+                  console.error('Error sending message:', error);
+                  toast.error('Failed to send message');
+                }).finally(() => {
+                  setIsLoading(false); // 清除加载状态
+                });
+              } else {
+                console.log('[SendButton] Empty message or already loading, not sending');
+              }
+            }}
             style={{
               position: 'absolute',
-              right: '1%',
+              right: '8px',
               top: '50%',
-              transform: 'translateY(-50%) scale(0.7)',
+              transform: 'translateY(-50%)',
               zIndex: 2,
               background: 'linear-gradient(100deg, #00C6FB 0%, #3F51B5 100%)',
               borderRadius: '50%',
-              boxShadow: '0 0 16px 4px #00C6FB88, 0 2px 8px 0 rgba(0,0,0,0.12)',
-              transition: 'box-shadow 0.25s, transform 0.18s',
-              padding: '6px',
+              boxShadow: '0 4px 12px rgba(0, 198, 251, 0.3), 0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'all 0.2s ease-in-out',
+              padding: '8px',
               border: 'none',
-              cursor: 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
               outline: 'none',
-              animation: 'glowPulse 2s infinite alternate',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             } as React.CSSProperties}
             onMouseOver={e => {
-              e.currentTarget.style.boxShadow = '0 0 38px 10px #00C6FBcc, 0 2px 8px 0 rgba(0,0,0,0.14)';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(0.85)';
+              if (!isLoading) {
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 198, 251, 0.4), 0 4px 8px rgba(0,0,0,0.15)';
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
+              }
             }}
             onMouseOut={e => {
-              e.currentTarget.style.boxShadow = '0 0 16px 4px #00C6FB88, 0 2px 8px 0 rgba(0,0,0,0.12)';
-              e.currentTarget.style.transform = 'translateY(-50%) scale(0.7)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 198, 251, 0.3), 0 2px 4px rgba(0,0,0,0.1)';
+              e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
             }}
           >
             {isLoading ? <AiOutlineLoading3Quarters className="animate-spin" /> : <FiSend />}
