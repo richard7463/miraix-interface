@@ -325,11 +325,44 @@ export const queryTokenListByAddress = async (
   try {
     // Fetch token list from API
     const response = await fetch(`https://sol-wallet-theta.vercel.app/api/tokens?walletAddress=${address}`);
-    const tokenData: TokenData[] = await response.json();
-    console.log('Raw tokenData for address', address, ':', tokenData);
+    
+    if (!response.ok) {
+      console.error('API request failed:', response.status, response.statusText);
+      storeCallback([]);
+      return;
+    }
+    
+    const rawData = await response.json();
+    console.log('Raw API response for address', address, ':', rawData);
 
-    if (!Array.isArray(tokenData)) {
-      console.error('Token data is not an array:', tokenData);
+    // 处理不同的响应格式
+    let tokenData: TokenData[];
+    
+    if (Array.isArray(rawData)) {
+      // 如果直接是数组
+      tokenData = rawData;
+    } else if (rawData && typeof rawData === 'object') {
+      // 如果是对象，尝试提取tokens字段
+      if (Array.isArray(rawData.tokens)) {
+        tokenData = rawData.tokens;
+      } else if (Array.isArray(rawData.data)) {
+        tokenData = rawData.data;
+      } else if (rawData.result && Array.isArray(rawData.result)) {
+        tokenData = rawData.result;
+      } else {
+        console.error('Token data is not in expected format:', rawData);
+        storeCallback([]);
+        return;
+      }
+    } else {
+      console.error('Token data is not an array or object:', rawData);
+      storeCallback([]);
+      return;
+    }
+
+    if (!Array.isArray(tokenData) || tokenData.length === 0) {
+      console.log('No tokens found for address:', address);
+      storeCallback([]);
       return;
     }
 
@@ -400,12 +433,41 @@ export const queryTokenListByAddressPromise = async (
   try {
     // Fetch token list from API
     const response = await fetch(`https://sol-wallet-theta.vercel.app/api/tokens?walletAddress=${address}`);
-    const tokenData: TokenData[] = await response.json();
-    console.log('Raw tokenData for address', address, ':', tokenData);
+    
+    if (!response.ok) {
+      console.error('API request failed:', response.status, response.statusText);
+      return await storeCallback([]);
+    }
+    
+    const rawData = await response.json();
+    console.log('Raw API response for address', address, ':', rawData);
 
-    if (!Array.isArray(tokenData)) {
-      console.error('Token data is not an array:', tokenData);
-      return;
+    // 处理不同的响应格式
+    let tokenData: TokenData[];
+    
+    if (Array.isArray(rawData)) {
+      // 如果直接是数组
+      tokenData = rawData;
+    } else if (rawData && typeof rawData === 'object') {
+      // 如果是对象，尝试提取tokens字段
+      if (Array.isArray(rawData.tokens)) {
+        tokenData = rawData.tokens;
+      } else if (Array.isArray(rawData.data)) {
+        tokenData = rawData.data;
+      } else if (rawData.result && Array.isArray(rawData.result)) {
+        tokenData = rawData.result;
+      } else {
+        console.error('Token data is not in expected format:', rawData);
+        return await storeCallback([]);
+      }
+    } else {
+      console.error('Token data is not an array or object:', rawData);
+      return await storeCallback([]);
+    }
+
+    if (!Array.isArray(tokenData) || tokenData.length === 0) {
+      console.log('No tokens found for address:', address);
+      return await storeCallback([]);
     }
 
     // 常用 token 的本地 logo 映射
@@ -458,7 +520,7 @@ export const queryTokenListByAddressPromise = async (
 
   } catch (error) {
     console.error('Failed to fetch token list:', error);
-    return undefined;  // Return undefined in case of error
+    return await storeCallback([]);  // Return result of callback in case of error
   }
 };
 
@@ -663,28 +725,28 @@ export const checkTransactionStatus = async (signature: string): Promise<{
     if (!response) {
       return {
         status: 'fail',
-        message: '交易未找到',
+        message: 'Transaction not found',
         error: 'Transaction not found'
       };
     }
 
     if (response.meta?.err) {
-      const errorMessage = response.meta.logMessages?.find(log => log.includes('Error:')) || '交易失敗';
+      const errorMessage = response.meta.logMessages?.find(log => log.includes('Error:')) || 'Transaction failed';
       return {
         status: 'fail',
-        message: '交易失敗',
+        message: 'Transaction failed',
         error: errorMessage
       };
     }
 
     return {
       status: 'success',
-      message: '交易成功'
+      message: 'Transaction successful'
     };
   } catch (error) {
     return {
       status: 'fail',
-      message: '查詢失敗',
+      message: 'Query failed',
       error: error.message
     };
   }
@@ -855,8 +917,8 @@ export const createAndBundleSignTransaction = async (
   wallet: any | any[],
   jitoFee?: number
 ): Promise<string[]> => {
-  let rpc1 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";//这里收费结点rpc
-  let rpc2 = "https://mainnet.block-engine.jito.wtf:443/api/v1/bundles";//这里jito结点捆绑用rpc
+  let rpc1 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";//Paid RPC node
+  let rpc2 = "https://mainnet.block-engine.jito.wtf:443/api/v1/bundles";//Jito node for bundle transactions
   
   const connection1 = new Connection(rpc1);
   const connection2 = new Connection(rpc2);
@@ -1097,17 +1159,17 @@ export const createDifferentBuySellSignTransaction = async (
         transaction.feePayer = fromWalletsell.publicKey;
         await transaction.sign(fromWalletbuy, fromWalletsell);
 
-        console.log(`[交易广播] 正在广播交易...`);
+        console.log(`[Transaction Broadcast] Broadcasting transaction...`);
         const signature = await connection2.sendRawTransaction(transaction.serialize());
-        console.log(`[交易成功] 交易签名: ${signature}`);
-        console.log(`[交易链接] https://solscan.io/tx/${signature}`);
+        console.log(`[Transaction Success] Transaction signature: ${signature}`);
+        console.log(`[Transaction Link] https://solscan.io/tx/${signature}`);
 
       } catch (error) {
-        console.error(`[处理失败] 钱包对 ${k + 1} 处理出错:`, error);
+        console.error(`[Processing Failed] Wallet pair ${k + 1} processing error:`, error);
       }
     }
   } catch (error) {
-    console.error('[严重错误] 交易过程中断:', error);
+    console.error('[Critical Error] Transaction process interrupted:', error);
     throw error;
   }
 };
@@ -1118,11 +1180,12 @@ export const executeTransactions = async(walletList, method, amount, mints, deci
   console.log('开始执行批量交易...');
   console.log(`交易参数: 钱包数量: ${walletList}, 金额: ${amount}, 代币地址: ${mints}, 滑点: ${slip}, Jito费用: ${jitogas}`);
   
+  
   const rpc1 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";//这里收费结点rpc
   const connection1 = new solanaWeb3.Connection(rpc1);
   const transactionDetails = []; // Store transaction details for each wallet
 
-  // 将私钥转换成公钥文本
+  // Convert private key to public key text
   function get_publicKey(c_pri) {
       const privateKeyBytes = bs58.decode(c_pri);
       const fromKeypair = solanaWeb3.Keypair.fromSecretKey(privateKeyBytes);
@@ -1131,21 +1194,21 @@ export const executeTransactions = async(walletList, method, amount, mints, deci
   }
 
   try {
-      // 分组交易，根据method决定每组的数量
-      const groups = []; // 存储分组结果
-      const params = walletList.map(wallet => `${wallet.privateKey},${wallet.amount ? wallet.amount : amount}`).join('\n'); // 使用walletList中的sol值
-      const paramsArray = params.split('\n').filter(line => line.trim() !== ''); // 按行分割并去掉空行
+      // Group transactions based on method to determine group size
+      const groups = []; // Store grouping results
+      const params = walletList.map(wallet => `${wallet.privateKey},${wallet.amount ? wallet.amount : amount}`).join('\n'); // Use sol value from walletList
+      const paramsArray = params.split('\n').filter(line => line.trim() !== ''); // Split by line and remove empty lines
 
-      // 每个txid里有3个交易
+      // Each txid contains 3 transactions
       for (let i = 0; i < paramsArray.length; i += 3) {
-          // 每18行一组
+          // Group by 18 lines
           const group = paramsArray.slice(i, i + 3).join('\n');
-          groups.push(group); // 添加到结果中
+          groups.push(group); // Add to results
       }
 
-      console.log(`总共需要处理 ${paramsArray.length} 个钱包交易，已分成 ${Math.ceil(paramsArray.length / 3)} 组`);
+      console.log(`Total ${paramsArray.length} wallet transactions to process, grouped into ${Math.ceil(paramsArray.length / 3)} groups`);
       // logOutput.textContent += `开始交易` + '\n';
-      // 定义一个变量用来存捆绑交易信息的数据
+      // Define a variable to store bundle transaction information data
       const tradebase64array = [];
 
       for (let k = 0; k < groups.length; k++) {

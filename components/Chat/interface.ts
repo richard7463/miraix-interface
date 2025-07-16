@@ -3,6 +3,19 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: string;
+  thoughts?: string[];
+  swapEntities?: any;
+  quote?: any;
+  responseData?: any;
+  mintKeypair?: any; // 保存Token创建时的mintKeypair
+  transactionStatus?: {
+    txid: string;
+    status: string;
+    fromToken: any;
+    toToken: any;
+    fromAmount: string;
+    toAmount: string;
+  };
 }
 
 export interface Persona {

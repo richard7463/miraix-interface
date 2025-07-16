@@ -1,0 +1,11 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="16" fill="url(#warden-bg)"/>
+  <path d="M32 16L44 24V36C44 44 32 48 32 48C32 48 20 44 20 36V24L32 16Z" fill="#fff" stroke="#4C94E5" stroke-width="2"/>
+  <text x="32" y="38" text-anchor="middle" font-size="16" fill="#4C94E5" font-family="Arial" font-weight="bold">$</text>
+  <defs>
+    <linearGradient id="warden-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2A8C7A"/>
+      <stop offset="1" stop-color="#368B8B"/>
+    </linearGradient>
+  </defs>
+</svg> 

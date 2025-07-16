@@ -93,31 +93,8 @@ interface NewSwapProps {
   onTransactionSuccess?: (txid: string, fromToken: Token, toToken: Token, fromAmount: string, toAmount: string) => void;
 }
 
-const USDT_TOKEN: Token = {
-  symbol: "USDT",
-  name: "Tether USD",
-  logo: "",
-  chain: "SOLANA",
-  chainLogo: "",
-  address: "es9vmfrzacermjfrf4h2fyd4kconky11mcce8benwnyb",
-  balance: 0,
-  price: 1,
-  decimals: 6
-};
-
-const SOL_TOKEN: Token = {
-  symbol: "SOL",
-  name: "Solana",
-  logo: "",
-  chain: "SOLANA",
-  chainLogo: "",
-  address: "so11111111111111111111111111111111111111112",
-  balance: 0,
-  price: 167.82,
-  decimals: 9
-};
-
-const DECIMALS = 6;
+// 移除硬编码的 token 定义和 getTokenDecimals 函数
+// 所有 token 信息都将从 Jupiter API 动态获取
 
 export default function NewSwap({
   fromToken: fromTokenProp,
@@ -133,6 +110,8 @@ export default function NewSwap({
   console.log("🚀 NewSwap component rendered!");
   console.log("NewSwap props:", { quote, thoughts, responseData });
   console.log("NewSwap fromAmountProp:", fromAmountProp);
+  console.log("NewSwap fromTokenProp:", fromTokenProp);
+  console.log("NewSwap toTokenProp:", toTokenProp);
   console.log("NewSwap responseData details:", {
     success: responseData?.success,
     error: responseData?.error,
@@ -147,21 +126,81 @@ export default function NewSwap({
   console.log("Actual quote:", actualQuote);
   console.log("Quote input logo:", actualQuote?.inputMintLogo);
   console.log("Quote output logo:", actualQuote?.outputMintLogo);
+  console.log("Quote inAmount:", actualQuote?.inAmount);
+  console.log("Quote outAmount:", actualQuote?.outAmount);
 
   const [fromAmount, setFromAmount] = useState<string>(fromAmountProp || "0");
   const [toAmount, setToAmount] = useState<string>("0");
-  const [fromToken, setFromToken] = useState<Token>(fromTokenProp || SOL_TOKEN);
-  const [toToken, setToToken] = useState<Token>(toTokenProp || {
-    symbol: "BONK",
-    name: "Bonk",
-    logo: "",
-    chain: "SOLANA",
-    chainLogo: "",
-    address: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
-    balance: 0,
-    price: 0.000001,
-    decimals: 9
+  
+  // 使用动态获取的 token 信息，不再硬编码默认值
+  const [fromToken, setFromToken] = useState<Token>(() => {
+    if (fromTokenProp) {
+      // 如果 fromTokenProp 的 address 是 symbol，转换为正确的地址
+      let address = fromTokenProp.address;
+      if (fromTokenProp.address === 'SOL') {
+        address = 'So11111111111111111111111111111111111111112';
+      } else if (fromTokenProp.address === 'USDC') {
+        address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+      } else if (fromTokenProp.address === 'USDT') {
+        address = 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB';
+      } else if (fromTokenProp.address === 'BONK') {
+        address = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263';
+      } else if (fromTokenProp.address === 'JUP') {
+        address = 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN';
+      }
+      
+      return {
+        ...fromTokenProp,
+        address
+      };
+    }
+    return {
+      symbol: "SOL",
+      name: "Solana",
+      logo: "",
+      chain: "SOLANA",
+      chainLogo: "",
+      address: "So11111111111111111111111111111111111111112",
+      balance: 0,
+      price: 0,
+      decimals: 9
+    };
   });
+  
+  const [toToken, setToToken] = useState<Token>(() => {
+    if (toTokenProp) {
+      // 如果 toTokenProp 的 address 是 symbol，转换为正确的地址
+      let address = toTokenProp.address;
+      if (toTokenProp.address === 'SOL') {
+        address = 'So11111111111111111111111111111111111111112';
+      } else if (toTokenProp.address === 'USDC') {
+        address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+      } else if (toTokenProp.address === 'USDT') {
+        address = 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB';
+      } else if (toTokenProp.address === 'BONK') {
+        address = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263';
+      } else if (toTokenProp.address === 'JUP') {
+        address = 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN';
+      }
+      
+      return {
+        ...toTokenProp,
+        address
+      };
+    }
+    return {
+      symbol: "USDC",
+      name: "USD Coin",
+      logo: "",
+      chain: "SOLANA",
+      chainLogo: "",
+      address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      balance: 0,
+      price: 0,
+      decimals: 6
+    };
+  });
+  
   const [slippage, setSlippage] = useState<number>(slippageProp);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -185,10 +224,48 @@ export default function NewSwap({
   }, [responseData]);
 
   useEffect(() => {
-    if (fromTokenProp) setFromToken(fromTokenProp);
+    if (fromTokenProp) {
+      // 确保 address 字段使用正确的地址而不是 symbol
+      let address = fromTokenProp.address;
+      if (fromTokenProp.address === 'SOL') {
+        address = 'So11111111111111111111111111111111111111112';
+      } else if (fromTokenProp.address === 'USDC') {
+        address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+      } else if (fromTokenProp.address === 'USDT') {
+        address = 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB';
+      } else if (fromTokenProp.address === 'BONK') {
+        address = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263';
+      } else if (fromTokenProp.address === 'JUP') {
+        address = 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN';
+      }
+      
+      setFromToken(prev => ({
+        ...fromTokenProp,
+        address
+      }));
+    }
   }, [fromTokenProp]);
   useEffect(() => {
-    if (toTokenProp) setToToken(toTokenProp);
+    if (toTokenProp) {
+      // 确保 address 字段使用正确的地址而不是 symbol
+      let address = toTokenProp.address;
+      if (toTokenProp.address === 'SOL') {
+        address = 'So11111111111111111111111111111111111111112';
+      } else if (toTokenProp.address === 'USDC') {
+        address = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+      } else if (toTokenProp.address === 'USDT') {
+        address = 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB';
+      } else if (toTokenProp.address === 'BONK') {
+        address = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263';
+      } else if (toTokenProp.address === 'JUP') {
+        address = 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN';
+      }
+      
+      setToToken(prev => ({
+        ...toTokenProp,
+        address
+      }));
+    }
   }, [toTokenProp]);
   useEffect(() => {
     if (fromAmountProp !== undefined) {
@@ -200,10 +277,40 @@ export default function NewSwap({
     if (slippageProp !== undefined) setSlippage(slippageProp);
   }, [slippageProp]);
 
+  // 使用 Jupiter API 获取 token 信息
+  const getTokenInfoFromJupiter = async (mintAddress: string) => {
+    try {
+      console.log(`🔍 从 Jupiter API 获取 token 信息: ${mintAddress}`);
+      const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const tokenData = await response.json();
+      console.log(`✅ Jupiter API 返回的 token 信息:`, {
+        symbol: tokenData.symbol,
+        name: tokenData.name,
+        decimals: tokenData.decimals,
+        logoURI: tokenData.logoURI
+      });
+      
+      return tokenData;
+    } catch (error) {
+      console.error(`❌ 从 Jupiter API 获取 token 信息失败: ${mintAddress}`, error);
+      return null;
+    }
+  };
+
   // Handle quote data
   useEffect(() => {
     if (actualQuote) {
-      console.log("Processing quote in useEffect:", actualQuote);
+      console.log("🔄 Processing quote in useEffect:", actualQuote);
+      console.log("🔄 Current toToken state before processing:", {
+        symbol: toToken.symbol,
+        decimals: toToken.decimals,
+        address: toToken.address
+      });
       
       // Update token information
       if (actualQuote.inputMint) {
@@ -216,134 +323,144 @@ export default function NewSwap({
       }
       
       if (actualQuote.outputMint) {
-        setToToken(prev => ({
-          ...prev,
-          address: actualQuote.outputMint,
-          logo: actualQuote.outputMintLogo || prev.logo,
-          decimals: prev.decimals || 6
-        }));
+        // 异步获取 token decimals
+        const processOutputMint = async () => {
+          // 使用 Jupiter API 获取 token 信息来确定正确的 decimals
+          const getTokenDecimalsFromAPI = async (mintAddress: string) => {
+            try {
+              const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+              if (response.ok) {
+                const tokenData = await response.json();
+                return tokenData.decimals;
+              }
+            } catch (error) {
+              console.warn(`⚠️ 无法从 API 获取 ${mintAddress} 的 decimals`);
+            }
+            return 6; // 默认 fallback
+          };
+          
+          const correctDecimals = await getTokenDecimalsFromAPI(actualQuote.outputMint);
+          console.log("🔄 Setting toToken with correct decimals:", {
+            currentSymbol: toToken.symbol,
+            correctDecimals: correctDecimals,
+            outputMint: actualQuote.outputMint
+          });
+          
+          setToToken(prev => {
+            const newToToken = {
+              ...prev,
+              address: actualQuote.outputMint,
+              logo: actualQuote.outputMintLogo || prev.logo,
+              decimals: correctDecimals
+            };
+            console.log("🔄 New toToken state:", newToToken);
+            return newToToken;
+          });
+        };
+        
+        processOutputMint();
       }
 
       // Update amounts with proper decimal handling
-      if (actualQuote.inAmount && !fromAmountProp) {
+      if (fromAmountProp) {
+        // 优先使用传入的 fromAmountProp，不依赖 Jupiter API 的 inAmount
+        console.log('[NewSwap] Using fromAmountProp:', fromAmountProp);
+        setFromAmount(fromAmountProp);
+      } else {
         // 只有在没有 fromAmountProp 时才使用 quote 中的金额
-        console.log('[NewSwap] Using quote inAmount because fromAmountProp is not provided');
+        console.log('[NewSwap] No fromAmountProp provided, using quote inAmount');
         console.log('[NewSwap] Quote inAmount:', actualQuote.inAmount);
-        // 根据 token symbol 确定正确的 decimals
-        const getTokenDecimals = (tokenSymbol: string) => {
-          switch (tokenSymbol.toUpperCase()) {
-            case 'USDC':
-            case 'USDT':
-              return 6;
-            case 'SOL':
-              return 9;
-            case 'BONK':
-              return 5; // BONK 使用 5 decimals
-            case 'JUP':
-              return 6;
-            case 'RAY':
-              return 6;
-            case 'SRM':
-              return 6;
-            case 'MNGO':
-              return 6;
-            case 'ORCA':
-              return 6;
-            case 'SAMO':
-              return 9;
-            case 'COPE':
-              return 6;
-            case 'ALEPH':
-              return 6;
-            case 'MEDIA':
-              return 6;
-            case 'ROPE':
-              return 9;
-            case 'STEP':
-              return 9;
-            case 'SLND':
-              return 6;
-            case 'SNY':
-              return 6;
-            case 'MER':
-              return 6;
-            case 'TULIP':
-              return 6;
-            case 'LIKE':
-              return 9;
-            default:
-              return 9; // 默认值
-          }
+        
+        // 异步获取 input token decimals
+        const processInputMint = async () => {
+          const getTokenDecimalsFromAPI = async (mintAddress: string) => {
+            try {
+              const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+              if (response.ok) {
+                const tokenData = await response.json();
+                return tokenData.decimals;
+              }
+            } catch (error) {
+              console.warn(`⚠️ 无法从 API 获取 ${mintAddress} 的 decimals`);
+            }
+            return 9; // 默认 fallback
+          };
+          
+          const inputDecimals = await getTokenDecimalsFromAPI(actualQuote.inputMint);
+          const normalizedAmount = (parseInt(actualQuote.inAmount) / Math.pow(10, inputDecimals)).toString();
+          setFromAmount(normalizedAmount);
+          
+          // 同时更新 fromToken 的 decimals
+          setFromToken(prev => ({
+            ...prev,
+            decimals: inputDecimals
+          }));
         };
         
-        const inputDecimals = getTokenDecimals(fromToken.symbol);
-        const normalizedAmount = (parseInt(actualQuote.inAmount) / Math.pow(10, inputDecimals)).toString();
-        setFromAmount(normalizedAmount);
-        
-        // 同时更新 fromToken 的 decimals
-        setFromToken(prev => ({
-          ...prev,
-          decimals: inputDecimals
-        }));
+        processInputMint();
       }
       
       if (actualQuote.outAmount) {
-        // 根据 token symbol 确定正确的 decimals
-        const getTokenDecimals = (tokenSymbol: string) => {
-          switch (tokenSymbol.toUpperCase()) {
-            case 'USDC':
-            case 'USDT':
-              return 6;
-            case 'SOL':
-              return 9;
-            case 'BONK':
-              return 5; // BONK 使用 5 decimals
-            case 'JUP':
-              return 6;
-            case 'RAY':
-              return 6;
-            case 'SRM':
-              return 6;
-            case 'MNGO':
-              return 6;
-            case 'ORCA':
-              return 6;
-            case 'SAMO':
-              return 9;
-            case 'COPE':
-              return 6;
-            case 'ALEPH':
-              return 6;
-            case 'MEDIA':
-              return 6;
-            case 'ROPE':
-              return 9;
-            case 'STEP':
-              return 9;
-            case 'SLND':
-              return 6;
-            case 'SNY':
-              return 6;
-            case 'MER':
-              return 6;
-            case 'TULIP':
-              return 6;
-            case 'LIKE':
-              return 9;
-            default:
-              return 9; // 默认值
+        // 异步获取 token 信息并计算 toAmount
+        const processToAmount = async () => {
+          // 获取 output token 信息
+          const outputTokenInfo = await getTokenInfoFromJupiter(actualQuote.outputMint);
+          
+          if (outputTokenInfo) {
+            const correctSymbol = outputTokenInfo.symbol;
+            const correctDecimals = outputTokenInfo.decimals;
+            
+            // 🔍 添加详细的调试信息
+            console.log('🔍 toAmount 计算调试信息:');
+            console.log('  - actualQuote.outputMint:', actualQuote.outputMint);
+            console.log('  - toToken.symbol (before):', toToken.symbol);
+            console.log('  - correctSymbol (from Jupiter):', correctSymbol);
+            console.log('  - toToken.decimals (before):', toToken.decimals);
+            console.log('  - correctDecimals (from Jupiter):', correctDecimals);
+            console.log('  - actualQuote.outAmount:', actualQuote.outAmount);
+            console.log('  - 计算过程: parseInt(actualQuote.outAmount) / Math.pow(10, correctDecimals)');
+            console.log('  - parseInt(actualQuote.outAmount):', parseInt(actualQuote.outAmount));
+            console.log('  - Math.pow(10, correctDecimals):', Math.pow(10, correctDecimals));
+            console.log('  - 除法结果:', parseInt(actualQuote.outAmount) / Math.pow(10, correctDecimals));
+            
+            const normalizedAmount = (parseInt(actualQuote.outAmount) / Math.pow(10, correctDecimals)).toString();
+            console.log('  - 最终 normalizedAmount:', normalizedAmount);
+            
+            setToAmount(normalizedAmount);
+            
+            // 同时更新 toToken 的 symbol 和 decimals 确保一致性
+            setToToken(prev => ({
+              ...prev,
+              symbol: correctSymbol,
+              decimals: correctDecimals,
+              name: outputTokenInfo.name,
+              logo: outputTokenInfo.logoURI || prev.logo
+            }));
+          } else {
+            // 如果 Jupiter API 失败，使用 fallback 方法
+            console.warn('⚠️ Jupiter API 获取 token 信息失败，使用 fallback 方法');
+            
+            // 尝试从 Jupiter API 获取 decimals 作为 fallback
+            const getFallbackDecimals = async (mintAddress: string) => {
+              try {
+                const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+                if (response.ok) {
+                  const tokenData = await response.json();
+                  return tokenData.decimals;
+                }
+              } catch (error) {
+                console.warn(`⚠️ Fallback API 也失败了: ${mintAddress}`);
+              }
+              return 6; // 最后的 fallback
+            };
+            
+            const fallbackDecimals = await getFallbackDecimals(actualQuote.outputMint);
+            const normalizedAmount = (parseInt(actualQuote.outAmount) / Math.pow(10, fallbackDecimals)).toString();
+            setToAmount(normalizedAmount);
           }
         };
         
-        const outputDecimals = getTokenDecimals(toToken.symbol);
-        const normalizedAmount = (parseInt(actualQuote.outAmount) / Math.pow(10, outputDecimals)).toString();
-        setToAmount(normalizedAmount);
-        
-        // 同时更新 toToken 的 decimals
-        setToToken(prev => ({
-          ...prev,
-          decimals: outputDecimals
-        }));
+        processToAmount();
       }
 
       if (actualQuote.slippageBps !== undefined) {
@@ -375,14 +492,36 @@ export default function NewSwap({
       console.log('[NewSwap] 查询钱包地址:', userPublicKey.toBase58());
       try {
         let balance: number | undefined = 0;
-        if (!fromToken.address || fromToken.address.toLowerCase() === SOL_TOKEN.address.toLowerCase()) {
+        if (!fromToken.address || fromToken.address.toLowerCase() === 'So11111111111111111111111111111111111111112') {
           // 查询 SOL 余额
           const lamports = await connection.getBalance(userPublicKey);
           balance = lamports / 1e9;
           console.log('[NewSwap] lamports:', lamports, 'SOL:', balance);
         } else {
           // 查询 SPL Token 余额
-          const tokenMintAddress = new PublicKey(fromToken.address);
+          console.log('[NewSwap] 检查 fromToken.address:', fromToken.address);
+          
+          // 验证地址格式，如果不是有效的Solana地址，尝试使用quote中的inputMint
+          let tokenMintAddress: PublicKey;
+          try {
+            tokenMintAddress = new PublicKey(fromToken.address);
+          } catch (addressError) {
+            console.warn('[NewSwap] fromToken.address 不是有效的Solana地址:', fromToken.address);
+            
+            // 尝试使用quote中的inputMint
+            if (actualQuote && actualQuote.inputMint) {
+              console.log('[NewSwap] 使用 quote.inputMint:', actualQuote.inputMint);
+              try {
+                tokenMintAddress = new PublicKey(actualQuote.inputMint);
+              } catch (quoteAddressError) {
+                console.error('[NewSwap] quote.inputMint 也不是有效的地址:', actualQuote.inputMint);
+                throw new Error(`Invalid token address: ${fromToken.address}`);
+              }
+            } else {
+              throw new Error(`Invalid token address: ${fromToken.address}`);
+            }
+          }
+          
           const tokenAccounts = await connection.getParsedTokenAccountsByOwner(userPublicKey, {
             mint: tokenMintAddress,
           });
@@ -395,6 +534,16 @@ export default function NewSwap({
         setFromToken(prev => ({ ...prev, balance }));
       } catch (error) {
         console.error('[NewSwap] 查询余额失败:', error);
+        
+        // 提供更友好的错误信息
+        if (error instanceof Error) {
+          if (error.message.includes('Invalid public key input')) {
+            console.error('[NewSwap] Token地址无效，无法查询余额');
+          } else if (error.message.includes('Invalid token address')) {
+            console.error('[NewSwap] Token地址格式错误');
+          }
+        }
+        
         setFromToken(prev => ({ ...prev, balance: 0 }));
       }
     };
@@ -416,17 +565,12 @@ export default function NewSwap({
     }
     setFromAmount(val);
     
-    // 确保toAmount的计算正确
-    if (val && !isNaN(parseFloat(val))) {
-      const calculatedAmount = (parseFloat(val) * (toToken.price || 1)).toFixed(toToken.decimals);
-      setToAmount(calculatedAmount);
-    } else {
-      setToAmount("0");
-    }
+    // 移除错误的toAmount计算，让toAmount只通过quote数据来设置
+    // toAmount应该由Jupiter API的quote数据决定，而不是通过简单的价格计算
   };
 
   const formatAddress = (address: string) => {
-    if (address === SOL_TOKEN.address) return "...";
+    if (address === 'So11111111111111111111111111111111111111112') return "...";
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
 
@@ -447,47 +591,39 @@ export default function NewSwap({
   };
 
   async function fetchTokenInfoByAddress(address: string): Promise<TokenInfo | null> {
-    // mock: you can replace with real API
-    if (address.toLowerCase() === 'so11111111111111111111111111111111111111112') {
+    try {
+      console.log(`🔍 fetchTokenInfoByAddress: 获取地址 ${address} 的 token 信息`);
+      
+      // 使用 Jupiter API 获取 token 信息
+      const response = await fetch(`https://tokens.jup.ag/token/${address}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const tokenData = await response.json();
+      console.log(`✅ fetchTokenInfoByAddress: 成功获取 token 信息:`, {
+        symbol: tokenData.symbol,
+        name: tokenData.name,
+        decimals: tokenData.decimals,
+        logoURI: tokenData.logoURI
+      });
+      
       return {
-        symbol: 'SOL',
-        name: 'Solana',
-        logo: '',
+        symbol: tokenData.symbol,
+        name: tokenData.name,
+        logo: tokenData.logoURI || '',
         address,
         chain: 'SOLANA',
         mint: address,
-        decimals: 9,
-        image: '',
+        decimals: tokenData.decimals,
+        image: tokenData.logoURI || '',
         balance: 0
       } as any;
+    } catch (error) {
+      console.error(`❌ fetchTokenInfoByAddress: 获取 token 信息失败: ${address}`, error);
+      return null;
     }
-    if (address.toLowerCase() === 'dezxaz8z7pnrnjjz3wxborgixca6xjnb7yab1ppb263') {
-      return {
-        symbol: 'BONK',
-        name: 'Bonk',
-        logo: '',
-        address,
-        chain: 'SOLANA',
-        mint: address,
-        decimals: 9,
-        image: '',
-        balance: 0
-      } as any;
-    }
-    if (address.toLowerCase() === 'es9vmfrzacermjfrf4h2fyd4kconky11mcce8benwnyb') {
-      return {
-        symbol: 'USDT',
-        name: 'Tether USD',
-        logo: '',
-        address,
-        chain: 'SOLANA',
-        mint: address,
-        decimals: 6,
-        image: '',
-        balance: 0
-      } as any;
-    }
-    return null;
   }
 
   // Debug output for logos
@@ -501,14 +637,14 @@ export default function NewSwap({
     return null;
   };
   
-  const fromLogoUrl = getLocalLogoUrl(fromToken.symbol) || 
+  const fromLogoUrl = fromToken.logo || 
                      (actualQuote && actualQuote.inputMintLogo) || 
-                     fromToken.logo || 
-                     '/favicon.png';
-  const toLogoUrl = getLocalLogoUrl(toToken.symbol) || 
+                     getLocalLogoUrl(fromToken.symbol) || 
+                     'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+  const toLogoUrl = toToken.logo || 
                    (actualQuote && actualQuote.outputMintLogo) || 
-                   toToken.logo || 
-                   '/favicon.png';
+                   getLocalLogoUrl(toToken.symbol) || 
+                   'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
   
   console.log("From logo URL:", fromLogoUrl);
   console.log("To logo URL:", toLogoUrl);
@@ -547,13 +683,13 @@ export default function NewSwap({
     
     if (!embeddedWallet) {
       console.log('❌ No embedded wallet found');
-      setError('未找到嵌入式钱包，请先连接钱包');
+      setError('Embedded wallet not found, please connect your wallet');
       return;
     }
     
     if (!actualQuote) {
       console.log('❌ No quote available');
-      setError('缺少报价信息');
+      setError('Missing quote information');
       return;
     }
 
@@ -572,12 +708,12 @@ export default function NewSwap({
       console.log('💰 SOL balance:', solBalanceInSol, 'lamports:', solBalance);
       
       if (solBalanceInSol < 0.01) {
-        setError('SOL 余额不足，需要至少 0.01 SOL 支付交易费用');
+        setError('Insufficient SOL balance. Need at least 0.01 SOL for transaction fees');
         return;
       }
 
       // 检查是否有包装的 SOL 账户
-      if (fromToken.address.toLowerCase() === SOL_TOKEN.address.toLowerCase()) {
+      if (fromToken.address.toLowerCase() === 'So11111111111111111111111111111111111111112') {
         console.log('🔍 Checking for wrapped SOL accounts...');
         try {
           // 检查 wSOL 账户 (So11111111111111111111111111111111111111112)
@@ -599,30 +735,33 @@ export default function NewSwap({
       }
 
       // 检查交易代币余额
-      if ((fromToken.address && fromToken.address.toLowerCase() === SOL_TOKEN.address.toLowerCase()) || !fromToken.address) {
-        // 如果是 SOL 或地址为空，检查是否有足够的 SOL 进行交易
+      if ((fromToken.address && fromToken.address.toLowerCase() === 'So11111111111111111111111111111111111111112') || !fromToken.address || fromToken.symbol === 'SOL') {
+        // 如果是 SOL，直接检查原生 SOL 余额
         const requiredAmount = parseFloat(fromAmount) + 0.01; // 交易金额 + 费用
         console.log('💰 Required SOL amount:', requiredAmount, 'Available:', solBalanceInSol);
         console.log('💰 Transaction amount:', parseFloat(fromAmount), 'Fee estimate: 0.01');
         if (solBalanceInSol < requiredAmount) {
-          setError(`SOL 余额不足，需要 ${requiredAmount.toFixed(4)} SOL，当前余额 ${solBalanceInSol.toFixed(4)} SOL`);
+          setError(`Insufficient SOL balance. Need ${requiredAmount.toFixed(4)} SOL (${parseFloat(fromAmount).toFixed(4)} SOL for transaction + 0.01 SOL for fees). Current balance: ${solBalanceInSol.toFixed(4)} SOL`);
           return;
         }
       } else {
         // 如果是 SPL Token，检查 Token 余额
-        if (!fromToken.address) {
-          setError(`代币地址无效: ${fromToken.symbol}`);
+        // 确保使用正确的地址
+        const tokenAddress = fromToken.address === 'SOL' ? 'So11111111111111111111111111111111111111112' : fromToken.address;
+        
+        if (!tokenAddress || tokenAddress === 'SOL') {
+          setError(`Invalid token address: ${fromToken.symbol}`);
           return;
         }
         
         try {
-          const tokenMintAddress = new PublicKey(fromToken.address);
+          const tokenMintAddress = new PublicKey(tokenAddress);
           const tokenAccounts = await connection.getParsedTokenAccountsByOwner(userPublicKey, {
             mint: tokenMintAddress,
           });
           
           if (tokenAccounts.value.length === 0) {
-            setError(`未找到 ${fromToken.symbol} 代币账户，请确保您持有该代币`);
+            setError(`No ${fromToken.symbol} token account found. Please ensure you hold this token`);
             return;
           }
           
@@ -630,18 +769,18 @@ export default function NewSwap({
           console.log(`💰 ${fromToken.symbol} balance:`, tokenBalance);
           
           if (tokenBalance < parseFloat(fromAmount)) {
-            setError(`${fromToken.symbol} 余额不足，需要 ${fromAmount}，当前余额 ${tokenBalance}`);
+            setError(`Insufficient ${fromToken.symbol} balance. Need ${fromAmount}, current balance: ${tokenBalance}`);
             return;
           }
         } catch (tokenError: any) {
           console.error('❌ Error checking token balance:', tokenError);
-          setError(`检查 ${fromToken.symbol} 余额失败: ${tokenError.message}`);
+          setError(`Failed to check ${fromToken.symbol} balance: ${tokenError.message}`);
           return;
         }
       }
     } catch (balanceError) {
       console.error('❌ Error checking balance:', balanceError);
-      setError('检查余额失败，请稍后重试');
+      setError('Failed to check balance, please try again later');
       return;
     }
 
@@ -715,7 +854,7 @@ export default function NewSwap({
         console.log('❌ Swap API error response:', errorText);
         
         // 解析 Jupiter API 的错误信息
-        let errorMessage = '获取交易指令失败';
+        let errorMessage = 'Failed to get swap transaction instructions';
         try {
           const errorData = JSON.parse(errorText);
           if (errorData.error) {
@@ -726,7 +865,7 @@ export default function NewSwap({
         } catch (parseError) {
           // 如果无法解析 JSON，使用原始错误文本
           if (errorText.includes('Insufficient balance')) {
-            errorMessage = `余额不足: ${errorText}`;
+            errorMessage = `Insufficient balance: ${errorText}`;
           } else {
             errorMessage = errorText;
           }
@@ -766,14 +905,14 @@ export default function NewSwap({
         
         if (simulation.value.err) {
           console.error('❌ Transaction simulation failed:', simulation.value.err);
-          throw new Error(`交易模拟失败: ${JSON.stringify(simulation.value.err)}`);
+          throw new Error(`Transaction simulation failed: ${JSON.stringify(simulation.value.err)}`);
         }
       } catch (simulationError: any) {
         console.error('❌ Transaction simulation error:', simulationError);
         if (simulationError.message.includes('Attempt to debit an account but found no record of a prior credit')) {
-          throw new Error('账户余额不足或账户未初始化，请检查您的钱包余额');
+          throw new Error('Insufficient balance or account not initialized, please check your wallet balance');
         }
-        throw new Error(`交易模拟失败: ${simulationError.message}`);
+        throw new Error(`Transaction simulation failed: ${simulationError.message}`);
       }
 
       // 6. 使用 Privy 钱包签名
@@ -808,12 +947,12 @@ export default function NewSwap({
       console.log('✅ Transaction confirmation result:', confirmation);
       
       if (confirmation.value.err) {
-        throw new Error(`交易确认失败: ${JSON.stringify(confirmation.value.err)}`);
+        throw new Error(`Transaction confirmation failed: ${JSON.stringify(confirmation.value.err)}`);
       }
 
       // 9. UI 提示
       console.log('🎉 Transaction successful!');
-      toast.success('交易确认成功！');
+      toast.success('Transaction confirmed!');
       setError(null);
       
       // 10. 刷新余额
@@ -835,7 +974,7 @@ export default function NewSwap({
       });
       
       // 更详细的错误处理
-      let errorMessage = error.message || '交易失败';
+      let errorMessage = error.message || 'Transaction failed';
       
       // 处理 Jupiter API 特定的错误信息
       if (error.message.includes('Insufficient balance')) {
@@ -843,22 +982,22 @@ export default function NewSwap({
         const match = error.message.match(/You have ([\d.]+) SOL but need ([\d.]+) SOL/);
         if (match) {
           const [_, currentBalance, requiredBalance] = match;
-          errorMessage = `余额不足：您有 ${currentBalance} SOL，但需要 ${requiredBalance} SOL。请检查您的钱包余额或减少交易金额。`;
+          errorMessage = `Insufficient balance: You have ${currentBalance} SOL, but need ${requiredBalance} SOL. Please check your wallet balance or reduce the transaction amount.`;
         } else {
-          errorMessage = '余额不足，请检查您的钱包余额或减少交易金额';
+          errorMessage = 'Insufficient balance, please check your wallet balance or reduce the transaction amount';
         }
       } else if (error.message.includes('Attempt to debit an account but found no record of a prior credit')) {
-        errorMessage = '账户余额不足或账户未初始化，请检查您的钱包余额并确保有足够的 SOL 支付交易费用';
+        errorMessage = 'Insufficient balance or account not initialized, please check your wallet balance and ensure you have enough SOL for transaction fees';
       } else if (error.message.includes('insufficient funds')) {
-        errorMessage = '余额不足，请检查您的钱包余额';
+        errorMessage = 'Insufficient balance, please check your wallet balance';
       } else if (error.message.includes('Invalid account data')) {
-        errorMessage = '账户数据无效，请确保代币账户已正确初始化';
-      } else if (error.message.includes('获取交易指令失败')) {
-        errorMessage = '获取交易指令失败，请稍后重试';
+        errorMessage = 'Invalid account data, please ensure the token account is correctly initialized';
+      } else if (error.message.includes('Failed to get swap transaction instructions')) {
+        errorMessage = 'Failed to get swap transaction instructions, please try again later';
       }
       
       setError(errorMessage);
-      toast.error(`交易失败: ${errorMessage}`);
+      toast.error(`Transaction failed: ${errorMessage}`);
     } finally {
       console.log('🏁 Setting isConfirming to false');
       setIsConfirming(false);
@@ -901,7 +1040,7 @@ export default function NewSwap({
                   className="w-6 h-6" 
                   onError={(e) => {
                     console.log('Failed to load from token logo:', fromLogoUrl);
-                    e.currentTarget.src = '/favicon.png';
+                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
                   }}
                 />
               </div>
@@ -927,7 +1066,7 @@ export default function NewSwap({
             </div>
             <span className="text-sm text-right min-w-24 font-semibold text-gray-700 flex items-center gap-1">
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
-              ${(parseFloat(fromAmount) * (fromToken.price || 1)).toFixed(2)}
+              {actualQuote && actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * 1).toFixed(2)} USD`}
             </span>
           </div>
         </div>
@@ -954,7 +1093,7 @@ export default function NewSwap({
                   className="w-6 h-6" 
                   onError={(e) => {
                     console.log('Failed to load to token logo:', toLogoUrl);
-                    e.currentTarget.src = '/favicon.png';
+                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
                   }}
                 />
               </div>
@@ -971,12 +1110,12 @@ export default function NewSwap({
           <div className="flex w-full flex-row items-center justify-between flex-nowrap">
             <div className="relative group w-40 h-12 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 shadow-sm hover:shadow-md transition-shadow">
               <span className="font-semibold text-sm w-full h-8 flex items-center">
-                {toAmount && !isNaN(parseFloat(toAmount)) ? Number(toAmount).toFixed(toToken.decimals) : "0"}
+                {toAmount}
               </span>
             </div>
             <span className="text-sm text-right min-w-24 font-semibold text-gray-700 flex items-center gap-1">
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
-              ${(parseFloat(toAmount) * (toToken.price || 1)).toFixed(2)}
+              {actualQuote && actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * 1).toFixed(2)} USD`}
             </span>
           </div>
         </div>
@@ -998,10 +1137,10 @@ export default function NewSwap({
                 </span>
               </div>
             )}
-            {actualQuote && actualQuote.swapUsdValue && (
+            {actualQuote && (
               <div className="flex flex-row items-center w-full">
                 <label className="text-xs text-gray-500 min-w-[80px]">Swap Value:</label>
-                <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD</span>
+                <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">{actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * 1).toFixed(2)} USD`}</span>
               </div>
             )}
           </div>

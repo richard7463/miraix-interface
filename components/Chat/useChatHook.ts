@@ -299,7 +299,13 @@ const useChatHook = () => {
         const formattedMessages = messages.map(msg => ({
           ...msg,
           timestamp: msg.timestamp || new Date().toISOString(),
-          id: msg.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          id: msg.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          // 确保包含所有扩展字段
+          thoughts: msg.thoughts,
+          swapEntities: msg.swapEntities,
+          quote: msg.quote,
+          responseData: msg.responseData,
+          transactionStatus: msg.transactionStatus
         }));
 
         const response = await fetch(API_ENDPOINTS.SAVE_MESSAGES(currentChatRef.current.id), {
@@ -337,36 +343,76 @@ const useChatHook = () => {
     const loadMessages = async (chatId: string) => {
       try {
         const chat = chatList.find(c => c.id === chatId)
+        console.log('[useChatHook] loadMessages called for chatId:', chatId, {
+          chat,
+          isNew: chat?.isNew,
+          chatListLength: chatList.length
+        });
+        
         if (chat?.isNew) {
-          console.log('Skipping message load for new chat:', chatId)
+          console.log('[useChatHook] Skipping message load for new chat:', chatId)
           return
         }
 
         if (messagesMap.current.has(chatId)) {
-          console.log('Messages already loaded for chat:', chatId)
+          console.log('[useChatHook] Messages already loaded for chat:', chatId)
           return
         }
 
-        console.log('Loading messages for chat:', chatId)
-        const response = await fetch(API_ENDPOINTS.CHAT_MESSAGES(chatId))
-        if (!response.ok) {
-          throw new Error('Failed to load messages')
-        }
-        const data = await response.json()
-        messagesMap.current.set(chatId, data.messages || [])
-        forceUpdate?.()
+        console.log('[useChatHook] Loading messages for chat:', chatId)
+        // 暂时注释掉消息加载API调用
+        // const response = await fetch(API_ENDPOINTS.CHAT_MESSAGES(chatId))
+        // if (!response.ok) {
+        //   throw new Error('Failed to load messages')
+        // }
+        // const data = await response.json()
+        // messagesMap.current.set(chatId, data.messages || [])
+        // forceUpdate?.()
+        console.log('[useChatHook] Message loading temporarily disabled');
       } catch (error) {
-        console.error('Error loading messages:', error)
+        console.error('[useChatHook] Error loading messages:', error)
         toast.error('Failed to load messages')
       }
     }
 
     const currentChatId = localStorage.getItem(StorageKeys.Chat_Current_ID)
-      if (currentChatId) {
+    console.log('[useChatHook] useEffect triggered, checking currentChatId:', currentChatId);
+    
+    if (currentChatId) {
       const currentChat = chatList.find(c => c.id === currentChatId)
-      if (currentChat && !currentChat.isNew) {
-        loadMessages(currentChatId)
-      }
+      console.log('[useChatHook] Found currentChat:', {
+        currentChatId,
+        currentChat,
+        isNew: currentChat?.isNew,
+        chatListLength: chatList.length,
+        chatListIds: chatList.map(c => ({ id: c.id, isNew: c.isNew }))
+      });
+      
+      // 检查是否是新创建的聊天（通过检查聊天是否在最近的操作中）
+      const isRecentlyCreated = currentChat && (
+        currentChat.isNew === true || 
+        (currentChat.createdAt && new Date(currentChat.createdAt).getTime() > Date.now() - 60000) // 1分钟内创建的
+      );
+      
+      // 暂时注释掉所有消息加载逻辑
+      // 只有在明确不是新建会话且不是最近创建的会话时才加载消息
+      // if (currentChat && currentChat.isNew === false && !isRecentlyCreated) {
+      //   console.log('[useChatHook] Loading messages for existing chat:', currentChatId);
+      //   loadMessages(currentChatId)
+      // } else {
+      //   console.log('[useChatHook] Skipping message load:', {
+      //     currentChatId,
+      //     currentChat,
+      //     isNew: currentChat?.isNew,
+      //     isRecentlyCreated,
+      //     reason: !currentChat ? 'chat not found' : 
+      //             currentChat.isNew === true ? 'chat is new' : 
+      //             isRecentlyCreated ? 'chat was recently created' : 'unknown'
+      //   });
+      // }
+      console.log('[useChatHook] Message loading temporarily disabled for all chats');
+    } else {
+      console.log('[useChatHook] No currentChatId in localStorage');
     }
 
     return () => {

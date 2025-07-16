@@ -225,40 +225,13 @@ const Chat = (props: ChatProps, ref: any) => {
         
         console.log('[sendMessage] Using wallet address:', walletAddress);
         
-        let response;
-        try {
-          response = await fetch('http://localhost:3009/api/chat-new', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
-              'message': `Create chat ${latestChat?.id}`,
-              'address': walletAddress
-            },
-            body: JSON.stringify({
-              chatId: latestChat?.id,
-              persona: latestChat?.persona,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              message: input,
-              timestamp: new Date().toISOString(),
-              walletAddress: walletAddress // 也在 body 中传递钱包地址
-            })
-          });
-        } catch (fetchError) {
-          console.error('[sendMessage] Fetch error:', fetchError);
-          throw new Error('无法连接到服务器，请检查服务器是否正在运行');
-        }
-
-        if (!response || !response.ok) {
-          throw new Error('Failed to create chat session');
-        }
-
-        // 更新聊天状态
-        updateChatStatus(latestChat?.id!, true);
-        
         // 添加用户消息到对话
-        const messages = [{ content: input, role: 'user' }];
+        const messages = [{ 
+          content: input, 
+          role: 'user',
+          timestamp: new Date().toISOString(),
+          id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }];
         setMessages(latestChat?.id!, messages);
         
         // 跳转到对应的聊天页面
@@ -293,18 +266,13 @@ const Chat = (props: ChatProps, ref: any) => {
       console.log('[handleKeypress] Key pressed:', e.key, 'Shift:', e.shiftKey);
       
       if (e.key === 'Enter' && !e.shiftKey) {
-        console.log('[handleKeypress] Enter pressed without shift, preventing default and calling handleSend');
         e.preventDefault();
         
-        // 直接从 ContentEditable 元素获取当前值
-        const currentValue = e.target.value || e.target.textContent || '';
-        console.log('[handleKeypress] Current value from element:', currentValue);
-        
-        if (currentValue.trim() && !isLoading) {
-          console.log('[handleKeypress] Calling sendMessage with current value');
-          const input = currentValue.trim();
-          setMessage(''); // 清空输入框
-          setIsLoading(true); // 设置加载状态
+        const input = message.trim();
+        if (input && !isLoading) {
+          console.log('[handleKeypress] Sending message:', input);
+          setIsLoading(true);
+          setMessage('');
           
           // 创建新的聊天
           const newChat = {
@@ -315,54 +283,39 @@ const Chat = (props: ChatProps, ref: any) => {
             updatedAt: new Date().toISOString()
           };
           
+          // 设置新的聊天
           setCurrentChat(newChat);
           
           // 使用 getState() 获取最新状态
           const currentState = useChatStore.getState();
           const latestChat = currentState.currentChat;
           
+          console.log('[handleKeypress] Created new chat:', {
+            chatId: latestChat?.id,
+            isNew: latestChat?.isNew
+          });
+          
           // 获取真实的 Solana 钱包地址
           const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
           const walletAddress = embeddedWallet?.address || '0x1234567890123456789012345678901234567890';
           
-          // 发送消息
-          fetch('http://localhost:3009/api/chat-new', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
-              'message': `Create chat ${latestChat?.id}`,
-              'address': walletAddress
-            },
-            body: JSON.stringify({
-              chatId: latestChat?.id,
-              persona: latestChat?.persona,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              message: input,
-              timestamp: new Date().toISOString(),
-              walletAddress: walletAddress
-            })
-          }).then(response => {
-            if (response.ok) {
-              updateChatStatus(latestChat?.id!, true);
-              const messages = [{ content: input, role: 'user' }];
-              setMessages(latestChat?.id!, messages);
-              router.push(`/chat/${latestChat?.id}`);
-            }
-          }).catch(error => {
-            console.error('Error sending message:', error);
-            toast.error('Failed to send message');
-          }).finally(() => {
-            setIsLoading(false); // 清除加载状态
-          });
+          // 添加用户消息到对话
+          const messages = [{ 
+            content: input, 
+            role: 'user',
+            timestamp: new Date().toISOString(),
+            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          }];
+          setMessages(latestChat?.id!, messages);
+          router.push(`/chat/${latestChat?.id}`);
+          setIsLoading(false);
         } else {
           console.log('[handleKeypress] Empty message or already loading, not sending');
         }
       }
     },
-    [setCurrentChat, setMessages, updateChatStatus, router, solanaWallets, isLoading]
-  )
+    [setCurrentChat, setMessages, updateChatStatus, router, solanaWallets, isLoading, message]
+  );
 
   const clearMessages = () => {
     // conversation.current = []
@@ -517,15 +470,11 @@ const Chat = (props: ChatProps, ref: any) => {
             onClick={() => {
               console.log('[SendButton] Clicked');
               
-              // 直接从 ContentEditable 元素获取当前值
-              const currentValue = textAreaRef.current?.value || textAreaRef.current?.textContent || '';
-              console.log('[SendButton] Current value from element:', currentValue);
-              
-              if (currentValue.trim() && !isLoading) {
-                console.log('[SendButton] Calling sendMessage with current value');
-                const input = currentValue.trim();
-                setMessage(''); // 清空输入框
-                setIsLoading(true); // 设置加载状态
+              const input = message.trim();
+              if (input && !isLoading) {
+                console.log('[SendButton] Sending message:', input);
+                setIsLoading(true);
+                setMessage('');
                 
                 // 创建新的聊天
                 const newChat = {
@@ -536,47 +485,32 @@ const Chat = (props: ChatProps, ref: any) => {
                   updatedAt: new Date().toISOString()
                 };
                 
+                // 设置新的聊天
                 setCurrentChat(newChat);
                 
                 // 使用 getState() 获取最新状态
                 const currentState = useChatStore.getState();
                 const latestChat = currentState.currentChat;
                 
+                console.log('[SendButton] Created new chat:', {
+                  chatId: latestChat?.id,
+                  isNew: latestChat?.isNew
+                });
+                
                 // 获取真实的 Solana 钱包地址
                 const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
                 const walletAddress = embeddedWallet?.address || '0x1234567890123456789012345678901234567890';
                 
-                // 发送消息
-                fetch('http://localhost:3009/api/chat-new', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
-                    'message': `Create chat ${latestChat?.id}`,
-                    'address': walletAddress
-                  },
-                  body: JSON.stringify({
-                    chatId: latestChat?.id,
-                    persona: latestChat?.persona,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    message: input,
-                    timestamp: new Date().toISOString(),
-                    walletAddress: walletAddress
-                  })
-                }).then(response => {
-                  if (response.ok) {
-                    updateChatStatus(latestChat?.id!, true);
-                    const messages = [{ content: input, role: 'user' }];
-                    setMessages(latestChat?.id!, messages);
-                    router.push(`/chat/${latestChat?.id}`);
-                  }
-                }).catch(error => {
-                  console.error('Error sending message:', error);
-                  toast.error('Failed to send message');
-                }).finally(() => {
-                  setIsLoading(false); // 清除加载状态
-                });
+                // 添加用户消息到对话
+                const messages = [{ 
+                  content: input, 
+                  role: 'user',
+                  timestamp: new Date().toISOString(),
+                  id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                }];
+                setMessages(latestChat?.id!, messages);
+                router.push(`/chat/${latestChat?.id}`);
+                setIsLoading(false);
               } else {
                 console.log('[SendButton] Empty message or already loading, not sending');
               }

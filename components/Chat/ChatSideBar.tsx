@@ -160,6 +160,21 @@ export const ChatSideBar = () => {
                 </div>
               </button>
             </div>
+            {/* Agent Hub Tab */}
+            <div className="w-full border border-neutral-200 dark:border-neutral-800 rounded-md mt-2">
+              <button
+                onClick={() => router.push('/agent-hub')}
+                className="peer/menu-button gap-2 overflow-hidden rounded-md p-2 text-left outline-none duration-300 ease-in-out focus-visible:ring-2 active:text-sidebar-foreground-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:font-medium data-[active=true]:text-sidebar-active data-[state=open]:hover:bg-neutral-100 dark:data-[state=open]:hover:bg-neutral-800 data-[state=open]:hover:text-sidebar-active group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-sidebar-active h-8 text-sm flex items-center font-medium transition-all group justify-between w-full"
+                type="button"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <RiRobot2Line className="h-4 w-4" />
+                    <h1 className="text-sm font-semibold">Agent Hub</h1>
+                  </div>
+                </div>
+              </button>
+            </div>
             
             {/* <TasksSelector
               taskList={mockTasks}

@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="16" fill="url(#messari-bg)"/>
+  <rect x="18" y="18" width="20" height="20" rx="5" fill="#fff" stroke="#4C94E5" stroke-width="2"/>
+  <circle cx="38" cy="38" r="6" fill="#3d7bc4" stroke="#4C94E5" stroke-width="2"/>
+  <rect x="36" y="36" width="8" height="2" rx="1" fill="#fff" transform="rotate(45 36 36)"/>
+  <defs>
+    <linearGradient id="messari-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4C94E5"/>
+      <stop offset="1" stop-color="#3d7bc4"/>
+    </linearGradient>
+  </defs>
+</svg> 

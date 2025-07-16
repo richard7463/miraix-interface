@@ -9,25 +9,15 @@ import { useChatStore } from '@/store/chatStore'
 import { useSolanaWallets } from '@privy-io/react-auth/solana'
 import Thoughts from './Thoughts'
 import NewSwap from '@/components/DeFi/NewSwap'
+import NewBridge from '@/components/DeFi/NewBridge'
+import StakingYield from '@/components/DeFi/StakingYield'
+import Market from '@/components/DeFi/Market'
+import TokenCreation from '@/components/DeFi/TokenCreation'
+import { createTokensFromSwapEntities } from '@/utils/swapHelpers'
 
 interface ChatIdConversationProps {
   chatId: string;
   hideActions?: boolean;
-}
-
-interface ExtendedChatMessage extends ChatMessage {
-  thoughts?: string[];
-  swapEntities?: any;
-  quote?: any;
-  responseData?: any;
-  transactionStatus?: {
-    txid: string;
-    status: string;
-    fromToken: any;
-    toToken: any;
-    fromAmount: string;
-    toAmount: string;
-  };
 }
 
 export default function ChatIdConversation({ chatId, hideActions = false }: ChatIdConversationProps) {
@@ -45,7 +35,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     saveMessages
   } = useChatStore()
 
-  const [messages, setMessages] = useState<ExtendedChatMessage[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
@@ -54,6 +44,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
   const [streamingContent, setStreamingContent] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [thinkingDots, setThinkingDots] = useState<string>('');
+  const [chatCreated, setChatCreated] = useState(false);
+  const [tokenDataMap, setTokenDataMap] = useState<{[key: string]: any}>({});
 
   // 获取 Solana 钱包地址
   const getWalletAddress = () => {
@@ -77,7 +69,6 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
   // 监听 currentChat 的变化，打印 isNew 状态
   useEffect(() => {
-
     console.log('[ChatIdConversation] currentChat status:', {
       chatId,
       currentChat,
@@ -93,6 +84,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       try {
         console.log('[ChatIdConversation] Loading messages for chat:', chatId)
         
+        // 恢复消息加载API调用
         let response;
         try {
           response = await fetch(API_ENDPOINTS.CHAT_MESSAGES(chatId), {
@@ -105,101 +97,232 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           });
         } catch (fetchError) {
           console.error('[ChatIdConversation] Fetch error loading messages:', fetchError);
-          throw new Error('无法连接到服务器，请检查服务器是否正在运行');
+          // 不要抛出错误，静默处理
+          console.log('[ChatIdConversation] Failed to load messages, but continuing...');
+          return;
         }
         
         if (!response || !response.ok) {
-          throw new Error('Failed to load messages')
+          console.warn('[ChatIdConversation] Failed to load messages, status:', response?.status);
+          // 不要抛出错误，静默处理
+          return;
         }
         
         const data = await response.json()
-        console.log('[ChatIdConversation] Received messages:', {
+        console.log('[ChatIdConversation] Raw API response:', {
           chatId,
-          messages: data.messages
+          fullResponse: data,
+          messages: data.messages,
+          messageCount: data.messages?.length || 0,
+          responseKeys: Object.keys(data)
         })
 
-        // 如果是新聊天，不要覆盖已有的消息
+        // 如果是历史会话，加载消息并按时间戳排序
         if (!currentChat?.isNew) {
-          setMessages(data.messages || [])
-          storeSetMessages(chatId, data.messages || [])
+          // 先检查消息的时间戳格式
+          if (data.messages && data.messages.length > 0) {
+            console.log('[ChatIdConversation] Message timestamp analysis:', {
+              firstMessage: {
+                timestamp: data.messages[0].timestamp,
+                createdAt: data.messages[0].createdAt,
+                id: data.messages[0].id,
+                role: data.messages[0].role,
+                content: data.messages[0].content?.substring(0, 50) + '...'
+              },
+              lastMessage: {
+                timestamp: data.messages[data.messages.length - 1].timestamp,
+                createdAt: data.messages[data.messages.length - 1].createdAt,
+                id: data.messages[data.messages.length - 1].id,
+                role: data.messages[data.messages.length - 1].role,
+                content: data.messages[data.messages.length - 1].content?.substring(0, 50) + '...'
+              },
+              allMessages: data.messages.map((msg: any, index: number) => ({
+                index,
+                id: msg.id,
+                role: msg.role,
+                timestamp: msg.timestamp,
+                createdAt: msg.createdAt,
+                content: msg.content?.substring(0, 30) + '...'
+              }))
+            });
+          }
+          
+          // 检查时间戳字段
+          console.log('[ChatIdConversation] Timestamp field analysis:', {
+            messages: data.messages?.map((msg: any) => ({
+              id: msg.id,
+              role: msg.role,
+              timestamp: msg.timestamp,
+              createdAt: msg.createdAt,
+              hasTimestamp: !!msg.timestamp,
+              hasCreatedAt: !!msg.createdAt,
+              timestampType: typeof msg.timestamp,
+              createdAtType: typeof msg.createdAt
+            }))
+          });
+          
+          // 从消息ID中提取时间戳的函数
+          const extractTimestampFromId = (id: string): number => {
+            // 处理格式: 'msg-1751625661227-al66jq4oe' 或 '1751625649553'
+            const match = id.match(/(?:msg-)?(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+          };
+          
+          const sortedMessages = (data.messages || []).sort((a: any, b: any) => {
+            // 首先尝试使用timestamp字段
+            const timeA = new Date(a.timestamp || a.createdAt || 0).getTime();
+            const timeB = new Date(b.timestamp || b.createdAt || 0).getTime();
+            
+            // 如果timestamp相同，使用ID中的时间戳
+            if (timeA === timeB && timeA !== 0) {
+              const idTimeA = extractTimestampFromId(a.id || '');
+              const idTimeB = extractTimestampFromId(b.id || '');
+              console.log('[ChatIdConversation] Using ID timestamp for sorting:', {
+                messageA: { 
+                  id: a.id, 
+                  role: a.role, 
+                  idTimeA,
+                  content: a.content?.substring(0, 30) + '...'
+                },
+                messageB: { 
+                  id: b.id, 
+                  role: b.role, 
+                  idTimeB,
+                  content: b.content?.substring(0, 30) + '...'
+                },
+                result: idTimeA - idTimeB
+              });
+              return idTimeA - idTimeB;
+            }
+            
+            console.log('[ChatIdConversation] Using timestamp field for sorting:', {
+              messageA: { 
+                id: a.id, 
+                role: a.role, 
+                timeA, 
+                timestamp: a.timestamp, 
+                createdAt: a.createdAt,
+                content: a.content?.substring(0, 30) + '...'
+              },
+              messageB: { 
+                id: b.id, 
+                role: b.role, 
+                timeB, 
+                timestamp: b.timestamp, 
+                createdAt: b.createdAt,
+                content: b.content?.substring(0, 30) + '...'
+              },
+              result: timeA - timeB
+            });
+            return timeA - timeB; // 按时间升序排列（最早的在前）
+          });
+          
+          console.log('[ChatIdConversation] Sorted messages:', {
+            originalCount: data.messages?.length || 0,
+            sortedCount: sortedMessages.length,
+            firstMessage: sortedMessages[0],
+            lastMessage: sortedMessages[sortedMessages.length - 1],
+            sortedOrder: sortedMessages.map((msg: any, index: number) => ({
+              index,
+              id: msg.id,
+              role: msg.role,
+              timestamp: msg.timestamp,
+              content: msg.content?.substring(0, 30) + '...'
+            }))
+          });
+          
+          setMessages(sortedMessages);
+          storeSetMessages(chatId, sortedMessages);
         }
+        
+        console.log('[ChatIdConversation] Message loading completed');
       } catch (error) {
         console.error('[ChatIdConversation] Error loading messages:', error)
-        toast.error('Failed to load messages')
+        // 不要显示 toast 错误，静默处理
+        console.log('[ChatIdConversation] Failed to load messages, but continuing...');
       } finally {
         setIsInitialLoading(false)
       }
     }
 
-    if (currentChat?.isNew) {
-      console.log('[ChatIdConversation] currentChat isNew:', {
-        chatId,
-        currentChat,
-        isNew: currentChat?.isNew
-      })
-
-      // 创建用户消息
-      const userMessage: ExtendedChatMessage = {
-        role: 'user',
-        content: getMessages(chatId)[0].content,
-        timestamp: new Date().toISOString(),
-        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      }
-
-      console.log('[ChatIdConversation] Created user message:', userMessage)
-
-      // 先添加用户消息
-      setMessages(prev => [...prev, userMessage])
-
-      // 显示 loading 状态
-      setIsLoading(true)
-
-      // 调用真实 API 获取回复
-      const fetchReply = async () => {
-        try {
-          const reply = await getAIResponse([userMessage]);
-          console.log('[ChatIdConversation] Received API reply:', reply)
-          
-          // 更新消息列表
-          setMessages(prev => {
-            const newMessages = [...prev, reply]
-            console.log('[ChatIdConversation] Updated messages:', newMessages)
-            
-            // 获取钱包地址并转换为正确的格式
-            const walletAddress = getWalletAddress()
-            console.log('[ChatIdConversation] Using wallet address for saveMessages:', walletAddress)
-            
-            saveMessages(chatId, newMessages, walletAddress).catch((error: Error) => {
-              console.error('[ChatIdConversation] Failed to save messages to server:', error)
-              toast.error('Failed to save messages to server')
-            })
-            return newMessages
-          })
-          
-          // 更新 store 中的消息
-          storeSetMessages(chatId, [...messages, userMessage, reply])
-          console.log('[ChatIdConversation] Updated store messages')
-        } catch (error) {
-          console.error('[ChatIdConversation] Error getting AI response:', error)
-          toast.error('Failed to get AI response')
-        } finally {
-          setIsLoading(false)
+    // 新建会话的处理逻辑
+    if (currentChat?.isNew && !chatCreated) {
+      console.log('[ChatIdConversation] Processing new chat:', chatId);
+      const existingMessages = getMessages(chatId);
+      console.log('[ChatIdConversation] New chat with existing messages:', existingMessages);
+      
+      // 使用本地消息，避免重复调用API
+      setMessages(existingMessages);
+      setIsInitialLoading(false);
+      
+      // 如果有用户消息但没有AI回复，自动调用AI回复
+      if (existingMessages.length > 0) {
+        const hasAIReply = existingMessages.some(msg => msg.role === 'assistant');
+        
+        if (!hasAIReply) {
+          console.log('[ChatIdConversation] Found user message without AI reply, triggering auto reply');
+          // 延迟一点时间确保组件完全加载
+          setTimeout(() => {
+            handleAutoReply(existingMessages);
+          }, 100);
         }
-      };
-
-      fetchReply();
-
-      // 设置 isNew 为 false
-      if (currentChat) {
-        currentChat.isNew = false
       }
-    } else {
-      // 如果不是新聊天，加载消息
-      loadMessages()
+      
+      // 标记聊天已创建
+      setChatCreated(true);
+      console.log('[ChatIdConversation] New chat ready for user input');
+    } 
+    // 非新建会话的处理逻辑
+    else if (!currentChat?.isNew) {
+      // 只在非新建会话时尝试加载消息
+      console.log('[ChatIdConversation] Loading messages for existing chat:', chatId);
+      // 恢复消息加载调用
+      loadMessages();
+      console.log('[ChatIdConversation] Message loading enabled for existing chat');
+    } 
+    // 其他情况（新建会话但已创建）
+    else {
+      // 新建会话，不需要加载消息
+      console.log('[ChatIdConversation] New chat (already created), skipping message load');
+      setIsInitialLoading(false);
     }
+    
+    return;
+  }, [currentChat, chatId, chatList, setCurrentChat, setChatList, chatCreated]);
 
-    setIsInitialLoading(false)
-  }, [currentChat, chatId, chatList, setCurrentChat, setChatList])
+  // 处理异步token数据创建
+  useEffect(() => {
+    const createTokenDataForMessages = async () => {
+      const newTokenDataMap = { ...tokenDataMap };
+      let hasChanges = false;
+
+      for (const message of messages) {
+        // 只对swap操作创建token数据，跳过其他操作
+        if (message.swapEntities && message.id && !tokenDataMap[message.id] && 
+            message.responseData?.data?.intent !== 'createToken') {
+          try {
+            console.log('[ChatIdConversation] 为消息创建token数据:', message.id);
+            const { createTokensFromSwapEntities } = await import('@/utils/swapHelpers');
+            const tokenData = await createTokensFromSwapEntities(message.swapEntities, message.quote);
+            
+            if (tokenData) {
+              newTokenDataMap[message.id] = tokenData;
+              hasChanges = true;
+              console.log('[ChatIdConversation] Token数据创建成功:', message.id, tokenData);
+            }
+          } catch (error) {
+            console.error('[ChatIdConversation] 创建token数据失败:', message.id, error);
+          }
+        }
+      }
+
+      if (hasChanges) {
+        setTokenDataMap(newTokenDataMap);
+      }
+    };
+
+    createTokenDataForMessages();
+  }, [messages, tokenDataMap]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -209,94 +332,76 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const mockAIResponse = async (message: string): Promise<ExtendedChatMessage> => {
-    try {
-      const walletAddress = getWalletAddress();
-      console.log('[mockAIResponse] Sending request to API with message:', message);
-      console.log('[mockAIResponse] Using wallet address:', walletAddress);
-      
-      let response;
-      try {
-        response = await fetch('http://localhost:3009/api/chat-new', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
-            'message': `Mock AI response for: ${message}`,
-            'address': walletAddress
-          },
-          body: JSON.stringify({
-            message: message,
-            walletAddress: walletAddress
-          })
-        });
-      } catch (fetchError) {
-        console.error('[mockAIResponse] Fetch error:', fetchError);
-        throw new Error('无法连接到服务器，请检查服务器是否正在运行');
-      }
+  // 添加isLoading状态变化的调试日志
+  useEffect(() => {
+    console.log('[ChatIdConversation] isLoading state changed:', {
+      isLoading,
+      isStreaming,
+      messagesLength: messages.length
+    });
+  }, [isLoading, isStreaming, messages.length]);
 
-      if (!response || !response.ok) {
-        const errorText = await response?.text() || 'Unknown error';
-        console.error(`[mockAIResponse] API request failed with status ${response?.status}:`, errorText);
-        throw new Error(`API request failed with status ${response?.status}: ${errorText}`);
-      }
-
-      const responseData = await response.json();
-      console.log('[mockAIResponse] Received response:', responseData);
-      
-      // Return the response in the expected format
-      return {
-        role: 'assistant' as const,
-        content: responseData.message || 'No response from AI',
-        timestamp: new Date().toISOString(),
-        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        thoughts: responseData.thoughts || [],
-        swapEntities: responseData.data?.entities || null,
-        responseData: responseData
-      };
-    } catch (error) {
-      console.error('Error calling AI API:', error);
-      // Return a fallback response in case of error
-      return {
-        role: 'assistant' as const,
-        content: '抱歉，我暂时无法连接到服务器。请检查服务器是否正在运行，或者稍后再试。',
-        timestamp: new Date().toISOString(),
-        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        thoughts: ['服务器连接失败'],
-        swapEntities: null,
-        responseData: { error: error instanceof Error ? error.message : 'Unknown error' }
-      };
-    }
+  const mockAIResponse = async (message: string): Promise<ChatMessage> => {
+    return {
+      role: 'assistant',
+      content: 'This is a mock AI reply.',
+      timestamp: new Date().toISOString(),
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    };
   };
 
-  const getAIResponse = async (messages: ExtendedChatMessage[]): Promise<ExtendedChatMessage> => {
+  const getAIResponse = async (messages: ChatMessage[]): Promise<ChatMessage> => {
     try {
-      // 使用与 mockAIResponse 相同的本地 API 端点
       const lastMessage = messages[messages.length - 1]?.content || '';
       const walletAddress = getWalletAddress();
-      console.log('[getAIResponse] Sending request to local API with message:', lastMessage);
+      console.log('[getAIResponse] Sending request to AI API with message:', lastMessage);
       console.log('[getAIResponse] Using wallet address:', walletAddress);
+      console.log('[getAIResponse] ChatId:', chatId);
       
-      let response;
-      try {
-        response = await fetch('http://localhost:3009/api/chat-new', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
-            'message': `AI response for: ${lastMessage}`,
-            'address': walletAddress
-          },
-          body: JSON.stringify({
-            message: lastMessage,
-            walletAddress: walletAddress
-          })
-        });
-      } catch (fetchError) {
-        console.error('[getAIResponse] Fetch error:', fetchError);
-        throw new Error('无法连接到服务器，请检查服务器是否正在运行');
+      // Debug: Check message content
+      console.log('[getAIResponse] Message debug:', {
+        original: lastMessage,
+        trimmed: lastMessage.toLowerCase().trim(),
+        target: 'find me the best staking yields',
+        matches: lastMessage.toLowerCase().trim() === 'find me the best staking yields'
+      });
+      
+      // 检查是否是staking yields请求
+      const isStakingYieldsRequest = lastMessage.toLowerCase().includes('staking yields') || lastMessage.toLowerCase().trim() === 'find me the best staking yields';
+      
+      // 检查是否是Token创建请求
+      const isTokenCreationRequest = lastMessage.toLowerCase().includes('create token') || 
+                                   lastMessage.toLowerCase().includes('create a token') ||
+                                   lastMessage.toLowerCase().includes('new token');
+      
+      // 如果是Token创建请求，生成mintKeypair并传递mintPubkey
+      let mintPubkey = null;
+      let mintKeypair = null;
+      if (isTokenCreationRequest) {
+        const { Keypair } = await import('@solana/web3.js');
+        mintKeypair = Keypair.generate();
+        mintPubkey = mintKeypair.publicKey.toBase58();
+        console.log('[getAIResponse] Generated mintPubkey for token creation:', mintPubkey);
       }
-
+      
+      // 调用 /api/chat-new 获取 AI 回复
+      const response = await fetch('http://localhost:3009/api/chat-new', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+          'message': `AI response for: ${lastMessage}`,
+          'address': walletAddress
+        },
+        body: JSON.stringify({
+          message: lastMessage,
+          walletAddress: walletAddress,
+          mintPubkey: mintPubkey // 传递mintPubkey给后端
+        })
+      });
+      
+      console.log('[getAIResponse] /api/chat-new response status:', response?.status);
+      
       if (!response || !response.ok) {
         const errorText = await response?.text() || 'Unknown error';
         console.error(`[getAIResponse] API request failed with status ${response?.status}:`, errorText);
@@ -313,6 +418,15 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         hasError: !!responseData.error,
         message: responseData.message
       });
+      
+      // 如果是staking yields请求，使用hardcode的AI回复消息
+      if (isStakingYieldsRequest) {
+        console.log('[getAIResponse] Using hardcoded message for staking yields request');
+        responseData.message = "I've found the best liquid staking yields for you. Please choose one of the options above to stake your SOL.";
+        if (responseData.data) {
+          responseData.data.response = "I've found the best liquid staking yields for you. Please choose one of the options above to stake your SOL.";
+        }
+      }
       
       // 正确提取 quote 数据 - 它可能在 result.quote.value 中
       const quote = responseData.quote || responseData.result?.quote?.value;
@@ -334,13 +448,14 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         thoughts: responseData.thoughts || [],
         quote: quote || null,
         swapEntities: responseData.data?.entities || null,
-        responseData: responseData
+        responseData: responseData,
+        mintKeypair: mintKeypair // 保存mintKeypair到消息中
       };
     } catch (error) {
       console.error('[ChatIdConversation] Error getting AI response:', error);
       setIsStreaming(false);
       
-      // 返回一个简单的错误响应，而不是调用可能失败的 mockAIResponse
+      // 返回一个简单的错误响应
       return {
         role: 'assistant' as const,
         content: '抱歉，我暂时无法连接到服务器。请检查服务器是否正在运行，或者稍后再试。',
@@ -351,6 +466,125 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         swapEntities: null,
         responseData: { error: error instanceof Error ? error.message : 'Unknown error' }
       };
+    } finally {
+      console.log('[getAIResponse] Function completed, ensuring loading state is properly managed');
+    }
+  };
+
+  // 处理自动AI回复
+  const handleAutoReply = async (existingMessages: ChatMessage[]) => {
+    console.log('[ChatIdConversation] handleAutoReply called with messages:', existingMessages);
+    
+    try {
+      setIsLoading(true);
+      
+      // 1. 先调用创建新会话 API
+      const createChatResponse = await fetch('https://new-miraix-api.vercel.app/api/create-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+          'message': 'test-message-for-signature',
+          'address': getWalletAddress()
+        },
+        body: JSON.stringify({
+          chatId: chatId,
+          persona: currentChat?.persona || { name: 'default', description: 'default' },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          message: existingMessages[0]?.content || ''
+        })
+      });
+      
+      if (!createChatResponse.ok) {
+        throw new Error(`Failed to create chat: ${createChatResponse.status}`);
+      }
+      
+      console.log('[ChatIdConversation] Chat created successfully in handleAutoReply');
+      
+      // 2. 获取 AI 回复
+      const aiReply = await getAIResponse(existingMessages);
+      const newMessages = [...existingMessages, aiReply];
+      setMessages(newMessages);
+      storeSetMessages(chatId, newMessages);
+      
+      // 3. 保存消息到服务器
+      const messagesToSave = newMessages.map(msg => ({
+        content: msg.content,
+        role: msg.role,
+        timestamp: msg.timestamp,
+        id: msg.id,
+        thoughts: msg.thoughts,
+        swapEntities: msg.swapEntities,
+        quote: msg.quote,
+        responseData: msg.responseData,
+        transactionStatus: msg.transactionStatus
+      }));
+      
+      await saveMessages(chatId, messagesToSave, getWalletAddress());
+      console.log('[ChatIdConversation] Auto AI reply and save done');
+      
+      // 4. 延迟更新聊天状态，标记为非新建，避免触发消息加载
+      console.log('[ChatIdConversation] Delaying isNew status update to avoid triggering message load');
+      setTimeout(() => {
+        updateChatStatus(chatId, false);
+        console.log('[ChatIdConversation] isNew status updated to false after delay');
+      }, 2000); // 延迟2秒更新状态
+      
+    } catch (err) {
+      console.error('[ChatIdConversation] Auto AI reply error:', err);
+      toast.error('Failed to auto reply for new chat');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchReply = async () => {
+    try {
+      // 获取最后一条用户消息
+      const lastUserMessage = messages.find(msg => msg.role === 'user');
+      if (!lastUserMessage) {
+        console.error('[fetchReply] No user message found');
+        return;
+      }
+
+      // 调用 AI 回复接口
+      const reply = await getAIResponse([lastUserMessage]);
+      console.log('[fetchReply] Received AI reply:', reply);
+      
+      // 更新消息列表
+      setMessages(prev => {
+        const newMessages = [...prev, reply];
+        console.log('[fetchReply] Updated messages:', newMessages);
+        
+        // 保存消息到服务器 - 使用正确的格式
+        const messagesToSave = newMessages.map(msg => ({
+          content: msg.content,
+          role: msg.role,
+          timestamp: msg.timestamp,
+          id: msg.id,
+          thoughts: msg.thoughts,
+          swapEntities: msg.swapEntities,
+          quote: msg.quote,
+          responseData: msg.responseData,
+          transactionStatus: msg.transactionStatus
+        }));
+        
+        saveMessages(chatId, messagesToSave, getWalletAddress()).catch((error: Error) => {
+          console.error('[fetchReply] Failed to save messages to server:', error);
+          toast.error('Failed to save messages to server');
+        });
+        return newMessages;
+      });
+      
+      // 更新 store 中的消息
+      storeSetMessages(chatId, [...messages, reply]);
+      console.log('[fetchReply] Updated store messages');
+    } catch (error) {
+      console.error('[fetchReply] Error getting AI response:', error);
+      toast.error('Failed to get AI response');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -361,7 +595,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       setIsLoading(true);
       setError(null); // 清除之前的错误
 
-      const userMessage: ExtendedChatMessage = {
+      const userMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'user',
         content: input.trim(),
@@ -386,82 +620,102 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       setInput('');
 
       // 如果是新建的聊天，先创建聊天会话
-      if (currentChat.isNew) {
+      if (currentChat.isNew && !chatCreated) {
         console.log('[ChatIdConversation] Creating new chat session for first message:', {
           chatId,
           currentChat,
           isNew: currentChat.isNew
         });
+        
         try {
-          console.log('[ChatIdConversation] Sending chat creation request to local API:', {
-            chatId,
-            persona: currentChat?.persona
+          // 1. 调用创建新会话 API
+          const createChatResponse = await fetch('https://new-miraix-api.vercel.app/api/create-chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
+              'message': 'test-message-for-signature',
+              'address': getWalletAddress()
+            },
+            body: JSON.stringify({
+              chatId: chatId,
+              persona: currentChat?.persona || { name: 'default', description: 'default' },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              message: input.trim()
+            })
           });
           
-          let createResponse;
-          try {
-            createResponse = await fetch('http://localhost:3009/api/chat-new', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'signature': '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890',
-                'message': `Create new chat with ID: ${chatId}`,
-                'address': getWalletAddress()
-              },
-              body: JSON.stringify({
-                message: `Create new chat with ID: ${chatId}`,
-                metadata: {
-                  chatId,
-                  persona: currentChat?.persona,
-                  createdAt: new Date().toISOString()
-                },
-                walletAddress: getWalletAddress()
-              })
+          if (!createChatResponse.ok) {
+            throw new Error(`Failed to create chat: ${createChatResponse.status}`);
+          }
+          
+          console.log('[ChatIdConversation] Chat created successfully in handleSend');
+          setChatCreated(true);
+          
+          // 2. 延迟更新聊天状态，标记为非新建，避免触发消息加载
+          console.log('[ChatIdConversation] Delaying chat status update to avoid triggering message load');
+          setTimeout(() => {
+            console.log('[ChatIdConversation] Updating chat status:', {
+              chatId,
+              isNew: false
             });
-          } catch (fetchError) {
-            console.error('[ChatIdConversation] Fetch error creating chat session:', fetchError);
-            throw new Error('无法连接到服务器，请检查服务器是否正在运行');
-          }
-          
-          if (createResponse && createResponse.ok) {
-            const responseData = await createResponse.json();
-            console.log('[ChatIdConversation] Chat creation response:', responseData);
-          } else {
-            console.warn('[ChatIdConversation] Failed to create chat session, but continuing...');
-          }
-
-          // 更新聊天状态
-          console.log('[ChatIdConversation] Updating chat status:', {
-            chatId,
-            isNew: false
-          });
-          updateChatStatus(chatId, false);
+            updateChatStatus(chatId, false);
+          }, 2000); // 延迟2秒更新状态
         } catch (err) {
           console.error('[ChatIdConversation] Error creating chat session:', err);
           toast.error('Failed to create chat session, but will try to continue');
-          // 继续处理消息，即使创建会话失败
         }
       }
 
+      // 每次用户输入都必须调用AI回复 - 使用包含新用户消息的数组
+      const messagesWithUserMessage = [...messages, userMessage];
+      console.log('[ChatIdConversation] Calling getAIResponse with messages:', messagesWithUserMessage);
+      
       try {
-        // 调用API获取回复
-        const replyMessage = await getAIResponse([...messages, userMessage]);
+        const replyMessage = await getAIResponse(messagesWithUserMessage);
+        console.log('[ChatIdConversation] Received AI reply:', replyMessage);
 
         // 更新消息列表
         setMessages(prev => {
           const newMessages = [...prev, replyMessage];
-          console.log('[ChatIdConversation] Saving new messages:', {
-            messages: newMessages,
-            currentChat,
-            chatId
+          console.log('[ChatIdConversation] Updated messages list:', {
+            previousLength: prev.length,
+            newLength: newMessages.length,
+            messages: newMessages
           });
+          
+          // 保存消息到服务器 - 使用正确的格式
+          const messagesToSave = newMessages.map(msg => ({
+            content: msg.content,
+            role: msg.role,
+            timestamp: msg.timestamp,
+            id: msg.id,
+            thoughts: msg.thoughts,
+            swapEntities: msg.swapEntities,
+            quote: msg.quote,
+            responseData: msg.responseData,
+            transactionStatus: msg.transactionStatus
+          }));
+          
+          console.log('[ChatIdConversation] Saving messages to store and server:', {
+            chatId,
+            messagesToSave,
+            walletAddress: getWalletAddress()
+          });
+          
           // Save to local store
           storeSetMessages(chatId, newMessages);
+          console.log('[ChatIdConversation] Messages saved to local store');
+          
           // Save to server
-          saveMessages(chatId, newMessages, getWalletAddress()).catch((error: Error) => {
+          saveMessages(chatId, messagesToSave, getWalletAddress()).then(() => {
+            console.log('[ChatIdConversation] Messages saved to server successfully');
+          }).catch((error: Error) => {
             console.error('[ChatIdConversation] Failed to save messages to server:', error);
             toast.error('Failed to save messages to server');
           });
+          
           return newMessages;
         });
       } catch (err) {
@@ -492,7 +746,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     const successMessage = `Great! I've successfully completed your swap transaction. You swapped ${fromAmount} ${fromToken.symbol} to ${toAmount} ${toToken.symbol}. You can check the transaction status on Solscan using the link below.`;
     
     // 创建交易状态卡片消息
-    const transactionStatusMessage: ExtendedChatMessage = {
+    const transactionStatusMessage: ChatMessage = {
       id: Date.now().toString(),
       role: 'assistant',
       content: successMessage,
@@ -509,6 +763,92 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
     // 添加消息到聊天
     setMessages(prev => [...prev, transactionStatusMessage]);
+  };
+
+  // 处理token creation成功消息
+  const handleTokenCreationSuccess = async (txid: string, tokenInfo: any) => {
+    console.log('🎉 Token creation success callback triggered:', { txid, tokenInfo });
+    
+    // 构建token创建成功消息
+    const successMessage = `Great! I've successfully created your token "${tokenInfo.name}" (${tokenInfo.symbol}). The token has been deployed to Solana Devnet. You can check the transaction status on Solscan using the link below.`;
+    
+    // 创建交易状态卡片消息
+    const transactionStatusMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content: successMessage,
+      timestamp: new Date().toISOString(),
+      transactionStatus: {
+        txid,
+        status: 'confirmed',
+        fromToken: tokenInfo,
+        toToken: tokenInfo,
+        fromAmount: '1',
+        toAmount: '1'
+      }
+    };
+
+    // 添加消息到聊天
+    setMessages(prev => [...prev, transactionStatusMessage]);
+  };
+
+  // 处理协议选择并发送消息
+  const handleProtocolSelect = async (protocol: any) => {
+    console.log('🌾 Protocol selected in ChatIdConversation:', protocol);
+    const message = `I want to stake 1 SOL using ${protocol.symbol}`;
+    console.log('🌾 Sending protocol selection message:', message);
+    
+    // 创建用户消息
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: message,
+      timestamp: new Date().toISOString(),
+    };
+
+    // 添加用户消息到消息列表
+    setMessages(prev => [...prev, userMessage]);
+
+    try {
+      setIsLoading(true);
+      
+      // 调用AI回复
+      const replyMessage = await getAIResponse([...messages, userMessage]);
+      console.log('[ChatIdConversation] Received AI reply for protocol selection:', replyMessage);
+
+      // 更新消息列表
+      setMessages(prev => {
+        const newMessages = [...prev, replyMessage];
+        
+        // 保存消息到服务器
+        const messagesToSave = newMessages.map(msg => ({
+          content: msg.content,
+          role: msg.role,
+          timestamp: msg.timestamp,
+          id: msg.id,
+          thoughts: msg.thoughts,
+          swapEntities: msg.swapEntities,
+          quote: msg.quote,
+          responseData: msg.responseData,
+          transactionStatus: msg.transactionStatus
+        }));
+        
+        // Save to local store
+        storeSetMessages(chatId, newMessages);
+        
+        // Save to server
+        saveMessages(chatId, messagesToSave, getWalletAddress()).catch((error: Error) => {
+          console.error('[ChatIdConversation] Failed to save messages to server:', error);
+        });
+        
+        return newMessages;
+      });
+    } catch (err) {
+      console.error('[ChatIdConversation] Error getting AI response for protocol selection:', err);
+      toast.error('Failed to get response for protocol selection');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isInitialLoading) {
@@ -531,36 +871,179 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                 hasQuote: !!message.quote,
                 hasResponseData: !!message.responseData,
                 responseDataSuccess: message.responseData?.success,
-                responseDataError: message.responseData?.error
+                responseDataError: message.responseData?.error,
+                responseDataKeys: message.responseData ? Object.keys(message.responseData) : [],
+                fullResponseData: message.responseData
               });
 
-              // Check if this is the special swap initiation reply
-              const isSwapInitiation =
-                message.role === 'assistant' &&
-                (message.quote || 
-                 message.responseData?.quote || 
-                 message.responseData?.result?.quote?.value ||
-                 message.swapEntities ||
-                 message.responseData?.error);
+              // 检查是否是 bridge 操作
+              const isBridgeOperation = message.role === 'assistant' && 
+                (message.responseData?.data?.intent === 'bridge' || 
+                 message.content.toLowerCase().includes('bridge') ||
+                 message.responseData?.quote?.provider);
 
-              console.log('[ChatIdConversation] isSwapInitiation:', {
+              // 检查是否是 staking 操作
+              const isStakingOperation = message.role === 'assistant' && 
+                (message.responseData?.data?.intent === 'stakingAgent' || 
+                 message.responseData?.data?.intent === 'staking' ||
+                 message.content.toLowerCase().includes('staking') ||
+                 message.responseData?.quote?.protocols ||
+                 (message.responseData?.success === true && message.responseData?.data?.quote?.protocols));
+
+              // 检查是否是 market 操作
+              const isMarketOperation = message.role === 'assistant' && 
+                (message.responseData?.data?.intent === 'marketData' || 
+                 message.responseData?.data?.intent === 'trending' ||
+                 message.content.toLowerCase().includes('market') ||
+                 message.content.toLowerCase().includes('trending') ||
+                 message.responseData?.data?.data?.trendingTokens ||
+                 (message.responseData?.success === true && message.responseData?.data?.data?.trendingTokens));
+
+              // 检查是否是 token creation 操作
+              const isTokenCreationOperation = message.role === 'assistant' && 
+                (message.responseData?.data?.intent === 'createToken' || 
+                 message.content.toLowerCase().includes('create token') ||
+                 message.content.toLowerCase().includes('token creation') ||
+                 message.responseData?.quote?.unsignedTx);
+
+              console.log('[ChatIdConversation] Staking operation check:', {
+                messageRole: message.role,
+                isAssistant: message.role === 'assistant',
+                intent: message.responseData?.data?.intent,
+                contentIncludesStaking: message.content.toLowerCase().includes('staking'),
+                hasQuoteProtocols: !!message.responseData?.quote?.protocols,
+                hasDataQuoteProtocols: !!(message.responseData?.success === true && message.responseData?.data?.quote?.protocols),
+                isStakingOperation,
+                isMarketOperation,
+                responseDataKeys: message.responseData ? Object.keys(message.responseData) : [],
+                dataKeys: message.responseData?.data ? Object.keys(message.responseData.data) : []
+              });
+
+              // 检查是否是 swap 操作
+              const hasSwapData = !!(message.quote || 
+                                   message.swapEntities ||
+                                   (message.responseData?.success === true && message.responseData?.data?.quote) ||
+                                   (message.responseData?.success === true && message.responseData?.data?.swapEntities));
+              
+              const hasSwapError = !!(message.responseData?.error && 
+                                   message.responseData?.error.includes('quote'));
+              
+              // 更严格的检查：只有当有真正的swap数据时才显示组件
+              // 检查是否包含真正的swap相关信息，而不是仅仅因为responseData存在
+              const hasValidSwapEntities = message.swapEntities && 
+                                         message.swapEntities.fromToken && 
+                                         message.swapEntities.toToken && 
+                                         message.swapEntities.amount;
+              
+              const hasRealSwapData = !!(message.quote || 
+                                       hasValidSwapEntities ||
+                                       message.responseData?.data?.quote ||
+                                       message.responseData?.data?.swapEntities);
+              
+              const isSwapInitiation = message.role === 'assistant' && hasRealSwapData && !isBridgeOperation && !isStakingOperation && !isMarketOperation && !isTokenCreationOperation;
+              
+              // 恢复swap组件显示，但使用更严格的判断
+              const shouldShowSwapComponent = true;
+              const shouldShowBridgeComponent = true;
+              const shouldShowStakingComponent = true;
+              const shouldShowMarketComponent = true;
+
+              console.log('[ChatIdConversation] Operation analysis:', {
+                isBridgeOperation,
+                isStakingOperation,
+                isMarketOperation,
                 isSwapInitiation,
                 messageRole: message.role,
+                hasSwapData,
+                hasRealSwapData,
+                hasValidSwapEntities,
+                hasSwapError,
                 hasQuote: !!message.quote,
                 hasResponseDataQuote: !!message.responseData?.quote,
                 hasResultQuote: !!message.responseData?.result?.quote?.value,
                 hasSwapEntities: !!message.swapEntities,
+                swapEntitiesDetails: message.swapEntities,
                 hasError: !!message.responseData?.error,
+                responseDataSuccess: message.responseData?.success,
+                responseDataError: message.responseData?.error,
+                responseDataKeys: message.responseData ? Object.keys(message.responseData) : [],
+                responseDataData: message.responseData?.data,
                 quoteInputLogo: message.quote?.inputMintLogo,
                 quoteOutputLogo: message.quote?.outputMintLogo,
                 content: message.content,
-                responseData: message.responseData
+                fullResponseData: message.responseData
               });
 
               return (
                 <div key={index} className="flex flex-col">
+                  {/* Render Thoughts and NewBridge if this is the bridge initiation reply */}
+                  {isBridgeOperation && shouldShowBridgeComponent && (
+                    <div className="bridge-thoughts-wrapper ml-[76px]">
+                      <Thoughts thoughts={message.thoughts || []} />
+                      <NewBridge 
+                        responseData={message.responseData}
+                        quote={message.responseData?.quote}
+                        thoughts={message.thoughts}
+                        onTransactionSuccess={handleTransactionSuccess}
+                      />
+                    </div>
+                  )}
+
+                  {/* Render StakingYield if this is the staking initiation reply */}
+                  {isStakingOperation && shouldShowStakingComponent && (() => {
+                    console.log('🌾 Rendering StakingYield component with:', {
+                      responseData: message.responseData,
+                      quote: message.responseData?.quote,
+                      hasProtocols: !!message.responseData?.quote?.protocols
+                    });
+                    return (
+                      <div className="staking-thoughts-wrapper ml-[76px]">
+                        <StakingYield 
+                          responseData={message.responseData}
+                          quote={message.responseData?.quote}
+                          onProtocolSelect={handleProtocolSelect}
+                        />
+                      </div>
+                    );
+                  })()}
+
+                  {/* Render Market if this is the market data reply */}
+                  {isMarketOperation && shouldShowMarketComponent && (() => {
+                    console.log('📊 Rendering Market component with:', {
+                      responseData: message.responseData,
+                      intent: message.responseData?.data?.intent
+                    });
+                    return (
+                      <div className="market-thoughts-wrapper ml-[76px]">
+                        <Market 
+                          responseData={message.responseData}
+                        />
+                      </div>
+                    );
+                  })()}
+
+                  {/* Render TokenCreation if this is the token creation reply */}
+                  {isTokenCreationOperation && (() => {
+                    console.log('🪙 Rendering TokenCreation component with:', {
+                      responseData: message.responseData,
+                      intent: message.responseData?.data?.intent,
+                      mintKeypair: message.mintKeypair
+                    });
+                    return (
+                      <div className="token-creation-thoughts-wrapper ml-[76px]">
+                        <TokenCreation 
+                          responseData={{
+                            ...message.responseData,
+                            mintKeypair: message.mintKeypair // 传递mintKeypair
+                          }}
+                          onTransactionSuccess={handleTokenCreationSuccess}
+                        />
+                      </div>
+                    );
+                  })()}
+
                   {/* Render Thoughts and NewSwap if this is the swap initiation reply */}
-                  {isSwapInitiation && (
+                  {isSwapInitiation && shouldShowSwapComponent && (
                     <div className="swap-thoughts-wrapper ml-[76px]">
                       <Thoughts thoughts={message.thoughts || []} />
                       {message.swapEntities ? (
@@ -589,101 +1072,26 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                             outputMintLogo: message.quote?.outputMintLogo
                           });
                           
-                          // 根据 token 类型设置正确的 decimals
-                          const getTokenDecimals = (tokenSymbol: string) => {
-                            switch (tokenSymbol.toUpperCase()) {
-                              case 'USDC':
-                              case 'USDT':
-                                return 6;
-                              case 'SOL':
-                                return 9;
-                              case 'BONK':
-                                return 5; // BONK 使用 5 decimals
-                              case 'JUP':
-                                return 6;
-                              case 'RAY':
-                                return 6;
-                              case 'SRM':
-                                return 6;
-                              case 'MNGO':
-                                return 6;
-                              case 'ORCA':
-                                return 6;
-                              case 'SAMO':
-                                return 9;
-                              case 'COPE':
-                                return 6;
-                              case 'ALEPH':
-                                return 6;
-                              case 'MEDIA':
-                                return 6;
-                              case 'ROPE':
-                                return 9;
-                              case 'STEP':
-                                return 9;
-                              case 'SLND':
-                                return 6;
-                              case 'SNY':
-                                return 6;
-                              case 'MER':
-                                return 6;
-                              case 'TULIP':
-                                return 6;
-                              case 'MNGO':
-                                return 6;
-                              case 'LIKE':
-                                return 9;
-                              case 'COPE':
-                                return 6;
-                              case 'ALEPH':
-                                return 6;
-                              case 'MEDIA':
-                                return 6;
-                              case 'ROPE':
-                                return 9;
-                              case 'STEP':
-                                return 9;
-                              case 'SLND':
-                                return 6;
-                              case 'SNY':
-                                return 6;
-                              case 'MER':
-                                return 6;
-                              case 'TULIP':
-                                return 6;
-                              default:
-                                return 9; // 默认值
-                            }
-                          };
+                          // 使用消息ID作为key来存储token数据
+                          const messageKey = message.id;
+                          const tokenData = messageKey ? tokenDataMap[messageKey] : undefined;
                           
-                          console.log('[ChatIdConversation] fromTokenAddress:', fromTokenAddress);
-                          console.log('[ChatIdConversation] toTokenAddress:', toTokenAddress);
+                          if (!tokenData) {
+                            console.warn('[ChatIdConversation] 无法创建token数据，使用基本NewSwap');
+                            return (
+                              <NewSwap 
+                                responseData={message.responseData}
+                                quote={message.quote}
+                                onTransactionSuccess={handleTransactionSuccess}
+                              />
+                            );
+                          }
                           
                           return (
                         <NewSwap
-                          fromToken={{
-                            symbol: message.swapEntities.fromToken,
-                            name: message.swapEntities.fromToken,
-                            logo: message.quote?.inputMintLogo || '',
-                            chain: message.swapEntities.network,
-                            chainLogo: '',
-                            address: fromTokenAddress,
-                            balance: 0,
-                            price: 0,
-                            decimals: getTokenDecimals(message.swapEntities.fromToken)
-                          }}
-                          toToken={{
-                            symbol: message.swapEntities.toToken,
-                            name: message.swapEntities.toToken,
-                            logo: message.quote?.outputMintLogo || '',
-                            chain: message.swapEntities.network,
-                            chainLogo: '',
-                            address: toTokenAddress,
-                            balance: 0,
-                            price: 0,
-                            decimals: getTokenDecimals(message.swapEntities.toToken)
-                          }}
-                          fromAmount={String(message.swapEntities.amount)}
+                          fromToken={tokenData.fromToken}
+                          toToken={tokenData.toToken}
+                          fromAmount={tokenData.fromAmount}
                           quote={message.quote}
                           responseData={message.responseData}
                           onTransactionSuccess={handleTransactionSuccess}
@@ -697,6 +1105,44 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                           onTransactionSuccess={handleTransactionSuccess}
                         />
                       )}
+                    </div>
+                  )}
+                  
+                  {/* Render transaction status card if this is a transaction success message */}
+                  {message.transactionStatus && (
+                    <div className="ml-[76px] mb-4">
+                      <div className="rounded-lg border bg-card text-card-foreground shadow-sm mt-4 max-w-[480px] mb-3 w-full">
+                        <div className="flex flex-col space-y-1.5 p-6">
+                          <h3 className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
+                            Transaction Status 
+                            <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground bg-green-500" style={{fontSize: '0.75em', padding: '0.25em 0.75em'}}>
+                              <span className="hidden md:block">Confirmed!</span>
+                              <span className="block md:hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-check-big h-4 w-4">
+                                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                  <path d="m9 11 3 3L22 4"></path>
+                                </svg>
+                              </span>
+                            </div>
+                          </h3>
+                        </div>
+                        <div className="p-6 pt-0 flex flex-col gap-4">
+                          <a 
+                            href={`https://solscan.io/tx/${message.transactionStatus.txid}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 flex items-center gap-2 cursor-pointer"
+                          >
+                            <span className="hidden md:block">Check Status on Solscan Explorer</span>
+                            <span className="block md:hidden">Check Status</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link h-4 w-4">
+                              <path d="M15 3h6v6"></path>
+                              <path d="M10 14 21 3"></path>
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   )}
                   

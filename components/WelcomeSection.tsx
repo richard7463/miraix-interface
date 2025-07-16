@@ -3,13 +3,25 @@ import { useRouter } from 'next/navigation';
 import useChatHook from './Chat/useChatHook';
 import { DefaultPersonas } from './Chat/useChatHook';
 
-export default function WelcomeSection() {
+// 新增：支持setMessage作为props
+interface WelcomeSectionProps {
+  setMessage?: (msg: string) => void;
+}
+
+export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
   const router = useRouter();
   const chatHook = useChatHook();
 
   const handleStartChat = async () => {
     const chat = await chatHook.onCreateChat(DefaultPersonas[0]);
     router.push(`/chat/${chat.id}`);
+  };
+
+  // 新增：快捷填充按钮
+  const handleCreateTokenExample = () => {
+    if (setMessage) {
+      setMessage('Create a token named abcpump ...');
+    }
   };
 
   return (
@@ -61,12 +73,19 @@ export default function WelcomeSection() {
         </div>
 
         {/* CTA Button */}
-        <div className="mt-6 sm:mt-12 md:mt-16">
+        <div className="mt-6 sm:mt-12 md:mt-16 flex flex-col items-center gap-4">
           <button
             onClick={handleStartChat}
             className="px-4 sm:px-8 md:px-10 py-2 sm:py-4 text-sm sm:text-lg md:text-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors duration-200"
           >
             Start Chatting Now
+          </button>
+          {/* 新增：一键填充创建Token意图 */}
+          <button
+            onClick={handleCreateTokenExample}
+            className="px-4 sm:px-8 md:px-10 py-2 sm:py-4 text-sm sm:text-lg md:text-xl font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition-colors duration-200"
+          >
+            Create a token named abcpump ...
           </button>
         </div>
       </div>

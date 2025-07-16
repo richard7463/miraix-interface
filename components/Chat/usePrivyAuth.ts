@@ -1,14 +1,15 @@
 import { useSignMessage } from '@privy-io/react-auth';
 import { useCallback } from 'react';
 import { API_ENDPOINTS } from '@/lib/config';
+import { useSolanaWallets } from '@privy-io/react-auth/solana';
 
 type AuthHeaders = Record<string, string>;
 
 // 测试模式：使用固定的测试签名
 const TEST_SIGNATURE = "0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
-const TEST_ADDRESS = "0x1234567890123456789012345678901234567890";
 
 export const usePrivyAuth = () => {
+  const { wallets: solanaWallets } = useSolanaWallets();
   const { signMessage } = useSignMessage({
     onSuccess: async ({ signature }) => {
       console.log('Signature successful:', signature);
@@ -18,11 +19,17 @@ export const usePrivyAuth = () => {
     }
   });
 
+  // 获取当前连接的Solana钱包地址
+  const getCurrentWalletAddress = useCallback(() => {
+    const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
+    return embeddedWallet?.address || '0x1234567890123456789012345678901234567890';
+  }, [solanaWallets]);
+
   const getAuthHeaders = useCallback(async (message: string): Promise<AuthHeaders> => {
     try {
       const { signature } = await signMessage({ message });
-      // Use mock address instead of window.ethereum?.selectedAddress
-      const address = TEST_ADDRESS;
+      // Use current Solana wallet address
+      const address = getCurrentWalletAddress();
       
       if (!address) {
         throw new Error('No address found');
@@ -38,16 +45,20 @@ export const usePrivyAuth = () => {
       console.error('Error getting auth headers:', error);
       throw error;
     }
-  }, [signMessage]);
+  }, [signMessage, getCurrentWalletAddress]);
 
   const getUserChats = useCallback(async () => {
     try {
       const message = 'Get user chats';
-      // 使用测试签名和地址
+      const currentAddress = getCurrentWalletAddress();
+      
+      console.log('[usePrivyAuth] Getting user chats for address:', currentAddress);
+      
+      // 使用当前连接的Solana钱包地址
       const headers = {
         'signature': TEST_SIGNATURE,
         'message': message,
-        'address': TEST_ADDRESS,
+        'address': currentAddress,
         'Content-Type': 'application/json'
       };
 
@@ -60,16 +71,18 @@ export const usePrivyAuth = () => {
         throw new Error('Failed to get user chats');
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('[usePrivyAuth] Received user chats:', data);
+      return data;
     } catch (error) {
       console.error('Error getting user chats:', error);
       throw error;
     }
-  }, []); // 移除 getAuthHeaders 依赖
+  }, [getCurrentWalletAddress]); // 添加getCurrentWalletAddress依赖
 
   const registerUser = useCallback(async () => {
     try {
-      const address = window.ethereum?.selectedAddress;
+      const address = getCurrentWalletAddress();
       if (!address) throw new Error('No address found');
 
       const response = await fetch(API_ENDPOINTS.REGISTER_USER, {
@@ -89,7 +102,7 @@ export const usePrivyAuth = () => {
       console.error('Error registering user:', error);
       throw error;
     }
-  }, []);
+  }, [getCurrentWalletAddress]);
 
   const createChat = useCallback(async (chatData: any) => {
     try {

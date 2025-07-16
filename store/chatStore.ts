@@ -84,7 +84,13 @@ export const useChatStore = create<ChatStore>()(
             const formattedMessages = messages.map(msg => ({
               ...msg,
               timestamp: msg.timestamp || new Date().toISOString(),
-              id: msg.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+              id: msg.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              // 确保包含所有扩展字段
+              thoughts: msg.thoughts,
+              swapEntities: msg.swapEntities,
+              quote: msg.quote,
+              responseData: msg.responseData,
+              transactionStatus: msg.transactionStatus
             }))
 
             // 使用提供的钱包地址，如果没有则使用测试地址
@@ -111,7 +117,7 @@ export const useChatStore = create<ChatStore>()(
             })
 
             console.log('[chatStore] API response status:', response.status)
-            
+
             if (!response.ok) {
               const errorText = await response.text()
               console.error('[chatStore] API error response:', errorText)

@@ -25,7 +25,10 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           message = 'bridge 1sol to usdc in ethereum';
           break;
         case 'stake':
-          message = 'stake 1sol in Jupiter';
+          message = 'Find me the best staking yields';
+          break;
+        case 'createToken':
+          message = 'Create a token named abcpump ...';
           break;
         case 'knowledge':
           message = 'show me the documentation for Jupiter protocol';
@@ -140,23 +143,23 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
             </button>
           </motion.div>
 
-          {/* Knowledge Card */}
+          {/* Create Token Card (English only) */}
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
             className="welcome-card p-3 sm:p-4 rounded-xl flex flex-col justify-between items-stretch gap-2"
           >
             <div className="p-1.5 rounded-lg bg-primary/5 flex flex-col justify-center items-center">
-              <IconWithLabel icon={<PiBookOpenTextBold />} label="Knowledge" color="#F59E42" />
+              <IconWithLabel icon={<FaCoins />} label="Create Token" color="#F59E42" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-semibold text-foreground">Developer Documentation</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">Access comprehensive docs for top DeFi protocols.</p>
+              <h3 className="text-sm sm:text-base font-semibold text-foreground">Create Token</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Experience Solana on-chain token creation in one click.</p>
             </div>
             <button 
-              onClick={() => handleAskThis('knowledge')}
+              onClick={() => handleAskThis('createToken')}
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
             >
-              <span>Ask this</span>
+              <span>Create a token named abcpump ...</span>
               <FiZap className="w-3.5 h-3.5" />
             </button>
           </motion.div>
