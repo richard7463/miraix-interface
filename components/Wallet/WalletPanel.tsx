@@ -417,18 +417,18 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                 <div className="h-full flex flex-col items-start justify-start border-l">
                     <div className={`fixed right-0 top-0 h-full w-96 transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                         <div className="flex flex-col h-full">
-                            <div className="border text-card-foreground shadow-sm h-screen border-l border-r-0 border-t-0 border-b-0 z-50 relative bg-white/95 rounded-none overflow-hidden w-96">
-                                <div className="p-6 flex items-center gap-2 flex-row justify-between space-y-0 py-4 pb-4 border-b">
+                            <div className="border text-card-foreground shadow-sm h-screen border-l border-r-0 border-t-0 border-b-0 z-50 relative bg-[#27272a] rounded-none overflow-hidden w-96">
+                                <div className="p-6 flex items-center gap-2 flex-row justify-between space-y-0 py-4 pb-4 border-b border-[#3f3f46]">
                                     <div className="flex items-center gap-2">
                                         <Listbox value={selectedWallet} onChange={(val) => { setSelectedWallet(val); console.log('[WalletPanel] Listbox onChange:', val); }}>
                                             <div className="relative">
-                                                <Listbox.Button className="relative w-[200px] h-11 cursor-pointer rounded-md bg-white py-2.5 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-primary hover:bg-gray-50 transition-colors">
+                                                <Listbox.Button className="relative w-[200px] h-11 cursor-pointer rounded-md bg-[#3f3f46] py-2.5 pl-3 pr-10 text-left shadow-sm ring-1 ring-inset ring-[#52525b] focus:outline-none focus:ring-2 focus:ring-primary hover:bg-[#52525b] transition-colors text-[#e0e0e6]">
                                                     <span className="block truncate text-sm">
                                                         {walletOptions.find(option => option.id === selectedWallet)?.name}
                                                     </span>
                                                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                                         <ChevronUpDownIcon
-                                                            className="h-5 w-5 text-gray-400"
+                                                            className="h-5 w-5 text-[#a1a1aa]"
                                                             aria-hidden="true"
                                                         />
                                                     </span>
@@ -439,12 +439,12 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     leaveFrom="opacity-100"
                                                     leaveTo="opacity-0"
                                                 >
-                                                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-[#3f3f46] py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                                                         {walletOptions.map((option) => (
                                                             <Listbox.Option
                                                                 key={option.id}
                                                                 className={({ active }) =>
-                                                                    `relative cursor-pointer select-none py-2 pl-3 pr-9 ${active ? 'bg-primary/10 text-primary' : 'text-gray-900'
+                                                                    `relative cursor-pointer select-none py-2 pl-3 pr-9 ${active ? 'bg-primary/10 text-primary' : 'text-[#e0e0e6]'
                                                                     }`
                                                                 }
                                                                 value={option.id}
@@ -478,7 +478,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                         </Listbox>
                                         <button
                                             onClick={() => { setIsSettingsOpen(!isSettingsOpen); console.log('[WalletPanel] setIsSettingsOpen:', !isSettingsOpen); }}
-                                            className={`inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-50 px-2 py-2 h-11 w-11 rounded-full transform ${isSettingsOpen ? 'scale-110' : 'scale-100'} cursor-pointer`}
+                                            className={`inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#3f3f46] hover:bg-[#52525b] px-2 py-2 h-11 w-11 rounded-full transform ${isSettingsOpen ? 'scale-110' : 'scale-100'} cursor-pointer text-[#e0e0e6]`}
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-settings">
                                                 <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -491,17 +491,17 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                 <div className="p-6 pt-0 space-y-4">
                                     <div className="mt-4">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex flex-col text-3xl font-bold">
+                                            <div className="flex flex-col text-3xl font-bold text-[#e0e0e6]">
                                                 {formatValue(totalBalance)}
                                             </div>
                                             <button
                                                 onClick={handleRefreshBalances}
                                                 disabled={isRefreshing}
-                                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-white hover:bg-gray-50 h-10 px-3 py-2 shadow-sm hover:shadow-md cursor-pointer disabled:cursor-not-allowed"
+                                                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#3f3f46] hover:bg-[#52525b] h-10 px-3 py-2 shadow-sm hover:shadow-md cursor-pointer disabled:cursor-not-allowed text-[#e0e0e6]"
                                                 title="Refresh balances"
                                             >
                                                 {isRefreshing ? (
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#a1a1aa]"></div>
                                                 ) : (
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw">
                                                         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
@@ -530,12 +530,12 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
                                     <div className="mt-4">
                                         <div className="w-full">
-                                            <div className="flex items-center justify-center rounded-md bg-gray-100 p-1 text-muted-foreground w-full">
+                                            <div className="flex items-center justify-center rounded-md bg-[#3f3f46] p-1 text-muted-foreground w-full">
                                                 <button
                                                     onClick={() => { setActiveTab('tokens'); console.log('[WalletPanel] setActiveTab: tokens'); }}
                                                     className={`flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all duration-200 ${activeTab === 'tokens'
-                                                        ? 'bg-white text-primary shadow-sm'
-                                                        : 'text-gray-600 hover:text-gray-900'
+                                                        ? 'bg-[#52525b] text-primary shadow-sm'
+                                                        : 'text-[#a1a1aa] hover:text-[#e0e0e6]'
                                                         } cursor-pointer`}
                                                 >
                                                     Tokens
@@ -543,8 +543,8 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                 <button
                                                     onClick={() => { setActiveTab('transactions'); console.log('[WalletPanel] setActiveTab: transactions'); }}
                                                     className={`flex-1 inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all duration-200 ${activeTab === 'transactions'
-                                                        ? 'bg-white text-primary shadow-sm'
-                                                        : 'text-gray-600 hover:text-gray-900'
+                                                        ? 'bg-[#52525b] text-primary shadow-sm'
+                                                        : 'text-[#a1a1aa] hover:text-[#e0e0e6]'
                                                         } cursor-pointer`}
                                                 >
                                                     Transactions
@@ -561,22 +561,22 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     .filter(token => token.balance > 0) // 只显示有余额的 token
                                                     .sort((a, b) => b.balance - a.balance) // 按余额降序排列
                                                     .map((token, index) => (
-                                                <div key={`evm-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                                                <div key={`evm-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-[#3f3f46] hover:bg-[#52525b] transition-colors cursor-pointer">
                                                     <div className="flex items-center gap-3">
                                                         <img
                                                             src={token.image || '/favicon.png'}
                                                             alt={token.symbol}
-                                                            className="w-8 h-8 rounded-full border border-gray-200 bg-white"
+                                                            className="w-8 h-8 rounded-full border border-[#52525b] bg-[#27272a]"
                                                             onError={(e) => {
                                                                 e.currentTarget.src = '/favicon.png';
                                                             }}
                                                         />
                                                         <div>
-                                                            <div className="font-medium">{token.balance.toFixed(6)}</div>
-                                                            <div className="text-sm text-gray-500">{token.name}</div>
+                                                            <div className="font-medium text-[#e0e0e6]">{token.balance.toFixed(6)}</div>
+                                                            <div className="text-sm text-[#a1a1aa]">{token.name}</div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-sm text-green-500 font-medium">
+                                                    <div className="text-sm text-green-400 font-medium">
                                                         {formatValue(calculateTokenValue(token))}
                                                     </div>
                                                 </div>
@@ -587,22 +587,22 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     .filter(token => token.balance > 0) // 只显示有余额的 token
                                                     .sort((a, b) => b.balance - a.balance) // 按余额降序排列
                                                     .map((token, index) => (
-                                                <div key={`sol-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                                                <div key={`sol-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-[#3f3f46] hover:bg-[#52525b] transition-colors cursor-pointer">
                                                     <div className="flex items-center gap-3">
                                                         <img
                                                             src={token.image || '/favicon.png'}
                                                             alt={token.symbol}
-                                                            className="w-8 h-8 rounded-full border border-gray-200 bg-white"
+                                                            className="w-8 h-8 rounded-full border border-[#52525b] bg-[#27272a]"
                                                             onError={(e) => {
                                                                 e.currentTarget.src = '/favicon.png';
                                                             }}
                                                         />
                                                         <div>
-                                                            <div className="font-medium">{token.balance.toFixed(6)}</div>
-                                                            <div className="text-sm text-gray-500">{token.name}</div>
+                                                            <div className="font-medium text-[#e0e0e6]">{token.balance.toFixed(6)}</div>
+                                                            <div className="text-sm text-[#a1a1aa]">{token.name}</div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-sm text-green-500 font-medium">
+                                                    <div className="text-sm text-green-400 font-medium">
                                                         {formatValue(calculateTokenValue(token))}
                                                     </div>
                                                 </div>
@@ -611,7 +611,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                             {/* 如果没有有余额的 token，显示提示信息 */}
                                             {((selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && evmTokens.filter(token => token.balance > 0).length === 0) &&
                                              ((selectedWallet === 'all' || selectedWallet.startsWith('solana-')) && solanaTokens.filter(token => token.balance > 0).length === 0) && (
-                                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                     <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
                                                     </svg>
@@ -625,23 +625,23 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                             {/* Solana Wallet Recent Transactions */}
                                             {selectedWallet.startsWith('solana-') ? (
                                                 loadingTx ? (
-                                                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                    <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                         <svg className="animate-spin h-6 w-6 mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
                                                         Loading recent transactions...
                                                     </div>
                                                 ) : recentTransactions.length === 0 ? (
-                                                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                    <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                         <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" /></svg>
                                                         No recent transactions
                                                     </div>
                                                 ) : (
-                                                    <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white shadow-sm">
+                                                    <div className="overflow-x-auto rounded-lg border border-[#52525b] bg-[#3f3f46] shadow-sm">
                                                         <table className="min-w-full text-xs text-left">
-                                                            <thead className="bg-gray-50">
+                                                            <thead className="bg-[#52525b]">
                                                                 <tr>
-                                                                    <th className="px-4 py-2 font-semibold text-gray-700">Txn Hash</th>
-                                                                    <th className="px-4 py-2 font-semibold text-gray-700">Time</th>
-                                                                    <th className="px-4 py-2 font-semibold text-gray-700">Amount (SOL)</th>
+                                                                    <th className="px-4 py-2 font-semibold text-[#e0e0e6]">Txn Hash</th>
+                                                                    <th className="px-4 py-2 font-semibold text-[#e0e0e6]">Time</th>
+                                                                    <th className="px-4 py-2 font-semibold text-[#e0e0e6]">Amount (SOL)</th>
                                                                     <th className="px-4 py-2"></th>
                                                                 </tr>
                                                             </thead>
@@ -651,15 +651,15 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                                     const time = tx.blockTime ? new Date(tx.blockTime * 1000).toLocaleString() : '';
                                                                     const amount = tx.meta?.postBalances && tx.meta?.preBalances ? ((tx.meta.postBalances[0] - tx.meta.preBalances[0]) / 1e9) : null;
                                                                     return (
-                                                                        <tr key={hash || idx} className="hover:bg-gray-50 transition-colors">
+                                                                        <tr key={hash || idx} className="hover:bg-[#52525b] transition-colors">
                                                                             <td className="px-4 py-2 max-w-[140px] truncate flex items-center gap-2 group">
-                                                                                <span className="truncate">{hash.slice(0, 8)}...{hash.slice(-6)}</span>
+                                                                                <span className="truncate text-[#e0e0e6]">{hash.slice(0, 8)}...{hash.slice(-6)}</span>
                                                                                 <button title="Copy" onClick={() => navigator.clipboard.writeText(hash)} className="opacity-60 group-hover:opacity-100 transition"><FaRegCopy size={14} /></button>
                                                                                 <a href={`https://solscan.io/tx/${hash}`} target="_blank" rel="noopener noreferrer" title="View on Solscan" className="opacity-60 group-hover:opacity-100 transition"><FaExternalLinkAlt size={14} /></a>
                                                                             </td>
-                                                                            <td className="px-4 py-2 whitespace-nowrap text-gray-500">{time}</td>
-                                                                            <td className={`px-4 py-2 font-mono ${(amount ?? 0) > 0 ? 'text-green-600' : (amount ?? 0) < 0 ? 'text-red-500' : 'text-gray-500'}`}>{amount !== null && amount !== undefined ? amount.toFixed(6) : '-'}</td>
-                                                                            <td className="px-4 py-2 text-gray-400"><FaArrowRight /></td>
+                                                                            <td className="px-4 py-2 whitespace-nowrap text-[#a1a1aa]">{time}</td>
+                                                                            <td className={`px-4 py-2 font-mono ${(amount ?? 0) > 0 ? 'text-green-400' : (amount ?? 0) < 0 ? 'text-red-400' : 'text-[#a1a1aa]'}`}>{amount !== null && amount !== undefined ? amount.toFixed(6) : '-'}</td>
+                                                                            <td className="px-4 py-2 text-[#a1a1aa]"><FaArrowRight /></td>
                                                                         </tr>
                                                                     );
                                                                 })}
@@ -668,7 +668,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     </div>
                                                 )
                                             ) : (
-                                                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                                                <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                     <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" /></svg>
                                                     EVM transaction history is not supported yet
                                                 </div>
@@ -678,21 +678,21 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                 </div>
 
                                 {isSettingsOpen && (
-                                    <div className="absolute top-20 right-4 z-50 rounded-md border bg-white p-4 text-popover-foreground shadow-md outline-none w-80 transform transition-all duration-300">
+                                    <div className="absolute top-20 right-4 z-50 rounded-md border bg-[#3f3f46] p-4 text-popover-foreground shadow-md outline-none w-80 transform transition-all duration-300 border-[#52525b]">
                                         <div className="space-y-4">
-                                            <h4 className="font-medium text-sm">AI Wallet Settings</h4>
+                                            <h4 className="font-medium text-sm text-[#e0e0e6]">AI Wallet Settings</h4>
 
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm">EVM Wallet</span>
-                                                    <span className="text-xs text-muted-foreground">
+                                                    <span className="text-sm text-[#e0e0e6]">EVM Wallet</span>
+                                                    <span className="text-xs text-[#a1a1aa]">
                                                         {`${evmWallet.address.slice(0, 6)}...${evmWallet.address.slice(-4)}`}
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
                                                     <button 
                                                         onClick={() => handleCopy(evmWallet.address, 'EVM')} 
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy h-3 w-3 mr-1">
                                                             <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
@@ -702,7 +702,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     </button>
                                                     <button 
                                                         onClick={() => window.open(`https://etherscan.io/address/${evmWallet.address}`, '_blank')}
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square-arrow-out-up-right h-3 w-3 mr-1">
                                                             <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
@@ -713,13 +713,13 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     </button>
                                                     <button 
                                                         onClick={() => handleExportWallet('evm')} 
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         Export
                                                     </button>
                                                     <button 
                                                         onClick={() => handleFundWallet('evm')} 
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         Fund
                                                     </button>
@@ -728,15 +728,15 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
                                             <div className="space-y-2 mt-3">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm">Solana Wallet</span>
-                                                    <span className="text-xs text-muted-foreground">
+                                                    <span className="text-sm text-[#e0e0e6]">Solana Wallet</span>
+                                                    <span className="text-xs text-[#a1a1aa]">
                                                         {`${solanaWallet.address.slice(0, 6)}...${solanaWallet.address.slice(-6)}`}
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
                                                     <button 
                                                         onClick={() => handleCopy(solanaWallet.address, 'Solana')}
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy h-3 w-3 mr-1">
                                                             <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
@@ -746,7 +746,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     </button>
                                                     <button 
                                                         onClick={() => window.open(`https://solscan.io/account/${solanaWallet.address}`, '_blank')}
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-square-arrow-out-up-right h-3 w-3 mr-1">
                                                             <path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
@@ -757,20 +757,20 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                     </button>
                                                     <button 
                                                         onClick={() => handleExportWallet('solana')} 
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         Export
                                                     </button>
                                                     <button 
                                                         onClick={() => handleFundWallet('solana')} 
-                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-gray-100 active:bg-gray-200 h-9 rounded-md px-3 transform hover:scale-105 active:scale-95"
+                                                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#52525b] bg-[#27272a] hover:bg-[#3f3f46] active:bg-[#52525b] h-9 rounded-md px-3 transform hover:scale-105 active:scale-95 text-[#e0e0e6]"
                                                     >
                                                         Fund
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            <div className="mt-4 border-t pt-4">
+                                            <div className="mt-4 border-t border-[#52525b] pt-4">
                                                 <button 
                                                     onClick={handleLogout} 
                                                     className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 h-9 rounded-md px-3 w-full transform hover:scale-105 active:scale-95"

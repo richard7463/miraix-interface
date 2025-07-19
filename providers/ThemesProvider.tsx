@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/Themes'
 
 export const ThemesProvider = ({ children }: PropsWithChildren) => {
   return (
-    <ThemeProvider defaultTheme="light" enableSystem={false}>
+    <ThemeProvider defaultTheme="dark" enableSystem={false}>
       <Theme accentColor="violet" style={{ height: '100%' }} className="h-full">
         {children}
         {/* <ThemePanel /> */}

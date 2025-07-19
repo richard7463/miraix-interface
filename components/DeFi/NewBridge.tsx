@@ -26,6 +26,7 @@ interface BridgeQuote {
   fromUsdValue?: string;
   toUsdValue?: string;
   swapUsdValue?: string; // 添加和NewSwap一致的字段
+  priceImpactPct?: string; // 新增价格影响百分比
 }
 
 interface BridgeResponseData {
@@ -522,169 +523,178 @@ export default function NewBridge({
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className={`border border-gray-200 shadow-xl rounded-2xl mt-2 flex flex-col items-center gap-4 max-w-[480px] mb-3 p-0 w-full text-gray-900 bg-white/95 backdrop-blur-md hover:shadow-2xl transition-all duration-300 ${className}`}
+        className={`overflow-hidden shadow-xl rounded-2xl mt-2 flex flex-col max-w-[480px] mb-3 w-full text-[#e0e0e6] bg-[#3f3f46] border border-[#52525b] hover:shadow-2xl transition-all duration-300 ${className}`}
         style={{ minWidth: 0 }}
       >
         {/* Header with Icon */}
-        <div className="flex flex-row items-center gap-1.5 w-full px-4 py-2 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50 rounded-t-2xl">
-          <div className="bg-gradient-to-tr from-purple-500 to-pink-500 rounded-full p-2 shadow-lg flex items-center justify-center">
-            <RiExchangeDollarLine className="text-white w-4 h-4" />
-          </div>
-          <span className="font-bold text-purple-600 text-sm tracking-wide">Bridge</span>
-        </div>
-
-        {/* Bridge Main Block */}
-        <div className="flex flex-col w-full gap-3 p-4 bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 rounded-xl mx-4 mt-2 shadow-sm border border-gray-100">
-          <p className="text-sm text-left font-semibold text-gray-700">From</p>
-          <div className="flex w-full justify-between relative mb-2">
-            <div className="flex w-1/2 items-center gap-3 relative">
-              <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm">
-                <img 
-                  src={fromLogoUrl} 
-                  alt={actualQuote?.fromToken || 'SOL'} 
-                  className="w-6 h-6" 
-                  onError={(e) => {
-                    console.log('Failed to load from token logo:', fromLogoUrl);
-                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
-                  }}
-                />
-              </div>
-              <span className="font-bold text-sm text-gray-800">{actualQuote?.fromToken || 'SOL'}</span>
+        <div className="flex items-center justify-between px-4 py-3 bg-[#27272a] border-b border-[#52525b]">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500/20">
+              <RiExchangeDollarLine className="w-3.5 h-3.5 text-purple-400" />
             </div>
-            <div className="flex flex-col items-end text-right">
-              <span className="text-xs text-right font-normal text-gray-500">Solana</span>
-              <span className="font-semibold text-sm tracking-tight text-gray-800">
-                {actualQuote?.fromToken || 'SOL'}
-              </span>
-            </div>
-          </div>
-          <div className="flex w-full flex-row items-center justify-between flex-nowrap">
-            <div className="relative group w-40 h-12 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 shadow-sm hover:shadow-md transition-shadow">
-              <span className="font-semibold text-sm w-full h-8 flex items-center">
-                {fromAmount}
-              </span>
-            </div>
-            <span className="text-sm text-right min-w-24 font-semibold text-gray-700 flex items-center gap-1">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
-              {actualQuote?.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * solPrice).toFixed(2)} USD`}
-            </span>
-          </div>
-        </div>
-
-        {/* Arrow */}
-        <div className="flex items-center justify-center cursor-pointer hover:opacity-80 rotate-90 transition-opacity">
-          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full p-2 shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="m21 16-4 4-4-4"></path>
-              <path d="M17 20V4"></path>
-              <path d="m3 8 4-4 4 4"></path>
-              <path d="M7 4v16"></path>
-            </svg>
-          </div>
-        </div>
-
-        {/* To Block */}
-        <div className="flex flex-col w-full gap-3 p-4 bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30 rounded-xl mx-4 mb-2 shadow-sm border border-gray-100">
-          <p className="text-sm text-left font-semibold text-gray-700">To</p>
-          <div className="flex w-full justify-between relative mb-2">
-            <div className="flex w-1/2 items-center gap-3 relative">
-              <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm">
-                <img 
-                  src={toLogoUrl} 
-                  alt={actualQuote?.toToken || 'ETH'} 
-                  className="w-6 h-6" 
-                  onError={(e) => {
-                    console.log('Failed to load to token logo:', toLogoUrl);
-                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
-                  }}
-                />
-              </div>
-              <span className="font-bold text-sm text-gray-800">{actualQuote?.toToken || 'ETH'}</span>
-            </div>
-            <div className="flex flex-col items-end text-right">
-              <span className="text-xs text-right font-normal text-gray-500">
-                {actualQuote?.toToken === 'USDC' ? 'Arbitrum' : 'Ethereum'}
-              </span>
-              <span className="font-semibold text-sm tracking-tight text-gray-800">
-                {actualQuote?.toToken || 'ETH'}
-              </span>
-            </div>
-          </div>
-          <div className="flex w-full flex-row items-center justify-between flex-nowrap">
-            <div className="relative group w-40 h-12 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 shadow-sm hover:shadow-md transition-shadow">
-              <span className="font-semibold text-sm w-full h-8 flex items-center">
-                {toAmount}
-              </span>
-            </div>
-            <span className="text-sm text-right min-w-24 font-semibold text-gray-700 flex items-center gap-1">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
-              {actualQuote?.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * solPrice).toFixed(2)} USD`}
-            </span>
+            <h3 className="text-sm font-medium text-[#e0e0e6]">Bridge Tokens</h3>
           </div>
         </div>
         
-        {/* Divider */}
-        <div className="w-full h-[1px] bg-gradient-to-r from-purple-200 via-pink-200 to-transparent my-1 rounded-full" />
-        
-        {/* Bridge Details Section */}
-        <div className="flex w-full p-4 pt-0 flex-col gap-3">
-          <div className="flex flex-col items-center w-full">
+        <div className="p-0">
+          {/* From Token Section */}
+          <div className="p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-[#a1a1aa]">From</span>
+            </div>
+            
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-[#3f3f46] flex items-center justify-center">
+                  <img 
+                    src={fromLogoUrl} 
+                    alt={actualQuote?.fromToken || 'SOL'} 
+                    className="w-5 h-5 object-contain" 
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+                    }}
+                  />
+                </div>
+                <span className="font-medium text-sm text-[#e0e0e6]">{actualQuote?.fromToken || 'SOL'}</span>
+                <span className="text-xs text-[#a1a1aa]">Solana</span>
+              </div>
+              
+              <div className="flex-1 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
+                <input
+                  type="text"
+                  value={fromAmount}
+                  readOnly
+                  className="w-full bg-transparent border-none outline-none text-right font-medium text-[#e0e0e6]"
+                  placeholder="0.0"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end">
+              <span className="text-xs text-[#a1a1aa]">
+                {actualQuote?.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)}` : `$${(parseFloat(fromAmount) * solPrice).toFixed(2)}`}
+              </span>
+            </div>
+          </div>
+          
+          {/* Bridge Direction Indicator */}
+          <div className="flex justify-center -my-2 relative z-10">
+            <div className="w-8 h-8 rounded-full bg-[#27272a] flex items-center justify-center border border-[#52525b] shadow-sm">
+              <RiExchangeDollarLine className="w-4 h-4 text-purple-400" />
+            </div>
+          </div>
+          
+          {/* To Token Section */}
+          <div className="p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-[#a1a1aa]">To</span>
+            </div>
+            
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-[#3f3f46] flex items-center justify-center">
+                  <img 
+                    src={toLogoUrl} 
+                    alt={actualQuote?.toToken || 'ETH'} 
+                    className="w-5 h-5 object-contain" 
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+                    }}
+                  />
+                </div>
+                <span className="font-medium text-sm text-[#e0e0e6]">{actualQuote?.toToken || 'ETH'}</span>
+                <span className="text-xs text-[#a1a1aa]">
+                  {actualQuote?.toToken === 'USDC' ? 'Arbitrum' : 'Ethereum'}
+                </span>
+              </div>
+              
+              <div className="flex-1 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
+                <div className="w-full text-right font-medium text-[#e0e0e6]">
+                  {toAmount}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end">
+              <span className="text-xs text-[#a1a1aa]">
+                {actualQuote?.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)}` : `$${(parseFloat(fromAmount) * solPrice).toFixed(2)}`}
+              </span>
+            </div>
+          </div>
+          
+          {/* Divider */}
+          <div className="w-full h-[1px] bg-[#52525b] mx-4" />
+          
+          {/* Bridge Details */}
+          <div className="p-4 space-y-2">
             {actualQuote && (
               <>
-                <div className="flex flex-row items-center w-full">
-                  <label className="text-xs text-gray-500 min-w-[80px]">Provider:</label>
-                  <span className="text-xs text-gray-600 leading-6 ml-auto font-medium capitalize">{actualQuote.provider}</span>
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#a1a1aa]">Provider</span>
+                  <span className="font-medium text-[#e0e0e6] capitalize">{actualQuote.provider}</span>
                 </div>
-                <div className="flex flex-row items-center w-full">
-                  <label className="text-xs text-gray-500 min-w-[80px]">Provider Fee:</label>
-                  <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">{actualQuote.providerFee} SOL</span>
+                
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#a1a1aa]">Provider Fee</span>
+                  <span className="font-medium text-[#e0e0e6]">{actualQuote.providerFee} SOL</span>
                 </div>
-                <div className="flex flex-row items-center w-full">
-                  <label className="text-xs text-gray-500 min-w-[80px]">Gas Estimate:</label>
-                  <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">{actualQuote.gasEstimate} ETH</span>
+                
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#a1a1aa]">Gas Estimate</span>
+                  <span className="font-medium text-[#e0e0e6]">{actualQuote.gasEstimate} ETH</span>
                 </div>
-                <div className="flex flex-row items-center w-full">
-                  <label className="text-xs text-gray-500 min-w-[80px]">Est. Time:</label>
-                  <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">{actualQuote.estimatedTime} minutes</span>
+                
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#a1a1aa]">Est. Time</span>
+                  <span className="font-medium text-[#e0e0e6]">{actualQuote.estimatedTime} minutes</span>
                 </div>
-                <div className="flex flex-row items-center w-full">
-                  <label className="text-xs text-gray-500 min-w-[80px]">Slippage:</label>
-                  <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">{(actualQuote.slippage * 100).toFixed(2)}%</span>
+                
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#a1a1aa]">Slippage</span>
+                  <span className="font-medium text-[#e0e0e6]">{(actualQuote.slippage * 100).toFixed(2)}%</span>
                 </div>
               </>
             )}
           </div>
-        </div>
-
-        {/* Action Button and Error */}
-        <div className="items-center flex w-full p-4 pt-0 flex-col">
-          <button
-            className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 h-10 px-4 py-1.5 w-full shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 ${
-              isConfirming || !!error 
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50' 
-                : 'bg-gradient-to-r from-purple-500 to-pink-400 text-white hover:from-purple-600 hover:to-pink-500 cursor-pointer'
-            }`}
-            disabled={isConfirming || !!error}
-            onClick={() => {
-              console.log('🎯 Bridge Confirm button clicked!');
-              console.log('Button state:', {
-                disabled: isConfirming || !!error,
-                isConfirming,
-                hasError: !!error,
-                errorMessage: error
-              });
-              handleConfirm();
-            }}
-            style={{ cursor: isConfirming || !!error ? 'not-allowed' : 'pointer' }}
-          >
-            {isConfirming ? 'Confirming Bridge...' : error ? 'Cannot Confirm' : 'Confirm Bridge'}
-          </button>
+          
+          {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 text-red-500 text-xs mt-2 p-2 bg-red-50 rounded-lg border border-red-200">
-              <span className="inline-block w-2 h-2 rounded-full bg-red-500"></span>
-              <span className="flex-1">{error}</span>
+            <div className="mx-4 mb-3 p-2 rounded-lg bg-red-900/20 border border-red-800 flex items-start gap-2">
+              <div className="w-4 h-4 text-red-400 shrink-0 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="15" y1="9" x2="9" y2="15"></line>
+                  <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+              </div>
+              <p className="text-xs text-red-400">{error}</p>
             </div>
           )}
+          
+          {/* Action Button */}
+          <div className="p-4 pt-0">
+            <button
+              className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 h-10 px-4 py-1.5 w-full shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 ${
+                isConfirming || !!error 
+                  ? 'bg-[#52525b] text-[#a1a1aa] cursor-not-allowed opacity-50' 
+                  : 'bg-gradient-to-r from-purple-500 to-pink-400 text-white hover:from-purple-600 hover:to-pink-500 cursor-pointer'
+              }`}
+              disabled={isConfirming || !!error}
+              onClick={() => {
+                console.log('🎯 Bridge Confirm button clicked!');
+                console.log('Button state:', {
+                  disabled: isConfirming || !!error,
+                  isConfirming,
+                  hasError: !!error,
+                  errorMessage: error
+                });
+                handleConfirm();
+              }}
+              style={{ cursor: isConfirming || !!error ? 'not-allowed' : 'pointer' }}
+            >
+              {isConfirming ? 'Confirming Bridge...' : error ? 'Cannot Confirm' : 'Confirm Bridge'}
+            </button>
+          </div>
         </div>
       </motion.div>
     </>

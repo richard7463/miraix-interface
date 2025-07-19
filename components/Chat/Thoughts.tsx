@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -14,7 +15,7 @@ export default function Thoughts({ thoughts, status = 'Processing your request' 
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="rounded-lg text-card-foreground max-w-[480px] w-full my-3 bg-gray-50 dark:bg-gray-900 border shadow-lg cursor-default select-none transform transition-all duration-300 ease-in-out"
+      className="rounded-lg text-card-foreground max-w-[480px] w-full my-3 bg-[#3f3f46] border border-[#52525b] shadow-lg cursor-default select-none transform transition-all duration-300 ease-in-out"
       style={{ minWidth: 0 }}
     >
       <div className="p-4 pb-2">
@@ -22,7 +23,7 @@ export default function Thoughts({ thoughts, status = 'Processing your request' 
           <div className="flex items-start space-x-2">
             <div className="min-w-2 min-h-2 bg-primary rounded-full self-start mt-1"></div>
             <span 
-              className="text-sm font-medium cursor-pointer hover:text-primary transition-colors" 
+              className="text-sm font-medium cursor-pointer hover:text-primary transition-colors text-[#e0e0e6]" 
               onClick={() => setIsExpanded((v) => !v)}
               style={{ cursor: 'pointer' }}
             >
@@ -46,20 +47,24 @@ export default function Thoughts({ thoughts, status = 'Processing your request' 
             <path d={isExpanded ? "m18 15-6-6-6 6" : "m6 9 6 6 6-6"}></path>
           </svg>
         </div>
-        <div 
-          className={`transition-all duration-300 ease-in-out overflow-hidden ${
-            isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <div className="mt-4 p-0 sm:p-2 space-y-2 border-t border-primary select-none">
+        
+        {isExpanded && thoughts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="mt-3 pt-3 border-t border-[#52525b]"
+          >
+            <div className="space-y-2">
             {thoughts.map((thought, index) => (
-              <div key={index} className="flex items-start space-x-2 mt-2">
-                <div className="min-w-2 min-h-2 bg-primary/50 rounded-full self-start mt-1"></div>
-                <span className="text-sm text-gray-400">{thought}</span>
+                <div key={index} className="text-sm text-[#a1a1aa] leading-relaxed">
+                  {thought}
               </div>
             ))}
           </div>
-        </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

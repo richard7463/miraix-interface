@@ -7,6 +7,7 @@ import { GiBridge } from 'react-icons/gi';
 import { PiBookOpenTextBold } from 'react-icons/pi';
 import GradientHero from './GradientHero';
 import IconWithLabel from './IconWithLabel';
+import InfiniteScrollText from './InfiniteScrollText';
 import { motion } from 'framer-motion';
 
 interface WelcomeSectionProps {
@@ -41,7 +42,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
   };
 
   return (
-    <div className="flex flex-col items-center px-4 py-6 sm:py-8 pb-0 w-full">
+    <div className="flex flex-col items-center px-4 py-6 sm:py-8 pb-0 w-full bg-zinc-800">
       <div className="flex flex-col items-center w-full max-w-4xl">
         {/* Top: Emoji + Title */}
         <motion.div 
@@ -83,87 +84,116 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           {/* Swap Card */}
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
-            className="welcome-card p-3 sm:p-4 rounded-xl flex flex-col justify-between items-stretch gap-2"
+            onClick={() => handleAskThis('swap')}
+            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
-            <div className="p-1.5 rounded-lg bg-primary/5 flex flex-col justify-center items-center">
-              <IconWithLabel icon={<FaExchangeAlt />} label="Swap" color="#3B82F6" />
+            <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
+              <FaExchangeAlt className="w-5 h-5 text-blue-400" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-semibold text-foreground">Swap With the Best Route</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">Get the best price for your swap with optimized routing.</p>
+            <div className="pt-12 pb-2">
+              <div className="self-stretch justify-start">
+                <span className="text-white/90 text-base font-normal font-['Anonymous_Pro']">Swap with the best route</span>
+                <span className="text-white text-base font-normal font-['Anonymous_Pro']"> </span>
+                <span className="text-white/30 text-base font-normal font-['Anonymous_Pro']">and get optimized pricing for your trades</span>
+              </div>
+              <div className="inline-flex justify-start items-center gap-1 mt-2">
+                <div 
+                  className="justify-start text-white/60 text-sm font-normal font-['Anonymous_Pro'] underline hover:text-white/80 transition-colors"
+                >
+                  Ask this
+                </div>
+                <div className="w-3.5 h-3.5 relative">
+                  <FiZap className="w-3.5 h-3.5 text-white/60" />
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={() => handleAskThis('swap')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
-            >
-              <span>Ask this</span>
-              <FiZap className="w-3.5 h-3.5" />
-            </button>
           </motion.div>
 
           {/* Bridge Card */}
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
-            className="welcome-card p-3 sm:p-4 rounded-xl flex flex-col justify-between items-stretch gap-2"
+            onClick={() => handleAskThis('bridge')}
+            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
-            <div className="p-1.5 rounded-lg bg-primary/5 flex flex-col justify-center items-center">
-              <IconWithLabel icon={<GiBridge />} label="Bridge" color="#8B5CF6" />
+            <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
+              <GiBridge className="w-5 h-5 text-purple-400" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-semibold text-foreground">Bridge Assets Across Chains</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">Move tokens across blockchains with ease and security.</p>
+            <div className="pt-12 pb-2">
+              <div className="self-stretch justify-start">
+                <span className="text-white/90 text-base font-normal font-['Anonymous_Pro']">Bridge assets across chains</span>
+                <span className="text-white text-base font-normal font-['Anonymous_Pro']"> </span>
+                <span className="text-white/30 text-base font-normal font-['Anonymous_Pro']">with ease and security</span>
+              </div>
+              <div className="inline-flex justify-start items-center gap-1 mt-2">
+                <div 
+                  className="justify-start text-white/60 text-sm font-normal font-['Anonymous_Pro'] underline hover:text-white/80 transition-colors"
+                >
+                  Ask this
+                </div>
+                <div className="w-3.5 h-3.5 relative">
+                  <FiZap className="w-3.5 h-3.5 text-white/60" />
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={() => handleAskThis('bridge')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
-            >
-              <span>Ask this</span>
-              <FiZap className="w-3.5 h-3.5" />
-            </button>
           </motion.div>
 
           {/* Stake Card */}
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
-            className="welcome-card p-3 sm:p-4 rounded-xl flex flex-col justify-between items-stretch gap-2"
+            onClick={() => handleAskThis('stake')}
+            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
-            <div className="p-1.5 rounded-lg bg-primary/5 flex flex-col justify-center items-center">
-              <IconWithLabel icon={<FaCoins />} label="Stake" color="#22C55E" />
+            <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
+              <FaCoins className="w-5 h-5 text-green-400" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-semibold text-foreground">Stake SOL for Rewards</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">Earn passive income with competitive APY rates.</p>
+            <div className="pt-12 pb-2">
+              <div className="self-stretch justify-start">
+                <span className="text-white/90 text-base font-normal font-['Anonymous_Pro']">Stake SOL for rewards</span>
+                <span className="text-white text-base font-normal font-['Anonymous_Pro']"> </span>
+                <span className="text-white/30 text-base font-normal font-['Anonymous_Pro']">and earn competitive APY rates</span>
+              </div>
+              <div className="inline-flex justify-start items-center gap-1 mt-2">
+                <div 
+                  className="justify-start text-white/60 text-sm font-normal font-['Anonymous_Pro'] underline hover:text-white/80 transition-colors"
+                >
+                  Ask this
+                </div>
+                <div className="w-3.5 h-3.5 relative">
+                  <FiZap className="w-3.5 h-3.5 text-white/60" />
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={() => handleAskThis('stake')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
-            >
-              <span>Ask this</span>
-              <FiZap className="w-3.5 h-3.5" />
-            </button>
           </motion.div>
 
-          {/* Create Token Card (English only) */}
+          {/* Create Token Card */}
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
-            className="welcome-card p-3 sm:p-4 rounded-xl flex flex-col justify-between items-stretch gap-2"
+            onClick={() => handleAskThis('createToken')}
+            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
-            <div className="p-1.5 rounded-lg bg-primary/5 flex flex-col justify-center items-center">
-              <IconWithLabel icon={<FaCoins />} label="Create Token" color="#F59E42" />
+            <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
+              <FaCoins className="w-5 h-5 text-orange-400" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-semibold text-foreground">Create Token</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">Experience Solana on-chain token creation in one click.</p>
+            <div className="pt-12 pb-2">
+              <div className="self-stretch justify-start">
+                <span className="text-white/90 text-base font-normal font-['Anonymous_Pro']">Create token on Solana</span>
+                <span className="text-white text-base font-normal font-['Anonymous_Pro']"> </span>
+                <span className="text-white/30 text-base font-normal font-['Anonymous_Pro']">in one click with on-chain creation</span>
+              </div>
+              <div className="inline-flex justify-start items-center gap-1 mt-2">
+                <div 
+                  className="justify-start text-white/60 text-sm font-normal font-['Anonymous_Pro'] underline hover:text-white/80 transition-colors"
+                >
+                  Ask this
+                </div>
+                <div className="w-3.5 h-3.5 relative">
+                  <FiZap className="w-3.5 h-3.5 text-white/60" />
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={() => handleAskThis('createToken')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
-            >
-              <span>Create a token named abcpump ...</span>
-              <FiZap className="w-3.5 h-3.5" />
-            </button>
           </motion.div>
         </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }} className="w-full mt-4 sm:mt-6"><InfiniteScrollText setMessage={setMessage} /></motion.div>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ export default function ChatPage({ chatId }: { chatId?: string }) {
     const originalOverflow = document.body.style.overflow;
     const originalBg = document.body.style.backgroundColor;
     document.body.style.overflow = 'hidden';
-    document.body.style.backgroundColor = '#0E0F12';
+    document.body.style.backgroundColor = '#27272a';
     return () => {
       document.body.style.overflow = originalOverflow;
       document.body.style.backgroundColor = originalBg;

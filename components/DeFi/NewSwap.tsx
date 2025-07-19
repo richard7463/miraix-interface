@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaExchangeAlt } from 'react-icons/fa';
+import { ArrowDownUp, AlertCircle } from 'lucide-react';
 import { SelectTokenModal, TokenInfo } from './SelectTokenModal';
 import { usePrivy } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
-import { Connection, Transaction, PublicKey, VersionedTransaction, VersionedMessage } from '@solana/web3.js';
+import { Connection, Transaction, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import toast from 'react-hot-toast';
+import { FaExchangeAlt } from 'react-icons/fa';
 
 interface Token {
   symbol: string;
@@ -1018,169 +1019,175 @@ export default function NewSwap({
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className={`border border-gray-200 shadow-xl rounded-2xl mt-2 flex flex-col items-center gap-4 max-w-[480px] mb-3 p-0 w-full text-gray-900 bg-white/95 backdrop-blur-md hover:shadow-2xl transition-all duration-300 ${className}`}
+        className={`overflow-hidden shadow-xl rounded-2xl mt-2 flex flex-col max-w-[480px] mb-3 w-full text-[#e0e0e6] bg-[#3f3f46] border border-[#52525b] hover:shadow-2xl transition-all duration-300 ${className}`}
         style={{ minWidth: 0 }}
       >
         {/* Header with Icon */}
-        <div className="flex flex-row items-center gap-1.5 w-full px-4 py-2 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-t-2xl">
-          <div className="bg-gradient-to-tr from-blue-500 to-cyan-500 rounded-full p-2 shadow-lg flex items-center justify-center">
-            <FaExchangeAlt className="text-white w-4 h-4" />
-          </div>
-          <span className="font-bold text-blue-600 text-sm tracking-wide">Swap</span>
-        </div>
-        {/* Swap Main Block */}
-        <div className="flex flex-col w-full gap-3 p-4 bg-gradient-to-br from-gray-50 via-blue-50/30 to-cyan-50/30 rounded-xl mx-4 mt-2 shadow-sm border border-gray-100">
-          <p className="text-sm text-left font-semibold text-gray-700">From</p>
-          <div className="flex w-full justify-between relative mb-2">
-            <div className="flex w-1/2 items-center gap-3 relative">
-              <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm">
-                <img 
-                  src={fromLogoUrl} 
-                  alt={fromToken.symbol} 
-                  className="w-6 h-6" 
-                  onError={(e) => {
-                    console.log('Failed to load from token logo:', fromLogoUrl);
-                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
-                  }}
-                />
-              </div>
-              <span className="font-bold text-sm text-gray-800">{fromToken.symbol}</span>
+        <div className="flex items-center justify-between px-4 py-3 bg-[#27272a] border-b border-[#52525b]">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/20">
+              <FaExchangeAlt className="w-3.5 h-3.5 text-blue-400" />
             </div>
-            <div className="flex flex-col items-end text-right">
-              <span className="text-xs text-right font-normal text-gray-500">{fromToken.chain}</span>
-              <button className="flex font-semibold text-sm tracking-tight hover:text-blue-600 transition-colors items-center gap-1 cursor-pointer" onClick={() => { setModalType('from'); setModalOpen(true); }}>
-                {fromToken.symbol}
-                <svg className="w-3 h-3 ml-1 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
-              </button>
-            </div>
-          </div>
-          <div className="flex w-full flex-row items-center justify-between flex-nowrap">
-            <div className="relative group w-40 h-12 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 shadow-sm hover:shadow-md transition-shadow">
-              <input
-                type="number"
-                value={fromAmount}
-                readOnly
-                className="flex w-full bg-transparent border-0 outline-none font-semibold text-sm placeholder:text-gray-400 focus:ring-0"
-                placeholder="Amount"
-              />
-            </div>
-            <span className="text-sm text-right min-w-24 font-semibold text-gray-700 flex items-center gap-1">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
-              {actualQuote && actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * 1).toFixed(2)} USD`}
-            </span>
-          </div>
-        </div>
-        {/* Arrow */}
-        <div className="flex items-center justify-center cursor-pointer hover:opacity-80 rotate-90 transition-opacity">
-          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full p-2 shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="m21 16-4 4-4-4"></path>
-              <path d="M17 20V4"></path>
-              <path d="m3 8 4-4 4 4"></path>
-              <path d="M7 4v16"></path>
-            </svg>
-          </div>
-        </div>
-        {/* To Block */}
-        <div className="flex flex-col w-full gap-3 p-4 bg-gradient-to-br from-gray-50 via-blue-50/30 to-cyan-50/30 rounded-xl mx-4 mb-2 shadow-sm border border-gray-100">
-          <p className="text-sm text-left font-semibold text-gray-700">To</p>
-          <div className="flex w-full justify-between relative mb-2">
-            <div className="flex w-1/2 items-center gap-3 relative">
-              <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm">
-                <img 
-                  src={toLogoUrl} 
-                  alt={toToken.symbol} 
-                  className="w-6 h-6" 
-                  onError={(e) => {
-                    console.log('Failed to load to token logo:', toLogoUrl);
-                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
-                  }}
-                />
-              </div>
-              <span className="font-bold text-sm text-gray-800">{toToken.symbol}</span>
-            </div>
-            <div className="flex flex-col items-end text-right">
-              <span className="text-xs text-right font-normal text-gray-500">{toToken.chain}</span>
-              <button className="flex font-semibold text-sm tracking-tight hover:text-blue-600 transition-colors items-center gap-1 cursor-pointer" onClick={() => { setModalType('to'); setModalOpen(true); }}>
-                {toToken.symbol}
-                <svg className="w-3 h-3 ml-1 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
-              </button>
-            </div>
-          </div>
-          <div className="flex w-full flex-row items-center justify-between flex-nowrap">
-            <div className="relative group w-40 h-12 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 shadow-sm hover:shadow-md transition-shadow">
-              <span className="font-semibold text-sm w-full h-8 flex items-center">
-                {toAmount}
-              </span>
-            </div>
-            <span className="text-sm text-right min-w-24 font-semibold text-gray-700 flex items-center gap-1">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M5 6h14M5 18h14" /></svg>
-              {actualQuote && actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * 1).toFixed(2)} USD`}
-            </span>
+            <h3 className="text-sm font-medium text-[#e0e0e6]">Swap Tokens</h3>
           </div>
         </div>
         
-        {/* Divider */}
-        <div className="w-full h-[1px] bg-gradient-to-r from-blue-200 via-cyan-200 to-transparent my-1 rounded-full" />
-        {/* Details Section */}
-        <div className="flex w-full p-4 pt-0 flex-col gap-3">
-          <div className="flex flex-col items-center w-full">
-            <div className="flex flex-row items-center w-full">
-              <label className="text-xs text-gray-500 min-w-[80px]">Slippage:</label>
-              <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">{(slippage / 100).toFixed(2)} %</span>
-            </div>
-            {actualQuote && (
-              <div className="flex flex-row items-center w-full">
-                <label className="text-xs text-gray-500 min-w-[80px]">Price Impact:</label>
-                <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">
-                  {actualQuote.priceImpactPct === "0" ? "< 0.01%" : `${parseFloat(actualQuote.priceImpactPct).toFixed(2)}%`}
+        <div className="p-0">
+          {/* From Token Section */}
+          <div className="p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-[#a1a1aa]">From</span>
+              {fromToken.balance !== undefined && (
+                <span className="text-xs text-[#a1a1aa]">
+                  Balance: {fromToken.balance.toFixed(4)} {fromToken.symbol}
                 </span>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-between gap-2">
+              <button 
+                onClick={() => { setModalType('from'); setModalOpen(true); }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#27272a] hover:bg-[#3f3f46] transition-colors border border-[#52525b]"
+              >
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-[#3f3f46] flex items-center justify-center">
+                  <img 
+                    src={fromLogoUrl} 
+                    alt={fromToken.symbol} 
+                    className="w-5 h-5 object-contain" 
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+                    }}
+                  />
+                </div>
+                <span className="font-medium text-sm text-[#e0e0e6]">{fromToken.symbol}</span>
+                <svg className="w-4 h-4 text-[#a1a1aa]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              <div className="flex-1 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
+                <input
+                  type="text"
+                  value={fromAmount}
+                  readOnly
+                  className="w-full bg-transparent border-none outline-none text-right font-medium text-[#e0e0e6]"
+                  placeholder="0.0"
+                />
               </div>
-            )}
+            </div>
+          </div>
+          
+          {/* Swap Direction Indicator */}
+          <div className="flex justify-center -my-2 relative z-10">
+            <div className="w-8 h-8 rounded-full bg-[#27272a] flex items-center justify-center border border-[#52525b] shadow-sm">
+              <ArrowDownUp className="w-4 h-4 text-[#a1a1aa]" />
+            </div>
+          </div>
+          
+          {/* To Token Section */}
+          <div className="p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-[#a1a1aa]">To</span>
+            </div>
+            
+            <div className="flex items-center justify-between gap-2">
+              <button 
+                onClick={() => { setModalType('to'); setModalOpen(true); }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#27272a] hover:bg-[#3f3f46] transition-colors border border-[#52525b]"
+              >
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-[#3f3f46] flex items-center justify-center">
+                  <img 
+                    src={toLogoUrl} 
+                    alt={toToken.symbol} 
+                    className="w-5 h-5 object-contain" 
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+                    }}
+                  />
+                </div>
+                <span className="font-medium text-sm text-[#e0e0e6]">{toToken.symbol}</span>
+                <svg className="w-4 h-4 text-[#a1a1aa]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              <div className="flex-1 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
+                <div className="w-full text-right font-medium text-[#e0e0e6]">
+                  {toAmount}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Divider */}
+          <div className="w-full h-[1px] bg-[#52525b] mx-4" />
+          
+          {/* Swap Details */}
+          <div className="p-4 space-y-2">
+            <div className="flex justify-between text-xs">
+              <span className="text-[#a1a1aa]">Slippage Tolerance</span>
+              <span className="font-medium text-[#e0e0e6]">{(slippage / 100).toFixed(2)}%</span>
+            </div>
+            
             {actualQuote && (
-              <div className="flex flex-row items-center w-full">
-                <label className="text-xs text-gray-500 min-w-[80px]">Swap Value:</label>
-                <span className="text-xs text-gray-600 leading-6 ml-auto font-medium">{actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)} USD` : `$${(parseFloat(fromAmount) * 1).toFixed(2)} USD`}</span>
-              </div>
+              <>
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#a1a1aa]">Price Impact</span>
+                  <span className="font-medium text-[#e0e0e6]">
+                    {actualQuote.priceImpactPct === "0" ? "< 0.01%" : `${parseFloat(actualQuote.priceImpactPct).toFixed(2)}%`}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between text-xs">
+                  <span className="text-[#a1a1aa]">Swap Value</span>
+                  <span className="font-medium text-[#e0e0e6]">
+                    {actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)}` : `$${(parseFloat(fromAmount) * 1).toFixed(2)}`}
+                  </span>
+                </div>
+              </>
             )}
           </div>
-        </div>
-        {/* Action Button and Error */}
-        <div className="items-center flex w-full p-4 pt-0 flex-col">
-          <button
-            className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 h-10 px-4 py-1.5 w-full shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 ${
-              isConfirming || !!error 
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50' 
-                : 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 cursor-pointer'
-            }`}
-            disabled={isConfirming || !!error}
-            onClick={() => {
-              console.log('🎯 Confirm button clicked!');
-              console.log('Button state:', {
-                disabled: isConfirming || !!error,
-                fromTokenBalance: fromToken.balance,
-                isConfirming,
-                hasError: !!error,
-                errorMessage: error,
-                // 详细分析每个禁用条件
-                noBalance: !fromToken.balance,
-                isConfirmingState: isConfirming,
-                hasErrorState: !!error
-              });
-              handleConfirm();
-            }}
-            style={{ cursor: isConfirming || !!error ? 'not-allowed' : 'pointer' }}
-          >
-            {isConfirming ? 'Confirming...' : error ? 'Cannot Confirm' : 'Confirm'}
-          </button>
+          
+          {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 text-red-500 text-xs mt-2 p-2 bg-red-50 rounded-lg border border-red-200">
-              <span className="inline-block w-2 h-2 rounded-full bg-red-500"></span>
-              <span className="flex-1">{error}</span>
+            <div className="mx-4 mb-3 p-2 rounded-lg bg-red-900/20 border border-red-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-red-400">{error}</p>
             </div>
           )}
+          
+          {/* Action Button */}
+          <div className="p-4 pt-0">
+            <button
+              className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 h-10 px-4 py-1.5 w-full shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 ${
+                isConfirming || !!error 
+                  ? 'bg-[#52525b] text-[#a1a1aa] cursor-not-allowed opacity-50' 
+                  : 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 cursor-pointer'
+              }`}
+              disabled={isConfirming || !!error}
+              onClick={() => {
+                console.log('🎯 Confirm button clicked!');
+                console.log('Button state:', {
+                  disabled: isConfirming || !!error,
+                  fromTokenBalance: fromToken.balance,
+                  isConfirming,
+                  hasError: !!error,
+                  errorMessage: error,
+                  // 详细分析每个禁用条件
+                  noBalance: !fromToken.balance,
+                  isConfirmingState: isConfirming,
+                  hasErrorState: !!error
+                });
+                handleConfirm();
+              }}
+              style={{ cursor: isConfirming || !!error ? 'not-allowed' : 'pointer' }}
+            >
+              {isConfirming ? 'Confirming...' : error ? 'Cannot Confirm' : 'Confirm Swap'}
+            </button>
+          </div>
         </div>
       </motion.div>
+      
       <SelectTokenModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

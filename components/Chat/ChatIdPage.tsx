@@ -10,7 +10,7 @@ export default function ChatIdPage({ chatId }: { chatId: string }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className="h-[calc(100vh-56px)] flex relative">
+    <div className="h-[calc(100vh-46px)] flex relative bg-zinc-800">
       {/* Mobile menu button */}
       <div className="lg:hidden absolute top-4 left-4 z-20">
         <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
@@ -29,7 +29,7 @@ export default function ChatIdPage({ chatId }: { chatId: string }) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col h-full w-full lg:w-auto" style={{ paddingTop: '76px', height: '90vh', overflow: 'auto' }}>
+      <div className="flex-1 flex flex-col h-full w-full lg:w-auto" style={{ overflow: 'auto' }}>
         <div className="absolute top-4 right-4">
           <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
             Beta

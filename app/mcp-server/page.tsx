@@ -245,7 +245,7 @@ export default function MCPServerPage() {
   const currentServers = filteredServers.slice(startIndex, endIndex)
 
   return (
-    <main className="min-h-screen pt-24 pb-16 overflow-y-auto relative" style={{ backgroundColor: theme === 'light' ? '#F8F9FB' : '#111217' }}>
+    <main className="min-h-screen pt-24 pb-16 overflow-y-auto relative" style={{ backgroundColor: theme === 'light' ? '#F8F9FB' : '#27272a' }}>
       {/* 背景装饰 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#4C94E5] rounded-full opacity-10 blur-3xl"></div>

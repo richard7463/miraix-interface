@@ -12,8 +12,9 @@
 
   .rt-TextAreaInput {
     border-radius: 40px;
-    background: #FFF;
-    border: 1px solid #e0e0e6;
+    background: #3f3f46;
+    border: 1px solid #52525b;
+    color: #e0e0e6;
 
     display: flex;
     align-items: center;
@@ -42,8 +43,9 @@
 .chat-side-bar {
   @apply overflow-hidden w-64 z-10;
 
-  background-color: var(--color-background);
+  background-color: #27272a;
   transition: 0.5s;
+  height: calc(100vh - 46px);
 
   @apply max-md:absolute max-md:top-0 max-md:bottom-0   max-md:border-none max-md:w-0;
 
@@ -53,7 +55,7 @@
   }
 
   > div {
-    border-right: 1px solid var(--gray-a4);
+    border-right: 1px solid #52525b;
   }
 
   &.show {

@@ -136,10 +136,10 @@ export const ConnectButton = () => {
       {ready && authenticated ? (
         <button
           onClick={() => setIsPanelOpen(true)}
-          className="flex items-center gap-2 text-sm bg-violet-200 hover:text-violet-900 py-2 px-4 rounded-md text-violet-700 ml-4 transition-all duration-200 hover:bg-violet-300"
+          className="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 py-1.5 px-3.5 rounded-md text-white/90 transition-all duration-200 border border-white/20"
         >
           <svg
-            className="w-4 h-4"
+            className="w-3.5 h-3.5"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -171,9 +171,9 @@ export const ConnectButton = () => {
       ) : (
         <button
           onClick={handleConnect}
-          className="flex items-center gap-2 bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+          className="flex items-center gap-2 bg-white/90 hover:bg-white text-gray-900 px-3.5 py-1.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] font-medium text-sm"
         >
-          <span className="font-medium">Connect</span>
+          <span>Connect</span>
         </button>
       )}
 

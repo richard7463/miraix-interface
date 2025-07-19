@@ -1,6 +1,6 @@
 // @ts-nocheck
 'use client'
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface SidePanelProps {
     isOpen: boolean;
@@ -63,7 +63,7 @@ export default function SidePanel({ isOpen, onClose, children }: SidePanelProps)
 
             {/* Panel with slide and scale animation */}
             <div
-                className={`absolute right-0 top-0 h-full w-96 bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ${isAnimating
+                className={`absolute right-0 top-0 h-full w-96 bg-zinc-800 shadow-lg transition-all duration-300 ${isAnimating
                     ? 'translate-x-0 scale-100 opacity-100'
                     : 'translate-x-full scale-95 opacity-0'
                     }`}
@@ -77,17 +77,17 @@ export default function SidePanel({ isOpen, onClose, children }: SidePanelProps)
                 <div className="flex h-full flex-col">
                     {/* Header */}
                     <div
-                        className="flex items-center justify-between border-b p-4"
+                        className="flex items-center justify-between border-b border-gray-600 p-4"
                         style={{ zIndex: 1002 }}
                     >
-                        <h2 className="text-lg font-medium">Panel Title</h2>
+                        <h2 className="text-lg font-medium text-gray-200">Panel Title</h2>
                         <button
                             onClick={onClose}
-                            className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                            className="rounded-full p-2 hover:bg-gray-700 transition-colors duration-200"
                         >
                             <span className="block h-4 w-4">
-                                <span className="absolute h-0.5 w-4 rotate-45 bg-gray-600 dark:bg-gray-300 transition-transform duration-200"></span>
-                                <span className="absolute h-0.5 w-4 -rotate-45 bg-gray-600 dark:bg-gray-300 transition-transform duration-200"></span>
+                                <span className="absolute h-0.5 w-4 rotate-45 bg-gray-300 transition-transform duration-200"></span>
+                                <span className="absolute h-0.5 w-4 -rotate-45 bg-gray-300 transition-transform duration-200"></span>
                             </span>
                         </button>
                     </div>

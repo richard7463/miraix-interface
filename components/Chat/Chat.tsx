@@ -383,7 +383,7 @@ const Chat = (props: ChatProps, ref: any) => {
   }, [message]);
 
   return (
-    <Flex direction="column" height="100vh" className="relative" style={{ minHeight: '100vh', overflow: 'hidden', flex: 1, paddingTop: '76px' }}>
+    <Flex direction="column" className="relative" style={{ height: 'calc(100vh - 46px)', overflow: 'hidden', flex: 1 }}>
       <Flex className="flex-1 px-4" style={{}}>
         {/* 仅在没有消息时显示欢迎，否则渲染消息列表 */}
         <WelcomeSection setMessage={setMessage} />
@@ -405,9 +405,9 @@ const Chat = (props: ChatProps, ref: any) => {
         flexDirection: 'column',
       }}>
         {/* 5 Action Buttons */}
-        <div style={{ width: '100%' }}>
+        {/* <div style={{ width: '100%' }}>
           <SwapBridgeStakeActionButtons setMessage={setMessage} />
-        </div>
+        </div> */}
         <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', height: '100%', width: '90%' }}>
           {(!message || message === '<br>') && (
             <span style={{
@@ -417,7 +417,7 @@ const Chat = (props: ChatProps, ref: any) => {
               height: '50px',
               display: 'flex',
               alignItems: 'center',
-              color: '#6b7280',
+              color: '#a0a0a6',
               pointerEvents: 'none',
               fontSize: 16,
               userSelect: 'none',
@@ -458,7 +458,8 @@ const Chat = (props: ChatProps, ref: any) => {
               background: 'transparent', 
               zIndex: 2,
               borderRadius: '25px',
-              border: '1px solid #e5e7eb',
+              border: '1px solid #52525b',
+              color: '#e0e0e6',
               transition: 'all 0.2s ease-in-out'
             }}
           />

@@ -21,69 +21,52 @@ export const Header = () => {
 
   return (
     <header
-      className={cs('block shadow-sm sticky top-0 dark:shadow-gray-500 py-3 px-4 z-20 border-b')}
+      className="self-stretch px-10 py-2.5 inline-flex justify-between items-center sticky top-0 z-50"
       style={{
-        backgroundColor: theme === 'light' ? '#F8F9FB' : '#18181c',
-        borderBottom: theme === 'light' ? '1px solid #E5E7EB' : '1px solid #23243a'
+        backgroundColor: '#27272a',
+        borderBottom: '1px solid #3f3f46',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        minHeight: '46px'
       }}
     >
-      <Flex align="center" gap="3">
+      {/* 左侧 Logo 和标题 */}
+      <div className="flex justify-start items-center gap-1.5">
+        <div className="w-5 h-5 relative overflow-hidden">
+          <img 
+            src="/favicon.png" 
+            alt="Miraix AI Logo" 
+            className="w-full h-full object-contain"
+          />
+        </div>
         <NextLink href="/">
-          <Flex align="center" gap="2" className="cursor-pointer hover:opacity-80 transition-opacity">
-            <Heading
-              as="h2"
-              size="4"
-              style={{
-                maxWidth: 200,
-                fontWeight: 900,
-                letterSpacing: '0.08em',
-                fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
-                background: theme === 'dark'
-                  ? 'linear-gradient(90deg, #7f7fd5 0%, #86a8e7 50%, #91eac9 100%)'
-                  : 'linear-gradient(90deg, #4f8cff 0%, #7fdbda 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: theme === 'dark'
-                  ? '0 2px 12px rgba(64,64,128,0.18)'
-                  : '0 2px 8px rgba(100,200,255,0.13)',
-                fontSize: 32
-              }}
-            >
-              MiraiX
-            </Heading>
-            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-              Beta
-            </span>
-          </Flex>
+          <div className="justify-start text-white/90 text-xl font-normal font-['Anonymous_Pro'] cursor-pointer hover:opacity-80 transition-opacity">
+            Miraix AI
+          </div>
         </NextLink>
-        <Flex align="center" gap="3" className="ml-auto" style={{}}>
-          {/* <Select.Root value={theme} onValueChange={setTheme} className="hidden">
-            <Select.Trigger radius="full" >
-              {theme === 'light' ? <FaMoon color="#e0e0e6" /> : <FaRegSun color="#e0e0e6" />}
-            </Select.Trigger>
-            <Select.Content>
-              <Select.Item value="light">
-                <FaRegSun color="#e0e0e6" />
-              </Select.Item>
-              <Select.Item value="dark">
-                <FaMoon color="#e0e0e6" />
-              </Select.Item>
-            </Select.Content>
-          </Select.Root> */}
+      </div>
+
+      {/* 右侧按钮区域 - 调整按钮尺寸 */}
+      <div className="flex items-center gap-2.5">
           <ConnectButton />
-        </Flex>
-        <Tooltip content="Navigation" style={{}}>
+        <Tooltip content="Navigation">
           <IconButton
             size="3"
             variant="ghost"
             color="gray"
             className="md:hidden"
             onClick={toggleNavBar}
+            style={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              width: '23px',
+              height: '23px'
+            }}
           >
-            <HamburgerMenuIcon width="16" height="16" />
+            <HamburgerMenuIcon width="14" height="14" />
           </IconButton>
         </Tooltip>
-      </Flex>
+      </div>
     </header>
   )
 }

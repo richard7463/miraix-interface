@@ -48,7 +48,7 @@ export default function Swap({ endpoint, className = '' }: SwapProps) {
     const style = document.createElement('style');
     style.textContent = `
       #${targetId} {
-        background: #0E0F12;
+        background: #27272a;
         border-radius: 1rem;
         padding: 0.75rem;
         margin: 0;
@@ -57,7 +57,7 @@ export default function Swap({ endpoint, className = '' }: SwapProps) {
         box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
       }
       #${targetId} .jupiter-terminal {
-        background: #0E0F12 !important;
+        background: #27272a !important;
         border-radius: 1rem !important;
         padding: 0 !important;
         margin: 0 !important;
@@ -68,20 +68,20 @@ export default function Swap({ endpoint, className = '' }: SwapProps) {
         display: none !important;
       }
       #${targetId} .jupiter-terminal-container {
-        background: #0E0F12 !important;
+        background: #27272a !important;
         border-radius: 1rem !important;
       }
       #${targetId} .jupiter-terminal-token-selector {
-        background: #1A1B1E !important;
-        border: 1px solid #2A2B2E !important;
+        background: #3f3f46 !important;
+        border: 1px solid #52525b !important;
         border-radius: 0.75rem !important;
       }
       #${targetId} .jupiter-terminal-token-selector:hover {
-        background: #2A2B2E !important;
+        background: #52525b !important;
       }
       #${targetId} .jupiter-terminal-input {
-        background: #1A1B1E !important;
-        border: 1px solid #2A2B2E !important;
+        background: #3f3f46 !important;
+        border: 1px solid #52525b !important;
         border-radius: 0.75rem !important;
         color: #ffffff !important;
       }
@@ -116,18 +116,18 @@ export default function Swap({ endpoint, className = '' }: SwapProps) {
         transform: translateY(0) !important;
       }
       #${targetId} .jupiter-terminal-token-list {
-        background: #1A1B1E !important;
-        border: 1px solid #2A2B2E !important;
+        background: #3f3f46 !important;
+        border: 1px solid #52525b !important;
         border-radius: 1rem !important;
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
       }
       #${targetId} .jupiter-terminal-token-list-item {
-        border-bottom: 1px solid #2A2B2E !important;
+        border-bottom: 1px solid #52525b !important;
         padding: 0.75rem 1rem !important;
         color: #ffffff !important;
       }
       #${targetId} .jupiter-terminal-token-list-item:hover {
-        background: #2A2B2E !important;
+        background: #52525b !important;
       }
       #${targetId} .jupiter-terminal-token-list-item:last-child {
         border-bottom: none !important;
@@ -174,7 +174,7 @@ export default function Swap({ endpoint, className = '' }: SwapProps) {
       integratedTargetId: targetId,
       endpoint: endpoint,
       theme: {
-        background: '#0E0F12',
+        background: '#27272a',
         primary: '#3B82F6',
         secondary: '#6B7280',
         accent: '#10B981',
@@ -197,7 +197,7 @@ export default function Swap({ endpoint, className = '' }: SwapProps) {
   }, [endpoint]);
 
   return (
-    <div className={`rounded-xl text-card-foreground max-w-[450px] p-0 sm:p-2 my-2 ml-11 bg-[#0E0F12] border border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-200 ${className}`}>
+    <div className={`rounded-xl text-card-foreground max-w-[450px] p-0 sm:p-2 my-2 ml-11 bg-zinc-800 border border-gray-600 shadow-sm hover:shadow-md transition-shadow duration-200 ${className}`}>
       <div id={targetId} className="w-full"></div>
     </div>
   );

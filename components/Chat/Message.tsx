@@ -53,7 +53,7 @@ const Message = (props: MessageProps) => {
             <Flex gap="4" align="center">
               <Tooltip open={tooltipOpen} content={copied ? "Copied!" : "Copy"}>
                 <IconButton
-                  className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="cursor-pointer hover:bg-gray-700 transition-colors"
                   variant="ghost"
                   color="gray"
                   onClick={onCopy}

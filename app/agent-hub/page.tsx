@@ -99,7 +99,7 @@ export default function AgentHubPage() {
   return (
     <main
       className="min-h-screen pt-24 pb-16 overflow-y-auto relative"
-      style={{ backgroundColor: theme === "light" ? "#F8F9FB" : "#111217" }}
+      style={{ backgroundColor: theme === "light" ? "#F8F9FB" : "#27272a" }}
     >
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

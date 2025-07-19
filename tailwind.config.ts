@@ -19,8 +19,8 @@ const config: Config = {
       },
       colors: {
         background: {
-          DEFAULT: '#fff',
-          dark: '#18181c',
+          DEFAULT: '#27272a',
+          dark: '#27272a',
         },
         primary: {
           DEFAULT: '#4C94E5',
@@ -39,12 +39,12 @@ const config: Config = {
           foreground: '#0f172a',
         },
         popover: {
-          DEFAULT: '#ffffff',
-          foreground: '#0f172a',
+          DEFAULT: '#27272a',
+          foreground: '#e0e0e6',
         },
         card: {
-          DEFAULT: '#ffffff',
-          foreground: '#0f172a',
+          DEFAULT: '#27272a',
+          foreground: '#e0e0e6',
         },
         border: {
           DEFAULT: '#e2e8f0',

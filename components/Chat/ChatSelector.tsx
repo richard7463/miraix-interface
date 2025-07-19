@@ -58,10 +58,10 @@ export const ChatSelector: React.FC<ChatSelectorProps> = ({
   }
 
   return (
-    <div className="w-full border border-neutral-200 dark:border-neutral-800 rounded-md">
+    <div className="w-full border border-gray-600 rounded-md">
       <button
         onClick={handleToggle}
-        className="peer/menu-button gap-2 overflow-hidden rounded-md p-2 text-left outline-none duration-300 ease-in-out focus-visible:ring-2 active:text-sidebar-foreground-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:font-medium data-[active=true]:text-sidebar-active data-[state=open]:hover:bg-neutral-100 dark:data-[state=open]:hover:bg-neutral-800 data-[state=open]:hover:text-sidebar-active group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-sidebar-active h-8 text-sm flex items-center font-medium transition-all group justify-between w-full"
+        className="peer/menu-button gap-2 overflow-hidden rounded-md p-2 text-left outline-none duration-300 ease-in-out focus-visible:ring-2 active:text-sidebar-foreground-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:font-medium data-[active=true]:text-sidebar-active data-[state=open]:hover:bg-gray-700 data-[state=open]:hover:text-sidebar-active group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-gray-700 hover:text-sidebar-active h-8 text-sm flex items-center font-medium transition-all group justify-between w-full"
         type="button"
         aria-controls="chat-list"
         aria-expanded={isOpen}
@@ -74,7 +74,7 @@ export const ChatSelector: React.FC<ChatSelectorProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <div 
-              className="h-fit w-fit p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-md transition-colors duration-200"
+              className="h-fit w-fit p-1 hover:bg-gray-700 rounded-md transition-colors duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 onCreateChat();
@@ -92,7 +92,7 @@ export const ChatSelector: React.FC<ChatSelectorProps> = ({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`h-[14px] w-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} text-neutral-500 dark:text-neutral-500`}
+              className={`h-[14px] w-[14px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} text-gray-500`}
             >
               <path d="m6 9 6 6 6-6" />
             </svg>
@@ -110,7 +110,7 @@ export const ChatSelector: React.FC<ChatSelectorProps> = ({
         <div className="mt-2 space-y-1 p-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-2">
-              <ImSpinner8 className="w-4 h-4 animate-spin text-neutral-500" />
+              <ImSpinner8 className="w-4 h-4 animate-spin text-gray-500" />
             </div>
           ) : (
             chatList.map((chat) => (
@@ -119,8 +119,8 @@ export const ChatSelector: React.FC<ChatSelectorProps> = ({
                 onClick={() => handleChatSelect(chat)}
                 className={`w-full text-left px-2 py-1.5 text-sm rounded-md transition-colors duration-200 ${
                   chat.id === currentChatId
-                    ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
-                    : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
+                    ? 'bg-gray-700 text-gray-100'
+                    : 'hover:bg-gray-700 text-gray-300'
                 }`}
               >
                 <div className="flex items-center gap-2">

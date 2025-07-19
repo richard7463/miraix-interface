@@ -11,7 +11,7 @@ const ChatProvider = () => {
   const provider = useChatHook()
   return (
     <ChatContext.Provider value={provider}>
-      <Flex>
+      <Flex className="bg-zinc-800" style={{ height: 'calc(100vh - 46px)' }}>
         <ChatSideBar />
         <Chat />
       </Flex>
@@ -21,7 +21,7 @@ const ChatProvider = () => {
 
 export default function ChatPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div>Loading...</div>}>
       <ChatProvider />
     </Suspense>
   )

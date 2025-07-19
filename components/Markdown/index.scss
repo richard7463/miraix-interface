@@ -5,11 +5,11 @@
 
   :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
     position: relative;
-    background-color: rgb(30, 30, 30) !important;
+    background-color: #3f3f46;
   }
 
   :where(pre code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-    @apply whitespace-pre-wrap #{!important};
+    @apply whitespace-pre-wrap;
   }
 
   :where(code[class~='highlight']) {

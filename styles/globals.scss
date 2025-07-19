@@ -7,13 +7,29 @@
 
 :root {
   @apply h-full;
-  --foreground-rgb: 34, 34, 34;
-  --background-start-rgb: 248, 249, 251;
-  --background-end-rgb: 255, 255, 255;
-  --text-color-light: #222;
+  --foreground-rgb: 224, 224, 230;
+  --background-start-rgb: 39, 39, 42;
+  --background-end-rgb: 39, 39, 42;
+  --text-color-light: #e0e0e6;
   --text-color-dark: #e0e0e6;
   --font-sans: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Roboto Mono', Menlo, Monaco, Consolas, monospace;
+  
+  // Radix UI 深色主题变量
+  --color-background: #27272a;
+  --color-foreground: #e0e0e6;
+  --gray-a1: #27272a;
+  --gray-a2: #3f3f46;
+  --gray-a3: #52525b;
+  --gray-a4: #52525b;
+  --gray-a5: #71717a;
+  --gray-a6: #a1a1aa;
+  --gray-a7: #d4d4d8;
+  --gray-a8: #e4e4e7;
+  --gray-a9: #f4f4f5;
+  --gray-a10: #fafafa;
+  --gray-a11: #fafafa;
+  --gray-a12: #ffffff;
   
   // Typography scale
   --font-size-xs: 0.75rem;    // 12px
@@ -51,17 +67,18 @@ html, body, #__next, #__next > div {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   letter-spacing: -0.011em;
+  background-color: #27272a !important;
 }
 
 [data-theme='dark'], .dark {
   color: var(--text-color-dark) !important;
+  background-color: #27272a !important;
 }
 
 
 html, body, #__next, #__next > div {
   height: 100vh !important;
   min-height: 100vh !important;
-  overflow: hidden !important;
   width: 100vw;
 }
 
@@ -73,8 +90,8 @@ html, body, #__next, #__next > div {
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background-start-rgb: 39, 39, 42;
+    --background-end-rgb: 39, 39, 42;
   }
 }
 
@@ -82,6 +99,7 @@ body {
   color: rgb(var(--foreground-rgb));
   font-family: var(--font-sans);
   @apply h-full;
+  background-color: #27272a !important;
 }
 
 .radix-themes {
@@ -94,7 +112,7 @@ body {
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.3;
-  color: #23252b;
+  color: #e0e0e6;
 }
 
 .welcome-card-desc {
@@ -102,7 +120,7 @@ body {
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: -0.01em;
-  color: #555c6a;
+  color: #a0a0a6;
   line-height: 1.6;
   margin: 0.5em 0 0.2em 0;
 }
@@ -119,12 +137,12 @@ body {
 }
 
 .welcome-card {
-  border: 1px solid rgba(127, 90, 240, 0.1);
-  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(127, 90, 240, 0.2);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(8px);
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 2px 4px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   will-change: transform, box-shadow, border-color;
@@ -134,11 +152,11 @@ body {
 }
 
 .welcome-card:hover {
-  border-color: rgba(127, 90, 240, 0.2);
-  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(127, 90, 240, 0.4);
+  background: rgba(255, 255, 255, 0.1);
   box-shadow: 
-    0 10px 15px -3px rgba(0, 0, 0, 0.08),
-    0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
 }
 
 .welcome-card:active {
@@ -241,7 +259,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-tight);
   line-height: var(--line-height-tight);
-  color: var(--text-color-light);
+  color: #e0e0e6;
 }
 
 p {
@@ -249,13 +267,14 @@ p {
   font-weight: var(--font-weight-normal);
   letter-spacing: var(--letter-spacing-normal);
   line-height: var(--line-height-normal);
-  color: var(--text-color-light);
+  color: #e0e0e6;
 }
 
 code, pre {
   font-family: var(--font-mono);
   font-size: 0.9em;
   letter-spacing: -0.01em;
+  color: #e0e0e6;
 }
 
 // Chat message styles
@@ -264,12 +283,15 @@ code, pre {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.6;
+  color: #e0e0e6;
 }
 
 .chat-message.user {
   font-weight: 500;
+  color: #e0e0e6;
 }
 
 .chat-message.assistant {
   font-weight: 400;
+  color: #e0e0e6;
 }
