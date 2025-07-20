@@ -74,18 +74,18 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           </p>
         </motion.div>
 
-        {/* Features Grid */}
+        {/* Features Grid - Desktop Version (hidden on mobile) */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="hidden sm:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-6xl"
+          className="hidden lg:grid grid-cols-4 gap-4 w-full max-w-6xl"
         >
           {/* Swap Card */}
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => handleAskThis('swap')}
-            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+            className="w-full px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
             <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
               <FaExchangeAlt className="w-5 h-5 text-blue-400" />
@@ -113,7 +113,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => handleAskThis('bridge')}
-            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+            className="w-full px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
             <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
               <GiBridge className="w-5 h-5 text-purple-400" />
@@ -141,7 +141,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => handleAskThis('stake')}
-            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+            className="w-full px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
             <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
               <FaCoins className="w-5 h-5 text-green-400" />
@@ -169,7 +169,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           <motion.div 
             whileHover={{ scale: 1.02, y: -2 }}
             onClick={() => handleAskThis('createToken')}
-            className="w-52 px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+            className="w-full px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
           >
             <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
               <FaCoins className="w-5 h-5 text-orange-400" />
@@ -193,6 +193,63 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
             </div>
           </motion.div>
         </motion.div>
+
+        {/* Mobile Version - Compact Cards */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="lg:hidden grid grid-cols-2 gap-3 w-full max-w-md"
+        >
+          {/* Swap Card - Mobile */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            onClick={() => handleAskThis('swap')}
+            className="px-3 py-2 bg-white/5 rounded-lg relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+          >
+            <div className="flex items-center gap-2">
+              <FaExchangeAlt className="w-4 h-4 text-blue-400" />
+              <span className="text-white/90 text-sm font-medium">Swap</span>
+            </div>
+          </motion.div>
+
+          {/* Bridge Card - Mobile */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            onClick={() => handleAskThis('bridge')}
+            className="px-3 py-2 bg-white/5 rounded-lg relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+          >
+            <div className="flex items-center gap-2">
+              <GiBridge className="w-4 h-4 text-purple-400" />
+              <span className="text-white/90 text-sm font-medium">Bridge</span>
+            </div>
+          </motion.div>
+
+          {/* Stake Card - Mobile */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            onClick={() => handleAskThis('stake')}
+            className="px-3 py-2 bg-white/5 rounded-lg relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+          >
+            <div className="flex items-center gap-2">
+              <FaCoins className="w-4 h-4 text-green-400" />
+              <span className="text-white/90 text-sm font-medium">Stake</span>
+            </div>
+          </motion.div>
+
+          {/* Create Token Card - Mobile */}
+          <motion.div 
+            whileHover={{ scale: 1.02 }}
+            onClick={() => handleAskThis('createToken')}
+            className="px-3 py-2 bg-white/5 rounded-lg relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+          >
+            <div className="flex items-center gap-2">
+              <FaCoins className="w-4 h-4 text-orange-400" />
+              <span className="text-white/90 text-sm font-medium">Create Token</span>
+            </div>
+          </motion.div>
+        </motion.div>
+
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.6 }} className="w-full mt-4 sm:mt-6"><InfiniteScrollText setMessage={setMessage} /></motion.div>
       </div>
     </div>

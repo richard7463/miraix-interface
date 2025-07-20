@@ -92,61 +92,61 @@ export default function StakingYield({
       </div>
       
       <div className="p-4">
-        {/* Expandable Section */}
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
+      {/* Expandable Section */}
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center gap-2 text-sm font-medium text-[#a1a1aa] hover:text-[#e0e0e6] transition-colors"
-          >
-            <span>Fetched Best Liquid Staking Yields</span>
-            <ChevronDownIcon 
-              className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-            />
-          </button>
-          
-          {/* Protocols Grid */}
+        >
+          <span>Fetched Best Liquid Staking Yields</span>
+          <ChevronDownIcon 
+            className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+          />
+        </button>
+        
+        {/* Protocols Grid */}
           <div className={`mt-3 transition-all duration-300 ${isExpanded ? 'max-h-[500px] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}`}>
             <div className="grid grid-cols-1 gap-3 pb-2">
-              {sortedProtocols.map((protocol, index) => (
+            {sortedProtocols.map((protocol, index) => (
                 <motion.div
-                  key={`${protocol.symbol}-${index}`}
+                key={`${protocol.symbol}-${index}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   className="bg-[#27272a] border border-[#52525b] rounded-lg p-3 hover:border-green-500/50 hover:bg-[#3f3f46] transition-all duration-200 cursor-pointer group"
-                  onClick={() => handleProtocolSelect(protocol)}
-                >
-                  <div className="flex items-center gap-3">
+                onClick={() => handleProtocolSelect(protocol)}
+              >
+                <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-[#3f3f46] flex items-center justify-center border border-[#52525b]">
-                      <img 
-                        src={protocol.logo} 
-                        alt={protocol.name}
+                  <img 
+                    src={protocol.logo} 
+                    alt={protocol.name}
                         className="w-6 h-6 object-contain"
-                        onError={(e) => {
-                          console.log('Failed to load protocol logo:', protocol.logo);
-                          e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
-                        }}
-                      />
+                    onError={(e) => {
+                      console.log('Failed to load protocol logo:', protocol.logo);
+                      e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+                    }}
+                  />
                     </div>
-                    <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-[#e0e0e6] truncate group-hover:text-green-400 transition-colors">
-                        {protocol.name}
-                      </p>
+                      {protocol.name}
+                    </p>
                       <p className="text-xs text-[#a1a1aa] truncate">
-                        {protocol.symbol}
-                      </p>
-                    </div>
-                    <div className="text-right">
+                      {protocol.symbol}
+                    </p>
+                  </div>
+                  <div className="text-right">
                       <p className="text-sm font-bold text-green-400">
-                        {protocol.apy.toFixed(2)}%
-                      </p>
+                      {protocol.apy.toFixed(2)}%
+                    </p>
                       <p className="text-xs text-[#a1a1aa]">APY</p>
                     </div>
                   </div>
                 </motion.div>
               ))}
-            </div>
+              </div>
           </div>
         </div>
       </div>
@@ -156,7 +156,7 @@ export default function StakingYield({
         <div className="text-xs text-[#a1a1aa] text-center">
           Select a protocol above to start staking your SOL
         </div>
-      </div>
+    </div>
     </motion.div>
   );
 } 

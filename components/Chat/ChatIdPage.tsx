@@ -12,11 +12,11 @@ export default function ChatIdPage({ chatId }: { chatId: string }) {
   return (
     <div className="h-[calc(100vh-46px)] flex relative bg-zinc-800">
       {/* Mobile menu button */}
-      <div className="lg:hidden absolute top-4 left-4 z-20">
+      {/* <div className="lg:hidden absolute top-4 left-4 z-20">
         <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <AiOutlineMenu />
         </IconButton>
-      </div>
+      </div> */}
 
       {/* Sidebar - hidden on mobile by default, shown when isSidebarOpen is true */}
       <div className={`
@@ -30,11 +30,6 @@ export default function ChatIdPage({ chatId }: { chatId: string }) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col h-full w-full lg:w-auto" style={{ overflow: 'auto' }}>
-        <div className="absolute top-4 right-4">
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-            Beta
-          </span>
-        </div>
         <div className="flex-1 overflow-hidden">
           <ChatIdConversation chatId={chatId} hideActions={true} />
         </div>

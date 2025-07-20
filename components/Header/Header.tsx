@@ -50,7 +50,7 @@ export const Header = () => {
       {/* 右侧按钮区域 - 调整按钮尺寸 */}
       <div className="flex items-center gap-2.5">
           <ConnectButton />
-        <Tooltip content="Navigation">
+        {/* <Tooltip content="Navigation">
           <IconButton
             size="3"
             variant="ghost"
@@ -65,7 +65,7 @@ export const Header = () => {
           >
             <HamburgerMenuIcon width="14" height="14" />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
       </div>
     </header>
   )

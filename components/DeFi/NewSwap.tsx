@@ -1027,9 +1027,9 @@ export default function NewSwap({
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/20">
               <FaExchangeAlt className="w-3.5 h-3.5 text-blue-400" />
-            </div>
-            <h3 className="text-sm font-medium text-[#e0e0e6]">Swap Tokens</h3>
           </div>
+            <h3 className="text-sm font-medium text-[#e0e0e6]">Swap Tokens</h3>
+        </div>
         </div>
         
         <div className="p-0">
@@ -1050,15 +1050,15 @@ export default function NewSwap({
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#27272a] hover:bg-[#3f3f46] transition-colors border border-[#52525b]"
               >
                 <div className="w-6 h-6 rounded-full overflow-hidden bg-[#3f3f46] flex items-center justify-center">
-                  <img 
-                    src={fromLogoUrl} 
-                    alt={fromToken.symbol} 
+                <img 
+                  src={fromLogoUrl} 
+                  alt={fromToken.symbol} 
                     className="w-5 h-5 object-contain" 
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
-                    }}
-                  />
-                </div>
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+                  }}
+                />
+              </div>
                 <span className="font-medium text-sm text-[#e0e0e6]">{fromToken.symbol}</span>
                 <svg className="w-4 h-4 text-[#a1a1aa]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -1066,23 +1066,23 @@ export default function NewSwap({
               </button>
               
               <div className="flex-1 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
-                <input
+              <input
                   type="text"
-                  value={fromAmount}
-                  readOnly
+                value={fromAmount}
+                readOnly
                   className="w-full bg-transparent border-none outline-none text-right font-medium text-[#e0e0e6]"
                   placeholder="0.0"
-                />
-              </div>
+              />
             </div>
           </div>
+        </div>
           
           {/* Swap Direction Indicator */}
           <div className="flex justify-center -my-2 relative z-10">
             <div className="w-8 h-8 rounded-full bg-[#27272a] flex items-center justify-center border border-[#52525b] shadow-sm">
               <ArrowDownUp className="w-4 h-4 text-[#a1a1aa]" />
-            </div>
           </div>
+        </div>
           
           {/* To Token Section */}
           <div className="p-4 space-y-3">
@@ -1096,15 +1096,15 @@ export default function NewSwap({
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#27272a] hover:bg-[#3f3f46] transition-colors border border-[#52525b]"
               >
                 <div className="w-6 h-6 rounded-full overflow-hidden bg-[#3f3f46] flex items-center justify-center">
-                  <img 
-                    src={toLogoUrl} 
-                    alt={toToken.symbol} 
+                <img 
+                  src={toLogoUrl} 
+                  alt={toToken.symbol} 
                     className="w-5 h-5 object-contain" 
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
-                    }}
-                  />
-                </div>
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png';
+                  }}
+                />
+              </div>
                 <span className="font-medium text-sm text-[#e0e0e6]">{toToken.symbol}</span>
                 <svg className="w-4 h-4 text-[#a1a1aa]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -1113,13 +1113,13 @@ export default function NewSwap({
               
               <div className="flex-1 px-3 py-2 rounded-lg bg-[#27272a] border border-[#52525b]">
                 <div className="w-full text-right font-medium text-[#e0e0e6]">
-                  {toAmount}
-                </div>
-              </div>
+                {toAmount}
             </div>
+              </div>
           </div>
-          
-          {/* Divider */}
+        </div>
+        
+        {/* Divider */}
           <div className="w-full h-[1px] bg-[#52525b] mx-4" />
           
           {/* Swap Details */}
@@ -1134,16 +1134,16 @@ export default function NewSwap({
                 <div className="flex justify-between text-xs">
                   <span className="text-[#a1a1aa]">Price Impact</span>
                   <span className="font-medium text-[#e0e0e6]">
-                    {actualQuote.priceImpactPct === "0" ? "< 0.01%" : `${parseFloat(actualQuote.priceImpactPct).toFixed(2)}%`}
-                  </span>
-                </div>
+                  {actualQuote.priceImpactPct === "0" ? "< 0.01%" : `${parseFloat(actualQuote.priceImpactPct).toFixed(2)}%`}
+                </span>
+              </div>
                 
                 <div className="flex justify-between text-xs">
                   <span className="text-[#a1a1aa]">Swap Value</span>
                   <span className="font-medium text-[#e0e0e6]">
                     {actualQuote.swapUsdValue ? `$${parseFloat(actualQuote.swapUsdValue).toFixed(2)}` : `$${(parseFloat(fromAmount) * 1).toFixed(2)}`}
                   </span>
-                </div>
+              </div>
               </>
             )}
           </div>
@@ -1153,38 +1153,38 @@ export default function NewSwap({
             <div className="mx-4 mb-3 p-2 rounded-lg bg-red-900/20 border border-red-800 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
               <p className="text-xs text-red-400">{error}</p>
-            </div>
+        </div>
           )}
           
           {/* Action Button */}
           <div className="p-4 pt-0">
-            <button
-              className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 h-10 px-4 py-1.5 w-full shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 ${
-                isConfirming || !!error 
+          <button
+            className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 h-10 px-4 py-1.5 w-full shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 ${
+              isConfirming || !!error 
                   ? 'bg-[#52525b] text-[#a1a1aa] cursor-not-allowed opacity-50' 
-                  : 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 cursor-pointer'
-              }`}
-              disabled={isConfirming || !!error}
-              onClick={() => {
-                console.log('🎯 Confirm button clicked!');
-                console.log('Button state:', {
-                  disabled: isConfirming || !!error,
-                  fromTokenBalance: fromToken.balance,
-                  isConfirming,
-                  hasError: !!error,
-                  errorMessage: error,
-                  // 详细分析每个禁用条件
-                  noBalance: !fromToken.balance,
-                  isConfirmingState: isConfirming,
-                  hasErrorState: !!error
-                });
-                handleConfirm();
-              }}
-              style={{ cursor: isConfirming || !!error ? 'not-allowed' : 'pointer' }}
-            >
+                : 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 cursor-pointer'
+            }`}
+            disabled={isConfirming || !!error}
+            onClick={() => {
+              console.log('🎯 Confirm button clicked!');
+              console.log('Button state:', {
+                disabled: isConfirming || !!error,
+                fromTokenBalance: fromToken.balance,
+                isConfirming,
+                hasError: !!error,
+                errorMessage: error,
+                // 详细分析每个禁用条件
+                noBalance: !fromToken.balance,
+                isConfirmingState: isConfirming,
+                hasErrorState: !!error
+              });
+              handleConfirm();
+            }}
+            style={{ cursor: isConfirming || !!error ? 'not-allowed' : 'pointer' }}
+          >
               {isConfirming ? 'Confirming...' : error ? 'Cannot Confirm' : 'Confirm Swap'}
-            </button>
-          </div>
+          </button>
+            </div>
         </div>
       </motion.div>
       

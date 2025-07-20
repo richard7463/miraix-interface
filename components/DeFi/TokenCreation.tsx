@@ -353,7 +353,7 @@ export default function TokenCreation({
             </div>
             <h3 className="text-sm font-medium text-[#e0e0e6]">Token Created Successfully</h3>
           </div>
-        </div>
+              </div>
         
         <div className="p-4">
           <div className="text-center mb-4">
@@ -361,8 +361,8 @@ export default function TokenCreation({
               <FaCheckCircle className="w-6 h-6 text-green-400" />
             </div>
             <h3 className="text-lg font-semibold text-[#e0e0e6] mb-2">
-              Token creation transaction ready!
-            </h3>
+                Token creation transaction ready!
+              </h3>
             <div className="text-[#a1a1aa] text-sm text-left bg-[#27272a] rounded-lg p-3 border border-[#52525b]">
               <div className="font-medium text-[#e0e0e6] mb-2">Token Details:</div>
               <div className="space-y-1 text-xs">
@@ -375,14 +375,14 @@ export default function TokenCreation({
               </div>
             </div>
           </div>
-          <button
-            onClick={handleViewOnSolscan}
+              <button
+                onClick={handleViewOnSolscan}
             className="w-full bg-[#3f3f46] hover:bg-[#52525b] transition-colors duration-200 text-sm font-medium text-[#e0e0e6] h-10 px-4 py-2 border border-[#52525b] hover:border-[#71717a] rounded-lg flex items-center justify-center gap-2"
-          >
-            <FaExternalLinkAlt className="w-4 h-4" />
-            View on Solscan
-          </button>
-        </div>
+              >
+                <FaExternalLinkAlt className="w-4 h-4" />
+                View on Solscan
+              </button>
+            </div>
       </motion.div>
     );
   }
@@ -400,11 +400,11 @@ export default function TokenCreation({
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500/20">
             <FaCoins className="w-3.5 h-3.5 text-purple-400" />
-          </div>
+            </div>
           <h3 className="text-sm font-medium text-[#e0e0e6]">Create New Token</h3>
-        </div>
-      </div>
-      
+            </div>
+          </div>
+
       <div className="p-4">
         <p className="text-xs text-[#a1a1aa] mb-4">Review token details before creation</p>
 
@@ -413,86 +413,86 @@ export default function TokenCreation({
           <div className="bg-[#27272a] border border-[#52525b] rounded-lg p-3">
             <h4 className="font-semibold text-[#e0e0e6] mb-3 text-sm">Token Details</h4>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
+                <div>
                 <span className="text-[#a1a1aa]">Name:</span>
                 <p className="font-semibold text-[#e0e0e6]">{tokenInfo?.name}</p>
-              </div>
-              <div>
+                </div>
+                <div>
                 <span className="text-[#a1a1aa]">Symbol:</span>
                 <p className="font-semibold text-[#e0e0e6]">{tokenInfo?.symbol}</p>
-              </div>
-              <div>
+                </div>
+                <div>
                 <span className="text-[#a1a1aa]">Decimals:</span>
                 <p className="font-semibold text-[#e0e0e6]">{tokenInfo?.decimals}</p>
-              </div>
-              <div>
+                </div>
+                <div>
                 <span className="text-[#a1a1aa]">Total Supply:</span>
                 <p className="font-semibold text-[#e0e0e6]">
-                  {formatNumber(tokenInfo?.totalSupply || 0)}
-                </p>
+                    {formatNumber(tokenInfo?.totalSupply || 0)}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
           {/* Network Information */}
           <div className="bg-[#27272a] border border-[#52525b] rounded-lg p-3">
             <h4 className="font-semibold text-[#e0e0e6] mb-3 text-sm">Network Information</h4>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
+                <div>
                 <span className="text-[#a1a1aa]">Network:</span>
                 <p className="font-semibold text-[#e0e0e6] capitalize">{tokenInfo?.network}</p>
-              </div>
-              <div>
+                </div>
+                <div>
                 <span className="text-[#a1a1aa]">Payer:</span>
                 <p className="font-mono text-xs text-[#e0e0e6] break-all">
-                  {tokenInfo?.payer}
-                </p>
+                    {tokenInfo?.payer}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
           {/* Generated Addresses */}
           <div className="bg-[#27272a] border border-[#52525b] rounded-lg p-3">
             <h4 className="font-semibold text-[#e0e0e6] mb-3 text-sm">Generated Addresses</h4>
             <div className="space-y-2 text-xs">
-              <div>
+                <div>
                 <span className="text-[#a1a1aa]">Mint Address:</span>
                 <p className="font-mono text-xs text-[#e0e0e6] break-all">
-                  {tokenInfo?.mintAddress}
-                </p>
-              </div>
-              <div>
+                    {tokenInfo?.mintAddress}
+                  </p>
+                </div>
+                <div>
                 <span className="text-[#a1a1aa]">Token Account:</span>
                 <p className="font-mono text-xs text-[#e0e0e6] break-all">
-                  {tokenInfo?.tokenAccountAddress}
-                </p>
+                    {tokenInfo?.tokenAccountAddress}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
           {/* Create Button */}
-          <button
-            onClick={handleConfirm}
-            disabled={isSigning || !embeddedWallet}
+              <button
+                onClick={handleConfirm}
+                disabled={isSigning || !embeddedWallet}
             className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 h-12"
-          >
-            {isSigning ? (
-              <>
-                <FaSpinner className="w-4 h-4 animate-spin" />
-                Creating Token...
-              </>
-            ) : (
-              'Create Token'
-            )}
-          </button>
+              >
+                {isSigning ? (
+                  <>
+                    <FaSpinner className="w-4 h-4 animate-spin" />
+                    Creating Token...
+                  </>
+                ) : (
+                  'Create Token'
+                )}
+              </button>
 
-          {!embeddedWallet && (
+            {!embeddedWallet && (
             <div className="text-center text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-2">
-              Please connect your wallet to create tokens
-            </div>
-          )}
+                Please connect your wallet to create tokens
+              </div>
+            )}
+          </div>
         </div>
-      </div>
     </motion.div>
   );
 } 

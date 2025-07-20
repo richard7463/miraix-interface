@@ -384,31 +384,31 @@ const Chat = (props: ChatProps, ref: any) => {
 
   return (
     <Flex direction="column" className="relative" style={{ height: 'calc(100vh - 46px)', overflow: 'hidden', flex: 1 }}>
-      <Flex className="flex-1 px-4" style={{}}>
+      <Flex className="flex-1 px-4 pb-20" style={{ overflow: 'auto' }}>
         {/* 仅在没有消息时显示欢迎，否则渲染消息列表 */}
         <WelcomeSection setMessage={setMessage} />
         <div ref={bottomOfChatRef} />
       </Flex>
-      <Flex className="chat-textarea w-full items-end gap-3 fixed bottom-0 inset-x-0 z-30" align="end" style={{
-        borderRadius: '40px',
+      <Flex className="chat-textarea w-full items-end gap-3 absolute bottom-0 inset-x-0 z-30 bg-zinc-800 border-t border-gray-600" align="end" style={{
+        borderRadius: '0',
         display: 'flex',
-        width: '70vw',
-        padding: '12px 18px',
+        width: '100%',
+        padding: '12px 16px',
         justifyContent: 'space-between',
         alignItems: 'center',
         minHeight: '22px',
         height: 'auto',
         boxSizing: 'border-box',
-        maxWidth: '100vw',
-        margin: '0 auto',
-        position: 'relative',
+        maxWidth: '100%',
+        margin: '0',
+        position: 'absolute',
         flexDirection: 'column',
       }}>
         {/* 5 Action Buttons */}
         {/* <div style={{ width: '100%' }}>
           <SwapBridgeStakeActionButtons setMessage={setMessage} />
         </div> */}
-        <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', height: '100%', width: '90%' }}>
+        <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', height: '100%', width: '100%', maxWidth: '660px', margin: '0 auto' }}>
           {(!message || message === '<br>') && (
             <span style={{
               position: 'absolute',

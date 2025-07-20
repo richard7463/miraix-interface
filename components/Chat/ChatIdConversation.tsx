@@ -856,8 +856,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
   }
 
   return (
-    <div className="flex flex-col relative" style={{ height: 'calc(100vh - 46px - 84px)' }}>
-      <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4">
+    <div className="flex flex-col relative" style={{ height: '100%' }}>
+      <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4" style={{ height: 'calc(100% - 100px)' }}>
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-500">
             No messages yet. Start a conversation!
@@ -978,14 +978,16 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                 <div key={index} className="flex flex-col">
                   {/* Render Thoughts and NewBridge if this is the bridge initiation reply */}
                   {isBridgeOperation && shouldShowBridgeComponent && (
-                    <div className="bridge-thoughts-wrapper ml-[76px]">
-                      <Thoughts thoughts={message.thoughts || []} />
-                      <NewBridge 
-                        responseData={message.responseData}
-                        quote={message.responseData?.quote}
-                        thoughts={message.thoughts}
-                        onTransactionSuccess={handleTransactionSuccess}
-                      />
+                    <div className="bridge-thoughts-wrapper md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[480px]">
+                        <Thoughts thoughts={message.thoughts || []} />
+                        <NewBridge 
+                          responseData={message.responseData}
+                          quote={message.responseData?.quote}
+                          thoughts={message.thoughts}
+                          onTransactionSuccess={handleTransactionSuccess}
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -997,12 +999,14 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                       hasProtocols: !!message.responseData?.quote?.protocols
                     });
                     return (
-                      <div className="staking-thoughts-wrapper ml-[76px]">
-                        <StakingYield 
-                          responseData={message.responseData}
-                          quote={message.responseData?.quote}
-                          onProtocolSelect={handleProtocolSelect}
-                        />
+                      <div className="staking-thoughts-wrapper md:ml-[76px] flex justify-center md:justify-start">
+                        <div className="w-full max-w-[480px]">
+                          <StakingYield 
+                            responseData={message.responseData}
+                            quote={message.responseData?.quote}
+                            onProtocolSelect={handleProtocolSelect}
+                          />
+                        </div>
                       </div>
                     );
                   })()}
@@ -1014,10 +1018,12 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                       intent: message.responseData?.data?.intent
                     });
                     return (
-                      <div className="market-thoughts-wrapper ml-[76px]">
-                        <Market 
-                          responseData={message.responseData}
-                        />
+                      <div className="market-thoughts-wrapper md:ml-[76px] flex justify-center md:justify-start">
+                        <div className="w-full max-w-[480px]">
+                          <Market 
+                            responseData={message.responseData}
+                          />
+                        </div>
                       </div>
                     );
                   })()}
@@ -1030,106 +1036,110 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                       mintKeypair: message.mintKeypair
                     });
                     return (
-                      <div className="token-creation-thoughts-wrapper ml-[76px]">
-                        <TokenCreation 
-                          responseData={{
-                            ...message.responseData,
-                            mintKeypair: message.mintKeypair // 传递mintKeypair
-                          }}
-                          onTransactionSuccess={handleTokenCreationSuccess}
-                        />
+                      <div className="token-creation-thoughts-wrapper md:ml-[76px] flex justify-center md:justify-start">
+                        <div className="w-full max-w-[480px]">
+                          <TokenCreation 
+                            responseData={{
+                              ...message.responseData,
+                              mintKeypair: message.mintKeypair // 传递mintKeypair
+                            }}
+                            onTransactionSuccess={handleTokenCreationSuccess}
+                          />
+                        </div>
                       </div>
                     );
                   })()}
 
                   {/* Render Thoughts and NewSwap if this is the swap initiation reply */}
                   {isSwapInitiation && shouldShowSwapComponent && (
-                    <div className="swap-thoughts-wrapper ml-[76px]">
-                      <Thoughts thoughts={message.thoughts || []} />
-                      {message.swapEntities ? (
-                        (() => {
-                          console.log('[ChatIdConversation] swapEntities:', message.swapEntities);
-                          console.log('[ChatIdConversation] quote:', message.quote);
-                          console.log('[ChatIdConversation] fromToken:', message.swapEntities.fromToken);
-                          console.log('[ChatIdConversation] toToken:', message.swapEntities.toToken);
-                          console.log('[ChatIdConversation] amount:', message.swapEntities.amount);
-                          console.log('[ChatIdConversation] amount type:', typeof message.swapEntities.amount);
-                          console.log('[ChatIdConversation] amount stringified:', String(message.swapEntities.amount));
-                          
-                          // 从 quote 中获取正确的 token 地址
-                          const fromTokenAddress = message.quote?.inputMint || '';
-                          const toTokenAddress = message.quote?.outputMint || '';
-                          
-                          console.log('[ChatIdConversation] fromTokenAddress:', fromTokenAddress);
-                          console.log('[ChatIdConversation] toTokenAddress:', toTokenAddress);
-                          console.log('[ChatIdConversation] quote.inputMint:', message.quote?.inputMint);
-                          console.log('[ChatIdConversation] quote.outputMint:', message.quote?.outputMint);
-                          console.log('[ChatIdConversation] quote structure:', {
-                            hasQuote: !!message.quote,
-                            inputMint: message.quote?.inputMint,
-                            outputMint: message.quote?.outputMint,
-                            inputMintLogo: message.quote?.inputMintLogo,
-                            outputMintLogo: message.quote?.outputMintLogo
-                          });
-                          
-                          // 使用消息ID作为key来存储token数据
-                          const messageKey = message.id;
-                          const tokenData = messageKey ? tokenDataMap[messageKey] : undefined;
-                          
-                          if (!tokenData) {
-                            console.warn('[ChatIdConversation] 无法创建token数据，使用基本NewSwap');
+                    <div className="swap-thoughts-wrapper md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[480px]">
+                        <Thoughts thoughts={message.thoughts || []} />
+                        {message.swapEntities ? (
+                          (() => {
+                            console.log('[ChatIdConversation] swapEntities:', message.swapEntities);
+                            console.log('[ChatIdConversation] quote:', message.quote);
+                            console.log('[ChatIdConversation] fromToken:', message.swapEntities.fromToken);
+                            console.log('[ChatIdConversation] toToken:', message.swapEntities.toToken);
+                            console.log('[ChatIdConversation] amount:', message.swapEntities.amount);
+                            console.log('[ChatIdConversation] amount type:', typeof message.swapEntities.amount);
+                            console.log('[ChatIdConversation] amount stringified:', String(message.swapEntities.amount));
+                            
+                            // 从 quote 中获取正确的 token 地址
+                            const fromTokenAddress = message.quote?.inputMint || '';
+                            const toTokenAddress = message.quote?.outputMint || '';
+                            
+                            console.log('[ChatIdConversation] fromTokenAddress:', fromTokenAddress);
+                            console.log('[ChatIdConversation] toTokenAddress:', toTokenAddress);
+                            console.log('[ChatIdConversation] quote.inputMint:', message.quote?.inputMint);
+                            console.log('[ChatIdConversation] quote.outputMint:', message.quote?.outputMint);
+                            console.log('[ChatIdConversation] quote structure:', {
+                              hasQuote: !!message.quote,
+                              inputMint: message.quote?.inputMint,
+                              outputMint: message.quote?.outputMint,
+                              inputMintLogo: message.quote?.inputMintLogo,
+                              outputMintLogo: message.quote?.outputMintLogo
+                            });
+                            
+                            // 使用消息ID作为key来存储token数据
+                            const messageKey = message.id;
+                            const tokenData = messageKey ? tokenDataMap[messageKey] : undefined;
+                            
+                            if (!tokenData) {
+                              console.warn('[ChatIdConversation] 无法创建token数据，使用基本NewSwap');
+                              return (
+                                <NewSwap 
+                                  responseData={message.responseData}
+                                  quote={message.quote}
+                                  onTransactionSuccess={handleTransactionSuccess}
+                                />
+                              );
+                            }
+                            
                             return (
-                              <NewSwap 
-                                responseData={message.responseData}
+                              <NewSwap
+                                fromToken={tokenData.fromToken}
+                                toToken={tokenData.toToken}
+                                fromAmount={tokenData.fromAmount}
                                 quote={message.quote}
+                                responseData={message.responseData}
                                 onTransactionSuccess={handleTransactionSuccess}
                               />
                             );
-                          }
-                          
-                          return (
-                        <NewSwap
-                          fromToken={tokenData.fromToken}
-                          toToken={tokenData.toToken}
-                          fromAmount={tokenData.fromAmount}
-                          quote={message.quote}
-                          responseData={message.responseData}
-                          onTransactionSuccess={handleTransactionSuccess}
-                        />
-                          );
-                        })()
-                      ) : (
-                        <NewSwap 
-                          responseData={message.responseData}
-                          quote={message.quote}
-                          onTransactionSuccess={handleTransactionSuccess}
-                        />
-                      )}
+                          })()
+                        ) : (
+                          <NewSwap 
+                            responseData={message.responseData}
+                            quote={message.quote}
+                            onTransactionSuccess={handleTransactionSuccess}
+                          />
+                        )}
+                      </div>
                     </div>
                   )}
                   
                   {/* Render transaction status card if this is a transaction success message */}
                   {message.transactionStatus && (
-                    <div className="ml-[76px] mb-4">
+                    <div className="md:ml-[76px] mb-4 flex justify-center md:justify-start">
                       <div className="rounded-xl border border-[#52525b] bg-[#27272a] shadow-lg mt-4 max-w-[480px] mb-3 w-full overflow-hidden">
                         <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-b border-[#52525b]">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <path d="m9 11 3 3L22 4"></path>
-                              </svg>
+                                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                  <path d="m9 11 3 3L22 4"></path>
+                                </svg>
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-[#e0e0e6]">Transaction Confirmed</h3>
                               <p className="text-sm text-[#a1a1aa]">Your swap was successful</p>
-                            </div>
-                          </div>
+                        </div>
+                        </div>
                           <div className="inline-flex items-center rounded-full bg-green-500/20 px-3 py-1 text-xs font-medium text-green-400 border border-green-500/30">
                             <span className="hidden md:block">Success</span>
                             <span className="block md:hidden">✓</span>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
                         <div className="p-4">
                           <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-between text-sm">
@@ -1138,19 +1148,19 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                                 {message.transactionStatus.txid.slice(0, 8)}...{message.transactionStatus.txid.slice(-8)}
                               </span>
                             </div>
-                            <a 
-                              href={`https://solscan.io/tx/${message.transactionStatus.txid}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
+                          <a 
+                            href={`https://solscan.io/tx/${message.transactionStatus.txid}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
                               className="inline-flex items-center justify-center gap-2 w-full rounded-lg bg-[#3f3f46] hover:bg-[#52525b] transition-colors duration-200 text-sm font-medium text-[#e0e0e6] h-10 px-4 py-2 border border-[#52525b] hover:border-[#71717a]"
-                            >
+                          >
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M15 3h6v6"></path>
-                                <path d="M10 14 21 3"></path>
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                              </svg>
+                              <path d="M15 3h6v6"></path>
+                              <path d="M10 14 21 3"></path>
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            </svg>
                               <span>View on Solscan</span>
-                            </a>
+                          </a>
                           </div>
                         </div>
                       </div>
@@ -1245,44 +1255,42 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="flex flex-col gap-1 p-4 mt-auto absolute bottom-0 bg-zinc-800 border-t border-gray-600 fixed w-[82%]" style={{ position: 'fixed' }}>
-        <form className="w-full rounded-xl flex flex-col overflow-hidden transition-colors duration-200 ease-in-out border border-gray-600 shadow-sm bg-gray-800 focus-within:border-blue-500 focus-within:shadow-md">
-          <div className="flex items-end gap-3 p-3">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSend()
-                }
-              }}
-              placeholder="Ask MiraiX anything..."
-              className="flex-1 max-h-32 resize-none bg-transparent px-0 py-0 text-sm placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none border-none"
-              style={{ 
-                height: 'auto', 
-                minHeight: '24px',
-                lineHeight: '1.5',
-                fontSize: '14px'
-              }}
-              disabled={isLoading}
-            />
-            <button
-              onClick={handleSend}
-              disabled={isLoading || !input.trim()}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold border-0 bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 h-8 px-3 py-1.5 shadow-sm hover:shadow-md transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"
-              title={`isLoading: ${isLoading}, input: "${input}", input.trim(): "${input.trim()}"`}
-            >
-              {isLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m22 2-7 20-4-9-9-4 20-7z"/>
-                </svg>
-              )}
-            </button>
-          </div>
-        </form>
+      <div className="bottom-0 inset-x-0 z-30 bg-zinc-800 border-t border-gray-600 p-4" style={{ height: '100px' }}>
+        <div className="relative flex items-center w-full lg:w-[100%] mx-auto">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
+            placeholder="Ask MiraiX anything..."
+            className="flex-1 resize-none bg-transparent px-4 py-3 text-sm placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none border border-gray-600 rounded-xl"
+            style={{ 
+              minHeight: '50px',
+              lineHeight: '1.5',
+              fontSize: '16px',
+              color: '#e0e0e6'
+            }}
+            disabled={isLoading}
+          />
+          <button
+            onClick={handleSend}
+            disabled={isLoading || !input.trim()}
+            className="ml-3 inline-flex items-center justify-center rounded-lg text-sm font-semibold border-0 bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:from-blue-600 hover:to-cyan-500 h-10 w-10 shadow-sm hover:shadow-md transition-all duration-150 active:scale-95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:transform-none"
+            title={`isLoading: ${isLoading}, input: "${input}", input.trim(): "${input.trim()}"`}
+          >
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m22 2-7 20-4-9-9-4 20-7z"/>
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   )
