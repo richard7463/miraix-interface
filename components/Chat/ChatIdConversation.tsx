@@ -384,8 +384,11 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         console.log('[getAIResponse] Generated mintPubkey for token creation:', mintPubkey);
       }
       
+      const API_BASE_URL = process.env.NODE_ENV === 'production'
+        ? 'https://langgraph-defai-git-devworkflow-ritsuyans-projects.vercel.app'
+        : 'http://localhost:3009';
       // 调用 /api/chat-new 获取 AI 回复
-      const response = await fetch('http://localhost:3009/api/chat-new', {
+      const response = await fetch(`${API_BASE_URL}/api/chat-new`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

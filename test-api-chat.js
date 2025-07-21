@@ -14,8 +14,12 @@ async function testChatAPI() {
     
     console.log('发送请求数据:', JSON.stringify(requestData, null, 2));
     
+    const API_BASE_URL = process.env.NODE_ENV === 'production'
+      ? 'https://langgraph-defai-git-devworkflow-ritsuyans-projects.vercel.app'
+      : 'http://localhost:3009';
+
     // 发送请求
-    const response = await fetch('http://localhost:3000/api/chat', {
+    const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
