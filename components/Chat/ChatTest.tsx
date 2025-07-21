@@ -19,7 +19,12 @@ export default function ChatTest() {
     const testChat = {
       id: 'test-chat-1',
       isNew: true,
-      persona: 'test-persona',
+      persona: {
+        id: 'test-persona',
+        name: 'Test Persona',
+        prompt: 'This is a test persona',
+        role: 'assistant' as const
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }

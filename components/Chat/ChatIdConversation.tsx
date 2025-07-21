@@ -376,7 +376,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       
       // 如果是Token创建请求，生成mintKeypair并传递mintPubkey
       let mintPubkey = null;
-      let mintKeypair = null;
+      let mintKeypair: any = null;
       if (isTokenCreationRequest) {
         const { Keypair } = await import('@solana/web3.js');
         mintKeypair = Keypair.generate();

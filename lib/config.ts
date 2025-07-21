@@ -1,5 +1,7 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://new-miraix-api.vercel.app';
 
+export { API_BASE };
+
 export const API_ENDPOINTS = {
   CHAT: `${API_BASE}/api/chat`,
   CREATE_CHAT: `${API_BASE}/api/create-chat`,

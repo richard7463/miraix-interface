@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://new-miraix-api.vercel.app';
 
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout = 5000) {
+async function fetchWithTimeout(url, options = {}, timeout = 5000) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
@@ -19,7 +19,7 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout 
     }
 }
 
-export async function GET(request: Request, { params }: { params: { chatId: string } }) {
+export async function GET(request, { params }) {
     try {
     const chatId = await Promise.resolve(params.chatId);
         if (!chatId) {
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: { params: { chatId: stri
     }
 }
 
-export async function POST(request: Request, { params }: { params: { chatId: string } }) {
+export async function POST(request, { params }) {
     try {
     const { chatId } = params;
         if (!chatId) {

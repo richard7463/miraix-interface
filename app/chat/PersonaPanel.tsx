@@ -42,11 +42,11 @@ const PersonaPanel = (_props: PersonaPanelProps) => {
         list.filter((item) => {
           if (type === 'chat') {
             return (
-              !item.key && (item.prompt?.includes(searchText) || item.name?.includes(searchText))
+              !item.description && (item.prompt?.includes(searchText) || item.name?.includes(searchText))
             )
           } else {
             return (
-              item.key && (item.prompt?.includes(searchText) || item.name?.includes(searchText))
+              item.description && (item.prompt?.includes(searchText) || item.name?.includes(searchText))
             )
           }
         })
