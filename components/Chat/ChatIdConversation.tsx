@@ -461,7 +461,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       // 返回一个简单的错误响应
       return {
         role: 'assistant' as const,
-        content: '抱歉，我暂时无法连接到服务器。请检查服务器是否正在运行，或者稍后再试。',
+        content: 'Sorry, I am unable to connect to the server at the moment. Please check if the server is running or try again later.',
         timestamp: new Date().toISOString(),
         id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         thoughts: ['服务器连接失败'],
