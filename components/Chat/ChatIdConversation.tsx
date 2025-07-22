@@ -385,7 +385,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       }
       
       const API_BASE_URL = process.env.NODE_ENV === 'production'
-        ? 'https://langgraph-defai-git-devworkflow-ritsuyans-projects.vercel.app'
+        ? 'https://langgraph-defai.vercel.app'
         : 'http://localhost:3009';
       // 调用 /api/chat-new 获取 AI 回复
       const response = await fetch(`${API_BASE_URL}/api/chat-new`, {
