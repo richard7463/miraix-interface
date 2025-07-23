@@ -13,6 +13,7 @@ import NewBridge from '@/components/DeFi/NewBridge'
 import StakingYield from '@/components/DeFi/StakingYield'
 import Market from '@/components/DeFi/Market'
 import TokenCreation from '@/components/DeFi/TokenCreation'
+import TokenListTable from './TokenListTable';
 import { createTokensFromSwapEntities } from '@/utils/swapHelpers'
 
 interface ChatIdConversationProps {
@@ -868,6 +869,17 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         ) : (
           <>
             {messages.map((message, index) => {
+              if (message.responseData?.dataType === 'tokenList' && Array.isArray(message.responseData?.data)) {
+                return (
+                  <div key={index} className="flex flex-col">
+                    <div className="md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[680px]">
+                        <TokenListTable data={message.responseData.data} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
               console.log(`[ChatIdConversation] Processing message ${index}:`, {
                 role: message.role,
                 content: message.content,
