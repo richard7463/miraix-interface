@@ -15,6 +15,10 @@ import Market from '@/components/DeFi/Market'
 import TokenCreation from '@/components/DeFi/TokenCreation'
 import TokenListTable from './TokenListTable';
 import { createTokensFromSwapEntities } from '@/utils/swapHelpers'
+import MarketTrendCard from '@/components/MarketTrendCard';
+import CompareChart from '@/components/CompareChart';
+import SentimentChart from '@/components/SentimentChart';
+import ErrorBanner from '@/components/ErrorBanner';
 
 interface ChatIdConversationProps {
   chatId: string;
@@ -869,12 +873,61 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         ) : (
           <>
             {messages.map((message, index) => {
-              if (message.responseData?.dataType === 'tokenList' && Array.isArray(message.responseData?.data)) {
+              // tokenList/defiPools
+              if ((message.responseData?.dataType === 'tokenList' || message.responseData?.dataType === 'defiPools') && Array.isArray(message.responseData?.data)) {
                 return (
                   <div key={index} className="flex flex-col">
                     <div className="md:ml-[76px] flex justify-center md:justify-start">
                       <div className="w-full max-w-[680px]">
                         <TokenListTable data={message.responseData.data} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              // marketTrend
+              if (message.responseData?.dataType === 'marketTrend' && message.responseData?.data) {
+                return (
+                  <div key={index} className="flex flex-col">
+                    <div className="md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[480px]">
+                        <MarketTrendCard data={message.responseData.data} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              // volatilityCompare
+              if (message.responseData?.dataType === 'volatilityCompare' && message.responseData?.data) {
+                return (
+                  <div key={index} className="flex flex-col">
+                    <div className="md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[680px]">
+                        <CompareChart data={message.responseData.data} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              // sentiment
+              if (message.responseData?.dataType === 'sentiment' && message.responseData?.data) {
+                return (
+                  <div key={index} className="flex flex-col">
+                    <div className="md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[480px]">
+                        <SentimentChart data={message.responseData.data} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              // error
+              if (message.responseData?.dataType === 'error' && message.responseData?.error) {
+                return (
+                  <div key={index} className="flex flex-col">
+                    <div className="md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[480px]">
+                        <ErrorBanner message={message.responseData.error} />
                       </div>
                     </div>
                   </div>
