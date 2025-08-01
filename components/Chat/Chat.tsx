@@ -115,9 +115,18 @@ const Chat = (props: ChatProps, ref: any) => {
   // 初始化聊天
   useEffect(() => {
     const initializeChat = async () => {
+      if (!authenticated) {
+        setToastMessage('Please login to your wallet first');
+        setToastType('warning');
+        setShowToast(true);
+        // Redirect to login page or block further access
+        router.push('/login');
+        return;
+      }
+
       if (!currentChat) {
         console.log('[Chat] Initializing new chat');
-        // 创建新的聊天
+        // Create new chat
         const newChat = {
           id: crypto.randomUUID(),
           isNew: false,
@@ -126,16 +135,15 @@ const Chat = (props: ChatProps, ref: any) => {
           updatedAt: new Date().toISOString()
         };
         
-        // 更新状态
+        // Update state
         setCurrentChat(newChat);
         setChatList([...chatList, newChat]);
         console.log('[Chat] Created new chat:', newChat);
       }
     };
 
-    // initializeChat();
-  }, [currentChat, chatList, setCurrentChat, setChatList]);
-
+    initializeChat();
+  }, [authenticated, currentChat, chatList, setCurrentChat, setChatList, router]);
 
   // Test proxy by requesting baidu.com and qq.com
 
