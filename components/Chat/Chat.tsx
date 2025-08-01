@@ -120,7 +120,7 @@ const Chat = (props: ChatProps, ref: any) => {
         setToastType('warning');
         setShowToast(true);
         // Redirect to login page or block further access
-        router.push('/login');
+       // router.push('/login');
         return;
       }
 
