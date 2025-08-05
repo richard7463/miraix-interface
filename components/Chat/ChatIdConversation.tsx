@@ -950,11 +950,10 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                  message.content.toLowerCase().includes('bridge') ||
                  message.responseData?.quote?.provider);
 
-              // 检查是否是 staking 操作
+              // 检查是否是 staking 操作 (协议选择)
               const isStakingOperation = message.role === 'assistant' && 
                 (message.responseData?.data?.intent === 'stakingAgent' || 
                  message.responseData?.data?.intent === 'staking' ||
-                 (message.content.toLowerCase().includes('staking') && message.responseData?.success !== false) ||
                  message.responseData?.quote?.protocols ||
                  (message.responseData?.success === true && message.responseData?.data?.quote?.protocols));
 
@@ -987,7 +986,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                 dataKeys: message.responseData?.data ? Object.keys(message.responseData.data) : []
               });
 
-              // 检查是否是 swap 操作
+              // 检查是否是 swap 操作 (包括 stake intent，因为它使用swap机制)
               const hasSwapData = !!(message.quote || 
                                    message.swapEntities ||
                                    (message.responseData?.success === true && message.responseData?.data?.quote) ||
@@ -1008,7 +1007,10 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                                        message.responseData?.data?.quote ||
                                        message.responseData?.data?.swapEntities);
               
-              const isSwapInitiation = message.role === 'assistant' && hasRealSwapData && !isBridgeOperation && !isStakingOperation && !isMarketOperation && !isTokenCreationOperation;
+              // 对于stake intent，如果有quote数据，应该显示NewSwap组件
+              const isStakeIntent = message.responseData?.data?.intent === 'stake';
+              
+              const isSwapInitiation = message.role === 'assistant' && (hasRealSwapData || (isStakeIntent && message.quote)) && !isBridgeOperation && !isStakingOperation && !isMarketOperation && !isTokenCreationOperation;
               
               // 恢复swap组件显示，但使用更严格的判断
               const shouldShowSwapComponent = true;
