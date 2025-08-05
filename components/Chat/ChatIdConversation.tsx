@@ -954,7 +954,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
               const isStakingOperation = message.role === 'assistant' && 
                 (message.responseData?.data?.intent === 'stakingAgent' || 
                  message.responseData?.data?.intent === 'staking' ||
-                 message.content.toLowerCase().includes('staking') ||
+                 (message.content.toLowerCase().includes('staking') && message.responseData?.success !== false) ||
                  message.responseData?.quote?.protocols ||
                  (message.responseData?.success === true && message.responseData?.data?.quote?.protocols));
 
