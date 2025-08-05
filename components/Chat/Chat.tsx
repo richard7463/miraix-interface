@@ -112,18 +112,9 @@ const Chat = (props: ChatProps, ref: any) => {
     });
   }, [ready, authenticated, solanaWallets]);
 
-  // 初始化聊天
+  // 初始化聊天 - 移除登录检查，只在用户发送消息时检查
   useEffect(() => {
     const initializeChat = async () => {
-      if (!authenticated) {
-        setToastMessage('Please login to your wallet first');
-        setToastType('warning');
-        setShowToast(true);
-        // Redirect to login page or block further access
-       // router.push('/login');
-        return;
-      }
-
       if (!currentChat) {
         console.log('[Chat] Initializing new chat');
         // Create new chat
@@ -143,7 +134,7 @@ const Chat = (props: ChatProps, ref: any) => {
     };
 
     initializeChat();
-  }, [authenticated, currentChat, chatList, setCurrentChat, setChatList, router]);
+  }, [currentChat, chatList, setCurrentChat, setChatList]);
 
   // Test proxy by requesting baidu.com and qq.com
 
@@ -198,6 +189,14 @@ const Chat = (props: ChatProps, ref: any) => {
       console.log('[sendMessage] called', { isLoading, message, currentChatId: currentChat?.id });
       if (isLoading || !message.trim()) return;
 
+      // 检查登录状态
+      if (!authenticated) {
+        setToastMessage('Please login to your wallet first');
+        setToastType('warning');
+        setShowToast(true);
+        return;
+      }
+
       try {
         setIsLoading(true);
         const input = message.trim();
@@ -251,7 +250,7 @@ const Chat = (props: ChatProps, ref: any) => {
         setIsLoading(false);
       }
     },
-    [isLoading, message, setMessages, getMessages, router, updateChatStatus, solanaWallets, setCurrentChat, setChatList]
+    [isLoading, message, setMessages, getMessages, router, updateChatStatus, solanaWallets, setCurrentChat, setChatList, authenticated, setToastMessage, setToastType, setShowToast]
   );
 
   // 统一的发送处理函数
@@ -278,6 +277,14 @@ const Chat = (props: ChatProps, ref: any) => {
         
         const input = message.trim();
         if (input && !isLoading) {
+          // 检查登录状态
+          if (!authenticated) {
+            setToastMessage('Please login to your wallet first');
+            setToastType('warning');
+            setShowToast(true);
+            return;
+          }
+
           console.log('[handleKeypress] Sending message:', input);
           setIsLoading(true);
           setMessage('');
@@ -322,7 +329,7 @@ const Chat = (props: ChatProps, ref: any) => {
         }
       }
     },
-    [setCurrentChat, setMessages, updateChatStatus, router, solanaWallets, isLoading, message]
+    [setCurrentChat, setMessages, updateChatStatus, router, solanaWallets, isLoading, message, authenticated, setToastMessage, setToastType, setShowToast]
   );
 
   const clearMessages = () => {
@@ -481,6 +488,14 @@ const Chat = (props: ChatProps, ref: any) => {
               
               const input = message.trim();
               if (input && !isLoading) {
+                // 检查登录状态
+                if (!authenticated) {
+                  setToastMessage('Please login to your wallet first');
+                  setToastType('warning');
+                  setShowToast(true);
+                  return;
+                }
+
                 console.log('[SendButton] Sending message:', input);
                 setIsLoading(true);
                 setMessage('');

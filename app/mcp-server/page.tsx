@@ -245,20 +245,20 @@ export default function MCPServerPage() {
   const currentServers = filteredServers.slice(startIndex, endIndex)
 
   return (
-    <main className="min-h-screen pt-24 pb-16 overflow-y-auto relative" style={{ backgroundColor: theme === 'light' ? '#F8F9FB' : '#27272a' }}>
+    <main className="overflow-y-auto relative bg-zinc-800" style={{ height: 'calc(100vh - 46px)' }}>
       {/* 背景装饰 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#4C94E5] rounded-full opacity-10 blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#4C94E5] rounded-full opacity-10 blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative">
+      <div className="container mx-auto px-4 relative pt-6">
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-[#4C94E5] to-[#3d7bc4] bg-clip-text text-transparent">
               Model Context Protocol
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-gray-300 max-w-2xl mx-auto">
               Extend your agent's capabilities with our curated collection of MCP servers. Each server brings unique functionality to enhance your AI experience.
             </p>
           </div>
@@ -269,7 +269,7 @@ export default function MCPServerPage() {
             <div className="relative">
               <input
                 placeholder="Search MCP Server"
-                className="w-full px-6 py-4 rounded-lg pl-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md text-gray-900 dark:text-gray-100 border border-gray-200/50 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-[#4C94E5] focus:border-transparent transition-all duration-300"
+                className="w-full px-6 py-4 rounded-lg pl-12 bg-gray-800/80 backdrop-blur-md text-gray-100 border border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-[#4C94E5] focus:border-transparent transition-all duration-300"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -291,8 +291,8 @@ export default function MCPServerPage() {
 
           {/* 分类过滤器 - 创新滚动设计 */}
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#F8F9FB] dark:from-[#111217] to-transparent z-10"></div>
-            <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#F8F9FB] dark:from-[#111217] to-transparent z-10"></div>
+            <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-zinc-800 to-transparent z-10"></div>
+            <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-zinc-800 to-transparent z-10"></div>
             <div className="flex gap-4 py-4 overflow-x-auto scrollbar-hide px-8">
               {categories.map((category) => (
                 <div
@@ -300,7 +300,7 @@ export default function MCPServerPage() {
                   className={`inline-flex items-center rounded-full border text-sm font-medium transition-all duration-300 cursor-pointer px-6 py-2 whitespace-nowrap ${
                     selectedCategory === category
                       ? 'bg-gradient-to-r from-[#4C94E5] to-[#3d7bc4] text-white shadow-lg scale-105'
-                      : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border-gray-200/50 dark:border-gray-700/50'
+                      : 'bg-gray-800/80 backdrop-blur-md text-gray-300 hover:bg-gray-700 border-gray-700/50'
                   }`}
                   onClick={() => setSelectedCategory(category)}
                 >
@@ -315,7 +315,7 @@ export default function MCPServerPage() {
             {currentServers.map((server) => (
               <div
                 key={server.id}
-                className={`group relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl p-6 transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl hover:scale-[1.02] cursor-pointer ${
+                className={`group relative bg-gray-800/80 backdrop-blur-md rounded-xl p-6 transition-all duration-300 border border-gray-700/50 hover:shadow-2xl hover:scale-[1.02] cursor-pointer ${
                   hoveredServer === server.id ? 'ring-2 ring-[#4C94E5]' : ''
                 }`}
                 onMouseEnter={() => setHoveredServer(server.id)}
@@ -328,7 +328,7 @@ export default function MCPServerPage() {
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-r from-[#4C94E5] to-[#3d7bc4] rounded-full blur-md opacity-50"></div>
-                      <span className="relative flex shrink-0 overflow-hidden rounded-full w-12 h-12 bg-white border border-gray-200/50 dark:border-gray-700/50">
+                      <span className="relative flex shrink-0 overflow-hidden rounded-full w-12 h-12 bg-gray-700 border border-gray-600/50">
                         <img
                           className="aspect-square h-full w-full object-cover"
                           alt={`${server.name} logo`}
@@ -341,21 +341,21 @@ export default function MCPServerPage() {
                         {server.name}
                       </h3>
                       {server.author && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                        <div className="text-sm text-gray-400 truncate">
                           {server.author}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <p className="text-gray-600 dark:text-gray-300 line-clamp-4 text-sm leading-relaxed">
+                  <p className="text-gray-300 line-clamp-4 text-sm leading-relaxed">
                     {server.description}
                   </p>
 
                   <div className="flex items-center justify-between pt-4">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-gradient-to-r from-[#4C94E5] to-[#3d7bc4]"></span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{server.type}</span>
+                      <span className="text-sm text-gray-400">{server.type}</span>
                     </div>
                     <div className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-300 ${
                       server.status === 'active'
@@ -373,12 +373,12 @@ export default function MCPServerPage() {
           {/* 分页 - 创新设计 */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-8">
-              <div className="inline-flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-full border border-gray-200/50 dark:border-gray-700/50">
+              <div className="inline-flex items-center gap-2 p-2 bg-gray-800/80 backdrop-blur-md rounded-full border border-gray-700/50">
                 <button
                   className={`p-2 rounded-full transition-all duration-300 ${
                     currentPage === 1
                       ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'hover:bg-gray-700'
                   }`}
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
@@ -406,7 +406,7 @@ export default function MCPServerPage() {
                       className={`w-8 h-8 rounded-full transition-all duration-300 ${
                         currentPage === pageNum
                           ? 'bg-gradient-to-r from-[#4C94E5] to-[#3d7bc4] text-white'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                          : 'hover:bg-gray-700'
                       }`}
                       onClick={() => setCurrentPage(pageNum)}
                     >
@@ -419,7 +419,7 @@ export default function MCPServerPage() {
                   className={`p-2 rounded-full transition-all duration-300 ${
                     currentPage === totalPages
                       ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : 'hover:bg-gray-700'
                   }`}
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
