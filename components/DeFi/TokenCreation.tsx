@@ -54,12 +54,12 @@ export default function TokenCreation({
       // 从responseData中获取mintKeypair（如果存在的话）
       if (responseData?.mintKeypair) {
         setMintKeypair(responseData.mintKeypair);
-        console.log('🔍 Using mintKeypair from responseData');
+        console.log('🔍 Using mintKeypair from responseData:', responseData.mintKeypair.publicKey.toBase58());
       } else {
-        // 如果没有mintKeypair，创建一个新的（这种情况不应该发生）
-        const kp = Keypair.generate();
-        setMintKeypair(kp);
-        console.log('⚠️ No mintKeypair found in responseData, generated new one');
+        console.error('❌ No mintKeypair found in responseData!');
+        console.error('❌ This should not happen - mintKeypair should be passed from ChatIdConversation');
+        console.error('❌ responseData:', responseData);
+        setMintKeypair(null);
       }
     }
   }, [isTokenCreationData, responseData?.mintKeypair]);
@@ -81,7 +81,9 @@ export default function TokenCreation({
       return;
     }
     if (!mintKeypair) {
-      toast.error('Mint Keypair not generated');
+      toast.error('Mint Keypair missing - this is a development error. Please check console logs.');
+      console.error('❌ mintKeypair is null when trying to sign transaction');
+      console.error('❌ This means the mintKeypair was not properly passed from ChatIdConversation');
       return;
     }
 
@@ -218,6 +220,17 @@ export default function TokenCreation({
       
       // 3. 钱包签名
       console.log('✍️ Signing transaction...');
+      console.log('🔍 MintKeypair public key:', mintKeypair.publicKey.toBase58());
+      console.log('🔍 Expected mint address:', tokenInfo.mintAddress);
+      
+      // 验证mintKeypair是否匹配预期的mint地址
+      if (mintKeypair.publicKey.toBase58() !== tokenInfo.mintAddress) {
+        console.error('❌ MintKeypair mismatch!');
+        console.error('Expected:', tokenInfo.mintAddress);
+        console.error('Got:', mintKeypair.publicKey.toBase58());
+        throw new Error('Mint keypair does not match the expected mint address');
+      }
+      
       const signedTx = await embeddedWallet.signTransaction(transaction);
       // 4. mintKeypair签名
       signedTx.partialSign(mintKeypair);

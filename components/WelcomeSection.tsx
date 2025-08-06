@@ -85,7 +85,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
             onClick={handleCreateTokenExample}
             className="px-4 sm:px-8 md:px-10 py-2 sm:py-4 text-sm sm:text-lg md:text-xl font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition-colors duration-200"
           >
-            Create a token named abcpump ...
+            Create a token named abcpump
           </button>
         </div>
       </div>

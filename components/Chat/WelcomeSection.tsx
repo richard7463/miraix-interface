@@ -29,7 +29,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           message = 'Find me the best staking yields';
           break;
         case 'createToken':
-          message = 'Create a token named abcpump ...';
+          message = 'Create a token named abcpump';
           break;
         case 'knowledge':
           message = 'show me the documentation for Jupiter protocol';

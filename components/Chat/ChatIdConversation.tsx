@@ -379,6 +379,12 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                                    lastMessage.toLowerCase().includes('create a token') ||
                                    lastMessage.toLowerCase().includes('new token');
       
+      console.log('[getAIResponse] Token creation request check:', {
+        lastMessage,
+        isTokenCreationRequest,
+        lowerCase: lastMessage.toLowerCase()
+      });
+      
       // 如果是Token创建请求，生成mintKeypair并传递mintPubkey
       let mintPubkey = null;
       let mintKeypair: any = null;
