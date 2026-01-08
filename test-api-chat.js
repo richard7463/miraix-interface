@@ -15,7 +15,7 @@ async function testChatAPI() {
     console.log('发送请求数据:', JSON.stringify(requestData, null, 2));
     
     const API_BASE_URL = process.env.NODE_ENV === 'production'
-      ? 'https://langgraph-defai-git-devworkflow-ritsuyans-projects.vercel.app'
+      ? 'https://langgraph-defai.vercel.app'
       : 'http://localhost:3009';
 
     // 发送请求

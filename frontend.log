@@ -1,0 +1,2893 @@
+
+> chatgpt-lite@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.3.1 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://10.11.1.38:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 830ms
+ ○ Compiling /chat ...
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+warn - As of Tailwind CSS v3.3, the `@tailwindcss/line-clamp` plugin is now included by default.
+warn - Remove it from the `plugins` array in your configuration to eliminate this warning.
+ ✓ Compiled /chat in 44.5s
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ GET /chat 200 in 46646ms
+ ○ Compiling /_not-found/page ...
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ HEAD /chat 200 in 2289ms
+ ✓ Compiled /_not-found/page in 38.9s
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 39435ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 1295ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 201ms
+ ○ Compiling /chat/[chatId] ...
+ ✓ Compiled /chat/[chatId] in 29.3s
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/dfaad2d3-2a02-49ce-ad3a-2ec748530045 200 in 30545ms
+ GET /chat/c848aff7-d250-45bb-a6b7-5b8d41445a04 200 in 27401ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /tokens/eth.png 404 in 379ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 115ms
+ ✓ Compiled in 4.7s
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/6be82dc4-c4d4-409b-9a02-107f8374eafb 200 in 509ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 280ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ GET /chat 200 in 2579ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 365ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 172ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ HEAD /chat 200 in 263ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/e0552140-a78c-4080-a75f-34cafde5be41 200 in 160ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 127ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/fe08967e-a898-472f-8702-6e9a815c902f 200 in 91ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 133ms
+ ✓ Compiled in 2.2s
+ ✓ Compiled in 609ms
+ ✓ Compiled in 489ms
+ ✓ Compiled in 655ms
+ ✓ Compiled in 716ms
+ ✓ Compiled in 1187ms
+ ✓ Compiled in 762ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/d7a4e4ea-f2f9-4705-9372-ef8b74fdf09f 200 in 472ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 426ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+bigint: Failed to load bindings, pure JS will be used (try npm run rebuild?)
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ GET /chat 200 in 2581ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 585ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 429ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ HEAD /chat 200 in 1151ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/16f2e690-4eb0-4286-a1cc-f7f3dfa823cf 200 in 1312ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 448ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 168ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/3363d06f-73b2-4376-9f49-ef1332ab75fe 200 in 145ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 201ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ GET /chat 200 in 488ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 165ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 1241ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 2627ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ HEAD /chat 200 in 2076ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/ada6278a-540f-4d6f-ab87-a9085c45ab67 200 in 956ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 267ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/2efd6e8d-a1bd-4356-a47d-0df206fc391a 200 in 141ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat 200 in 124ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/5a0d6b74-de42-4087-852f-561fbc3f1f24 200 in 159ms
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+warn - As of Tailwind CSS v3.3, the `@tailwindcss/line-clamp` plugin is now included by default.
+warn - Remove it from the `plugins` array in your configuration to eliminate this warning.
+ ✓ Compiled in 590ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ GET /chat 200 in 1209ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 703ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /favicon-32x32.png 404 in 358ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+theme in chatsidebar light
+chatList in ChatSideBar: []
+ HEAD /chat 200 in 747ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+ GET /chat/f1a06349-2a94-4d32-935d-719532000e8a 200 in 248ms
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 1, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:1:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+1 | @import 'tailwindcss/base';
+
+
+styles/globals.scss 2:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 2, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:2:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+2 | @import 'tailwindcss/components';
+
+
+styles/globals.scss 3:9  root stylesheet
+
+
+
+ ⚠ ./styles/globals.scss
+Issue while running loader
+SassWarning: Deprecation Warning on line 3, column 8 of file:///Users/yanqing/Documents/GitHub/miraix-interface/styles/globals.scss:3:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+3 | @import 'tailwindcss/utilities';
+
+
+styles/globals.scss 4:9  root stylesheet
+
+
+
+theme light
+[WalletPanel] Embedded EVM Wallets: []
+[WalletPanel] Embedded Solana Wallets: []
+[WalletPanel] Total Embedded EVM Wallets: 0
+[WalletPanel] Total Embedded Solana Wallets: 0
+[WalletPanel] Final Wallet Options: [ { id: 'all', name: 'All Wallets...' } ]
+[WalletPanel] Selected EVM Wallet: undefined
+[WalletPanel] Selected Solana Wallet: undefined
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 436ms

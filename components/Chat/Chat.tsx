@@ -95,7 +95,9 @@ const Chat = (props: ChatProps, ref: any) => {
     updateChatStatus,
     setMessages,
     getMessages,
-    setChatList
+    setChatList,
+    enableX402Payment,
+    setEnableX402Payment
   } = useChatStore();
 
   // 监控钱包状态变化
@@ -419,6 +421,44 @@ const Chat = (props: ChatProps, ref: any) => {
         position: 'absolute',
         flexDirection: 'column',
       }}>
+        {/* X402 Auto-Payment Toggle */}
+        <div style={{ width: '100%', maxWidth: '660px', margin: '0 auto', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                width: '44px',
+                height: '24px',
+                borderRadius: '12px',
+                backgroundColor: enableX402Payment ? '#3b82f6' : '#52525b',
+                transition: 'background-color 0.2s',
+                position: 'relative'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '2px',
+                  left: '2px',
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
+                  transform: enableX402Payment ? 'translateX(20px)' : 'translateX(0)',
+                  transition: 'transform 0.2s'
+                }}></div>
+              </div>
+              <input
+                type="checkbox"
+                checked={enableX402Payment}
+                onChange={(e) => setEnableX402Payment(e.target.checked)}
+                style={{ position: 'absolute', opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}
+              />
+            </div>
+            <span style={{ fontSize: '14px', color: '#d4d4d8', fontWeight: '500' }}>X402 Auto-Payment</span>
+            <span style={{ fontSize: '12px', color: '#71717a', marginLeft: '4px' }}>
+              {enableX402Payment ? '(Enabled - Auto complete workflow)' : '(Disabled - Manual confirm required)'}
+            </span>
+          </label>
+        </div>
+
         {/* 5 Action Buttons */}
         {/* <div style={{ width: '100%' }}>
           <SwapBridgeStakeActionButtons setMessage={setMessage} />

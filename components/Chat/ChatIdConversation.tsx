@@ -37,7 +37,9 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     getMessages,
     setChatList,
     messagesMap,
-    saveMessages
+    saveMessages,
+    enableX402Payment,
+    setEnableX402Payment
   } = useChatStore()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -410,7 +412,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         body: JSON.stringify({
           message: lastMessage,
           walletAddress: walletAddress,
-          mintPubkey: mintPubkey // 传递mintPubkey给后端
+          mintPubkey: mintPubkey, // 传递mintPubkey给后端
+          enableX402Payment: enableX402Payment // 传递x402自动支付设置给后端
         })
       });
       
@@ -1331,7 +1334,26 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="bottom-0 inset-x-0 z-30 bg-zinc-800 border-t border-gray-600 p-4" style={{ height: '100px' }}>
+      <div className="bottom-0 inset-x-0 z-30 bg-zinc-800 border-t border-gray-600 p-4" style={{ height: '130px' }}>
+        <div className="flex items-center justify-between mb-2 w-full lg:w-[100%] mx-auto">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={enableX402Payment}
+                onChange={(e) => setEnableX402Payment(e.target.checked)}
+                className="sr-only"
+              />
+              <div className={`w-11 h-6 rounded-full transition-colors duration-200 ${enableX402Payment ? 'bg-blue-500' : 'bg-gray-600'}`}>
+                <div className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200 ${enableX402Payment ? 'translate-x-5' : ''}`}></div>
+              </div>
+            </div>
+            <span className="text-sm text-gray-300">X402 Auto-Payment</span>
+            <span className="text-xs text-gray-500 ml-2">
+              {enableX402Payment ? '(Auto complete)' : '(Manual confirm)'}
+            </span>
+          </label>
+        </div>
         <div className="relative flex items-center w-full lg:w-[100%] mx-auto">
           <textarea
             value={input}

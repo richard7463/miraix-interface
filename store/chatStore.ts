@@ -9,6 +9,8 @@ interface ChatStore {
   currentChat: Chat | null
   chatList: Chat[]
   messagesMap: Map<string, any[]>
+  enableX402Payment: boolean
+  setEnableX402Payment: (enabled: boolean) => void
   setCurrentChat: (chat: Chat | null) => void
   setChatList: (chats: Chat[]) => void
   updateChatStatus: (chatId: string, isNew: boolean) => void
@@ -24,7 +26,10 @@ export const useChatStore = create<ChatStore>()(
       currentChat: null,
       chatList: [],
       messagesMap: new Map<string, any[]>(),
-      
+      enableX402Payment: false,
+
+      setEnableX402Payment: (enabled) => set({ enableX402Payment: enabled }),
+
       setCurrentChat: (chat) => set({ currentChat: chat }),
       
       setChatList: (chats) => set({ chatList: chats }),
@@ -148,7 +153,8 @@ export const useChatStore = create<ChatStore>()(
       name: 'chat-storage',
       partialize: (state) => ({
         chatList: state.chatList,
-        messagesMap: Array.from(state.messagesMap.entries())
+        messagesMap: Array.from(state.messagesMap.entries()),
+        enableX402Payment: state.enableX402Payment
       })
     }
   )
