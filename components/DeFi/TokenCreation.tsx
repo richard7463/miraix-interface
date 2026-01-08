@@ -112,8 +112,8 @@ export default function TokenCreation({
       });
       
       // 创建连接 - 默认使用devnet进行测试
-      const rpcEndpoint = tokenInfo.network === 'mainnet' 
-        ? 'https://summer-wider-road.solana-mainnet.quiknode.pro/a2075ac578a82df2b00d14546fd7bb29c15d8ba3/'
+      const rpcEndpoint = tokenInfo.network === 'mainnet'
+        ? 'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/'
         : 'https://api.devnet.solana.com';
       
       console.log('🔗 Using RPC endpoint:', rpcEndpoint, 'for network:', tokenInfo.network || 'devnet');

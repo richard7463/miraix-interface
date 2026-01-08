@@ -488,7 +488,7 @@ export default function NewSwap({
       }
       
       // 使用项目中已有的 RPC 端点
-      const connection = new Connection('https://summer-wider-road.solana-mainnet.quiknode.pro/a2075ac578a82df2b00d14546fd7bb29c15d8ba3/', 'confirmed');
+      const connection = new Connection('https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/', 'confirmed');
       const userPublicKey = new PublicKey(embeddedWallet.address);
       console.log('[NewSwap] 查询钱包地址:', userPublicKey.toBase58());
       try {
@@ -696,7 +696,7 @@ export default function NewSwap({
 
     // 2. 重新检查余额（确保获取最新余额）
     console.log('💰 Checking balance before transaction...');
-    const connection = new Connection('https://summer-wider-road.solana-mainnet.quiknode.pro/a2075ac578a82df2b00d14546fd7bb29c15d8ba3/', 'confirmed');
+    const connection = new Connection('https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/', 'confirmed');
     const userPublicKey = new PublicKey(embeddedWallet.address);
     console.log('💰 Checking balance for address:', userPublicKey.toBase58());
     console.log('💰 From token:', fromToken.symbol, 'Address:', fromToken.address);
@@ -819,7 +819,7 @@ export default function NewSwap({
       
       // 使用多个 RPC 端点检查余额
       const rpcEndpoints = [
-        'https://summer-wider-road.solana-mainnet.quiknode.pro/a2075ac578a82df2b00d14546fd7bb29c15d8ba3/',
+        'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
         'https://api.mainnet-beta.solana.com',
         'https://solana-api.projectserum.com'
       ];

@@ -247,7 +247,7 @@ export default function NewBridge({
 
     // 2. Check balance
     console.log('💰 Checking balance before bridge transaction...');
-    const connection = new Connection('https://summer-wider-road.solana-mainnet.quiknode.pro/a2075ac578a82df2b00d14546fd7bb29c15d8ba3/', 'confirmed');
+    const connection = new Connection('https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/', 'confirmed');
     const userPublicKey = new PublicKey(embeddedWallet.address);
     console.log('💰 Checking balance for address:', userPublicKey.toBase58());
     console.log('💰 From amount:', fromAmount);

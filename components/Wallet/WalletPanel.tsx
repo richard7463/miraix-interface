@@ -389,7 +389,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
             if (activeTab === 'transactions' && selectedWallet.startsWith('solana-') && solanaWallet) {
                 setLoadingTx(true);
                 try {
-                    const connection = new Connection('https://summer-wider-road.solana-mainnet.quiknode.pro/a2075ac578a82df2b00d14546fd7bb29c15d8ba3/');
+                    const connection = new Connection('https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/');
                     const publicKey = new PublicKey(solanaWallet.address);
                     const signatures = await connection.getSignaturesForAddress(publicKey, { limit: 10 });
                     const txs = await Promise.all(
