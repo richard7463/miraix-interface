@@ -1130,7 +1130,43 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                   })()}
 
                   {/* Render Thoughts and NewSwap if this is the swap initiation reply */}
-                  {isSwapInitiation && shouldShowSwapComponent && (
+                  {isSwapInitiation && shouldShowSwapComponent && (() => {
+                    // 检查是否 X402 已执行（通过 thoughts 中是否有 swap 执行步骤）
+                    const thoughts = message.thoughts || [];
+                    const hasSwapExecution = thoughts.some(t =>
+                      t.toLowerCase().includes('swap execution') ||
+                      t.toLowerCase().includes('execution failed') ||
+                      t.toLowerCase().includes('confirming swap')
+                    );
+
+                    console.log('[ChatIdConversation] X402 check:', {
+                      hasSwapExecution,
+                      thoughts: thoughts.join(', ')
+                    });
+
+                    // 如果 X402 已执行（后端已经尝试完成交易），不显示 NewSwap 组件
+                    if (hasSwapExecution) {
+                      return (
+                        <div className="swap-thoughts-wrapper md:ml-[76px] flex justify-center md:justify-start">
+                          <div className="w-full max-w-[480px]">
+                            <Thoughts thoughts={message.thoughts || []} />
+                            <div className="bg-gray-800 rounded-lg p-4 mt-2">
+                              <p className="text-sm text-gray-300">
+                                X402 Auto-payment: Transaction was processed automatically.
+                              </p>
+                              {message.responseData?.error && (
+                                <p className="text-sm text-red-400 mt-2">
+                                  Error: {message.responseData.error}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // 否则显示 NewSwap 组件供用户确认
+                    return (
                     <div className="swap-thoughts-wrapper md:ml-[76px] flex justify-center md:justify-start">
                       <div className="w-full max-w-[480px]">
                         <Thoughts thoughts={message.thoughts || []} />
@@ -1187,15 +1223,16 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                             );
                           })()
                         ) : (
-                          <NewSwap 
+                          <NewSwap
                             responseData={message.responseData}
                             quote={message.quote}
                             onTransactionSuccess={handleTransactionSuccess}
                           />
                         )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                   
                   {/* Render transaction status card if this is a transaction success message */}
                   {message.transactionStatus && (
