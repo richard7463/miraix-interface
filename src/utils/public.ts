@@ -294,7 +294,7 @@ export const queryTokenData = async (address: string): Promise<TokenData | null>
   if (!address) return null;
   
   try {
-    const response = await fetch(`https://api.jup.ag/tokens/v1/token/${address}`, {
+    const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${address}`, {
       headers: {
         'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
       }
@@ -304,8 +304,20 @@ export const queryTokenData = async (address: string): Promise<TokenData | null>
       return null;
     }
     
-    const tokenData: TokenData = await response.json();
-    return tokenData;
+    const tokenDataArray = await response.json();
+    const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+    
+    if (!tokenData) {
+      console.error('Token not found');
+      return null;
+    }
+    
+    // 转换 V2 格式到兼容格式
+    return {
+      ...tokenData,
+      address: tokenData.id,
+      logoURI: tokenData.icon
+    } as TokenData;
     
   } catch (error) {
     console.error('Error fetching token data:', error);

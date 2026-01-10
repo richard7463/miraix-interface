@@ -148,7 +148,7 @@ const HARDCODED_TOKEN_DATA = {
 };
 
 // Jupiter API端点
-const JUPITER_API_BASE = 'https://api.jup.ag/tokens/v1';
+const JUPITER_API_BASE = 'https://api.jup.ag/tokens/v2';
 const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v6';
 const JUPITER_API_KEY = '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7';
 
@@ -161,8 +161,8 @@ async function getTokenMetadata(mintAddress) {
   try {
     console.log(`[getTokenMetadata] 获取token元信息: ${mintAddress}`);
     
-    // 首先尝试从API获取
-    const response = await fetchFunction(`${JUPITER_API_BASE}/token/${mintAddress}`, {
+    // 使用 V2 search API
+    const response = await fetchFunction(`${JUPITER_API_BASE}/search?query=${mintAddress}`, {
       headers: {
         'x-api-key': JUPITER_API_KEY
       }
@@ -172,15 +172,26 @@ async function getTokenMetadata(mintAddress) {
       throw new Error(`HTTP ${response.status}`);
     }
     
-    const data = await response.json();
+    const dataArray = await response.json();
+    const data = Array.isArray(dataArray) && dataArray.length > 0 ? dataArray[0] : null;
+    
+    if (!data) {
+      throw new Error('Token not found');
+    }
+    
     console.log(`[getTokenMetadata] API成功获取token元信息:`, {
       name: data.name,
       symbol: data.symbol,
       decimals: data.decimals,
-      logoURI: data.logoURI
+      icon: data.icon
     });
     
-    return data;
+    // 转换 V2 格式到兼容格式
+    return {
+      ...data,
+      logoURI: data.icon,
+      address: data.id
+    };
   } catch (error) {
     console.error(`[getTokenMetadata] API获取失败，使用硬编码数据: ${mintAddress}`, error.message);
     

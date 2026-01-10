@@ -278,11 +278,11 @@ export default function NewSwap({
     if (slippageProp !== undefined) setSlippage(slippageProp);
   }, [slippageProp]);
 
-  // 使用 Jupiter API 获取 token 信息
+  // 使用 Jupiter API V2 获取 token 信息
   const getTokenInfoFromJupiter = async (mintAddress: string) => {
     try {
-      console.log(`🔍 从 Jupiter API 获取 token 信息: ${mintAddress}`);
-      const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+      console.log(`🔍 从 Jupiter API V2 获取 token 信息: ${mintAddress}`);
+      const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
         headers: {
           'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
         }
@@ -292,17 +292,31 @@ export default function NewSwap({
         throw new Error(`HTTP ${response.status}`);
       }
       
-      const tokenData = await response.json();
-      console.log(`✅ Jupiter API 返回的 token 信息:`, {
+      const tokenDataArray = await response.json();
+      // V2 API 返回数组，取第一个结果
+      const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+      
+      if (!tokenData) {
+        throw new Error('Token not found');
+      }
+      
+      console.log(`✅ Jupiter API V2 返回的 token 信息:`, {
         symbol: tokenData.symbol,
         name: tokenData.name,
         decimals: tokenData.decimals,
-        logoURI: tokenData.logoURI
+        icon: tokenData.icon
       });
       
-      return tokenData;
+      // 转换 V2 格式到兼容格式
+      return {
+        symbol: tokenData.symbol,
+        name: tokenData.name,
+        decimals: tokenData.decimals,
+        logoURI: tokenData.icon,
+        address: tokenData.id
+      };
     } catch (error) {
-      console.error(`❌ 从 Jupiter API 获取 token 信息失败: ${mintAddress}`, error);
+      console.error(`❌ 从 Jupiter API V2 获取 token 信息失败: ${mintAddress}`, error);
       return null;
     }
   };
@@ -330,17 +344,18 @@ export default function NewSwap({
       if (actualQuote.outputMint) {
         // 异步获取 token decimals
         const processOutputMint = async () => {
-          // 使用 Jupiter API 获取 token 信息来确定正确的 decimals
+          // 使用 Jupiter API V2 获取 token 信息来确定正确的 decimals
           const getTokenDecimalsFromAPI = async (mintAddress: string) => {
             try {
-              const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+              const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
                 headers: {
                   'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
                 }
               });
               if (response.ok) {
-                const tokenData = await response.json();
-                return tokenData.decimals;
+                const tokenDataArray = await response.json();
+                const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+                if (tokenData) return tokenData.decimals;
               }
             } catch (error) {
               console.warn(`⚠️ 无法从 API 获取 ${mintAddress} 的 decimals`);
@@ -384,14 +399,15 @@ export default function NewSwap({
         const processInputMint = async () => {
           const getTokenDecimalsFromAPI = async (mintAddress: string) => {
             try {
-              const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+              const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
                 headers: {
                   'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
                 }
               });
               if (response.ok) {
-                const tokenData = await response.json();
-                return tokenData.decimals;
+                const tokenDataArray = await response.json();
+                const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+                if (tokenData) return tokenData.decimals;
               }
             } catch (error) {
               console.warn(`⚠️ 无法从 API 获取 ${mintAddress} 的 decimals`);
@@ -453,17 +469,18 @@ export default function NewSwap({
             // 如果 Jupiter API 失败，使用 fallback 方法
             console.warn('⚠️ Jupiter API 获取 token 信息失败，使用 fallback 方法');
             
-            // 尝试从 Jupiter API 获取 decimals 作为 fallback
+            // 尝试从 Jupiter API V2 获取 decimals 作为 fallback
             const getFallbackDecimals = async (mintAddress: string) => {
               try {
-                const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+                const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
                   headers: {
                     'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
                   }
                 });
                 if (response.ok) {
-                  const tokenData = await response.json();
-                  return tokenData.decimals;
+                  const tokenDataArray = await response.json();
+                  const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+                  if (tokenData) return tokenData.decimals;
                 }
               } catch (error) {
                 console.warn(`⚠️ Fallback API 也失败了: ${mintAddress}`);
@@ -611,8 +628,8 @@ export default function NewSwap({
     try {
       console.log(`🔍 fetchTokenInfoByAddress: 获取地址 ${address} 的 token 信息`);
       
-      // 使用 Jupiter API 获取 token 信息
-      const response = await fetch(`https://api.jup.ag/tokens/v1/token/${address}`, {
+      // 使用 Jupiter API V2 获取 token 信息
+      const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${address}`, {
         headers: {
           'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
         }
@@ -622,23 +639,29 @@ export default function NewSwap({
         throw new Error(`HTTP ${response.status}`);
       }
       
-      const tokenData = await response.json();
+      const tokenDataArray = await response.json();
+      const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+      
+      if (!tokenData) {
+        throw new Error('Token not found');
+      }
+      
       console.log(`✅ fetchTokenInfoByAddress: 成功获取 token 信息:`, {
         symbol: tokenData.symbol,
         name: tokenData.name,
         decimals: tokenData.decimals,
-        logoURI: tokenData.logoURI
+        icon: tokenData.icon
       });
       
       return {
         symbol: tokenData.symbol,
         name: tokenData.name,
-        logo: tokenData.logoURI || '',
+        logo: tokenData.icon || '',
         address,
         chain: 'SOLANA',
         mint: address,
         decimals: tokenData.decimals,
-        image: tokenData.logoURI || '',
+        image: tokenData.icon || '',
         balance: 0
       } as any;
     } catch (error) {
