@@ -294,7 +294,11 @@ export const queryTokenData = async (address: string): Promise<TokenData | null>
   if (!address) return null;
   
   try {
-    const response = await fetch(`https://tokens.jup.ag/token/${address}`);
+    const response = await fetch(`https://api.jup.ag/tokens/v1/token/${address}`, {
+      headers: {
+        'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+      }
+    });
     if (!response.ok) {
       console.error('Failed to fetch token data:', response.statusText);
       return null;

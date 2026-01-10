@@ -31,8 +31,9 @@ const TOKEN_MINTS = {
 };
 
 // Jupiter API 端点
-const JUPITER_API_BASE = 'https://tokens.jup.ag';
+const JUPITER_API_BASE = 'https://api.jup.ag/tokens/v1';
 const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v6';
+const JUPITER_API_KEY = '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7';
 
 /**
  * 获取token的元信息
@@ -43,7 +44,11 @@ async function getTokenMetadata(mintAddress) {
   try {
     console.log(`🔍 获取token元信息: ${mintAddress}`);
     
-    const response = await fetch(`${JUPITER_API_BASE}/token/${mintAddress}`);
+    const response = await fetch(`${JUPITER_API_BASE}/token/${mintAddress}`, {
+      headers: {
+        'x-api-key': JUPITER_API_KEY
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

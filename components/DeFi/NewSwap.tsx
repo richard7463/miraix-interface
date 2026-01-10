@@ -282,7 +282,11 @@ export default function NewSwap({
   const getTokenInfoFromJupiter = async (mintAddress: string) => {
     try {
       console.log(`🔍 从 Jupiter API 获取 token 信息: ${mintAddress}`);
-      const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+      const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+        headers: {
+          'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -329,7 +333,11 @@ export default function NewSwap({
           // 使用 Jupiter API 获取 token 信息来确定正确的 decimals
           const getTokenDecimalsFromAPI = async (mintAddress: string) => {
             try {
-              const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+              const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+                headers: {
+                  'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+                }
+              });
               if (response.ok) {
                 const tokenData = await response.json();
                 return tokenData.decimals;
@@ -376,7 +384,11 @@ export default function NewSwap({
         const processInputMint = async () => {
           const getTokenDecimalsFromAPI = async (mintAddress: string) => {
             try {
-              const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+              const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+                headers: {
+                  'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+                }
+              });
               if (response.ok) {
                 const tokenData = await response.json();
                 return tokenData.decimals;
@@ -444,7 +456,11 @@ export default function NewSwap({
             // 尝试从 Jupiter API 获取 decimals 作为 fallback
             const getFallbackDecimals = async (mintAddress: string) => {
               try {
-                const response = await fetch(`https://tokens.jup.ag/token/${mintAddress}`);
+                const response = await fetch(`https://api.jup.ag/tokens/v1/token/${mintAddress}`, {
+                  headers: {
+                    'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+                  }
+                });
                 if (response.ok) {
                   const tokenData = await response.json();
                   return tokenData.decimals;
@@ -596,7 +612,11 @@ export default function NewSwap({
       console.log(`🔍 fetchTokenInfoByAddress: 获取地址 ${address} 的 token 信息`);
       
       // 使用 Jupiter API 获取 token 信息
-      const response = await fetch(`https://tokens.jup.ag/token/${address}`);
+      const response = await fetch(`https://api.jup.ag/tokens/v1/token/${address}`, {
+        headers: {
+          'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
