@@ -19,6 +19,7 @@ import MarketTrendCard from '@/components/MarketTrendCard';
 import CompareChart from '@/components/CompareChart';
 import SentimentChart from '@/components/SentimentChart';
 import ErrorBanner from '@/components/ErrorBanner';
+import { Connection, VersionedTransaction, Transaction } from '@solana/web3.js';
 
 interface ChatIdConversationProps {
   chatId: string;
@@ -53,6 +54,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
   const [thinkingDots, setThinkingDots] = useState<string>('');
   const [chatCreated, setChatCreated] = useState(false);
   const [tokenDataMap, setTokenDataMap] = useState<{[key: string]: any}>({});
+  const [processedX402Transactions, setProcessedX402Transactions] = useState<Set<string>>(new Set());
 
   // 获取 Solana 钱包地址
   const getWalletAddress = () => {
@@ -73,6 +75,107 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       setThinkingDots('');
     }
   }, [isLoading, isStreaming]);
+
+  // X402 自动签名和广播交易
+  useEffect(() => {
+    const handleX402AutoSign = async () => {
+      // 找到需要 X402 自动签名的消息
+      const x402Message = messages.find(msg => 
+        msg.responseData?.enableX402Payment === true && 
+        msg.responseData?.phase === 'waitingForX402Signature' &&
+        msg.responseData?.transaction &&
+        msg.id &&
+        !processedX402Transactions.has(msg.id)
+      );
+
+      if (!x402Message || !x402Message.id) {
+        return;
+      }
+
+      console.log('[X402] 检测到 X402 自动签名请求:', x402Message.id);
+
+      // 标记为已处理（防止重复处理）
+      setProcessedX402Transactions(prev => new Set(prev).add(x402Message.id!));
+
+      try {
+        // 获取钱包
+        const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
+        if (!embeddedWallet) {
+          toast.error('未找到钱包，请连接您的钱包');
+          return;
+        }
+
+        console.log('[X402] 使用钱包地址:', embeddedWallet.address);
+
+        // 获取未签名的交易数据
+        const swapTransactionBase64 = x402Message.responseData!.transaction;
+        console.log('[X402] 交易数据长度:', swapTransactionBase64.length);
+
+        // 反序列化交易
+        const transactionBuffer = Buffer.from(swapTransactionBase64, 'base64');
+        let transaction: Transaction | VersionedTransaction;
+
+        try {
+          transaction = VersionedTransaction.deserialize(transactionBuffer);
+          console.log('[X402] 使用 VersionedTransaction 反序列化成功');
+        } catch (versionedError) {
+          console.log('[X402] VersionedTransaction 反序列化失败，尝试 Legacy Transaction');
+          transaction = Transaction.from(transactionBuffer);
+          console.log('[X402] 使用 Legacy Transaction 反序列化成功');
+        }
+
+        // 使用用户的钱包签名
+        console.log('[X402] 开始签名交易...');
+        const signedTransaction = await embeddedWallet.signTransaction(transaction);
+        console.log('[X402] 交易签名成功');
+
+        // 连接到 Solana 网络
+        const connection = new Connection(
+          'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
+          'confirmed'
+        );
+
+        // 广播交易
+        console.log('[X402] 开始广播交易...');
+        const rawTransaction = signedTransaction.serialize();
+        const signature = await connection.sendRawTransaction(rawTransaction, {
+          skipPreflight: false,
+          preflightCommitment: 'confirmed',
+          maxRetries: 3
+        });
+
+        console.log('[X402] 交易已广播, signature:', signature);
+        toast.success(`X402 自动支付成功! 交易签名: ${signature.substring(0, 8)}...`);
+
+        // 确认交易
+        console.log('[X402] 等待交易确认...');
+        const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+        
+        if (confirmation.value.err) {
+          throw new Error(`交易确认失败: ${JSON.stringify(confirmation.value.err)}`);
+        }
+
+        console.log('[X402] 交易确认成功');
+        toast.success('交易已确认！');
+
+        // 更新消息状态（可选：更新 UI 显示交易成功）
+        // 这里可以添加逻辑来更新消息内容，显示交易签名
+
+      } catch (error: any) {
+        console.error('[X402] 自动签名失败:', error);
+        toast.error(`X402 自动签名失败: ${error.message || '未知错误'}`);
+        
+        // 移除已处理标记，允许重试
+        setProcessedX402Transactions(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(x402Message.id!);
+          return newSet;
+        });
+      }
+    };
+
+    handleX402AutoSign();
+  }, [messages, solanaWallets, processedX402Transactions]);
 
   // 监听 currentChat 的变化，打印 isNew 状态
   useEffect(() => {
