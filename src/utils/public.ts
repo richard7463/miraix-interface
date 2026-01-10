@@ -625,7 +625,7 @@ export const createAndSignTransaction = async (
   wallet: any | any[],
   jitoFee?: number
 ): Promise<string> => {
-  const rpc1 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";
+  const rpc1 = "https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f";
   const rpc2 = jitoFee && jitoFee > 0 
     ? "https://mainnet.block-engine.jito.wtf/api/v1/transactions"
     : rpc1;
@@ -731,7 +731,7 @@ export const checkTransactionStatus = async (signature: string): Promise<{
   error?: string
 }> => {
   try {
-    const rpc = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";
+    const rpc = "https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f";
     const connection = new Connection(rpc);
     
     const response = await connection.getTransaction(signature, {
@@ -933,7 +933,7 @@ export const createAndBundleSignTransaction = async (
   wallet: any | any[],
   jitoFee?: number
 ): Promise<string[]> => {
-  let rpc1 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";//Paid RPC node
+  let rpc1 = "https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f";//Paid RPC node
   let rpc2 = "https://mainnet.block-engine.jito.wtf:443/api/v1/bundles";//Jito node for bundle transactions
   
   const connection1 = new Connection(rpc1);
@@ -1040,11 +1040,11 @@ export const createDifferentBuySellSignTransaction = async (
   slip: number,
   jitogas: string
 ) => {
-  const rpc1 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";
+  const rpc1 = "https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f";
   let rpc2 = "https://mainnet.block-engine.jito.wtf/api/v1/transactions";
 
   if (jitogas === "0") {
-    rpc2 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";
+    rpc2 = "https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f";
   }
 
   if (buyWallets.length !== sellWallets.length) {
@@ -1197,7 +1197,7 @@ export const executeTransactions = async(walletList, method, amount, mints, deci
   console.log(`交易参数: 钱包数量: ${walletList}, 金额: ${amount}, 代币地址: ${mints}, 滑点: ${slip}, Jito费用: ${jitogas}`);
   
   
-  const rpc1 = "https://crimson-young-snowflake.solana-mainnet.quiknode.pro/282a4e738fcc905b3fd6f75d744a2ca9f1ab4ef0";//这里收费结点rpc
+  const rpc1 = "https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f";//这里收费结点rpc
   const connection1 = new solanaWeb3.Connection(rpc1);
   const transactionDetails = []; // Store transaction details for each wallet
 
