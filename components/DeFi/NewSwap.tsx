@@ -878,11 +878,11 @@ export default function NewSwap({
         }
       }
       
-      const response = await fetch('https://quote-api.jup.ag/v6/swap', {
+      const response = await fetch('https://api.jup.ag/swap/v1/swap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await getAccessToken()}`
+          'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
         },
         body: JSON.stringify({
           quoteResponse: actualQuote,
