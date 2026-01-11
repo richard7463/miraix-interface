@@ -101,7 +101,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         // 获取钱包
         const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
         if (!embeddedWallet) {
-          toast.error('未找到钱包，请连接您的钱包');
+          toast.error('Wallet not found. Please connect your wallet.');
           return;
         }
 
@@ -144,18 +144,18 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         });
 
         console.log('[X402] 交易已广播, signature:', signature);
-        toast.success(`X402 自动支付成功! 交易签名: ${signature.substring(0, 8)}...`);
+        toast.success(`X402 auto-payment successful! Transaction signature: ${signature.substring(0, 8)}...`);
 
         // 确认交易
         console.log('[X402] 等待交易确认...');
         const confirmation = await connection.confirmTransaction(signature, 'confirmed');
 
         if (confirmation.value.err) {
-          throw new Error(`交易确认失败: ${JSON.stringify(confirmation.value.err)}`);
+          throw new Error(`Transaction confirmation failed: ${JSON.stringify(confirmation.value.err)}`);
         }
 
-        console.log('[X402] 交易确认成功');
-        toast.success('交易已确认！');
+        console.log('[X402] Transaction confirmed');
+        toast.success('Transaction confirmed!');
 
         // 尝试获取代币信息并显示交易成功确认卡片
         console.log('[X402] x402Message.responseData?.quote:', x402Message.responseData?.quote);
@@ -239,8 +239,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         }
 
       } catch (error: any) {
-        console.error('[X402] 自动签名失败:', error);
-        toast.error(`X402 自动签名失败: ${error.message || '未知错误'}`);
+        console.error('[X402] Auto-sign failed:', error);
+        toast.error(`X402 auto-sign failed: ${error.message || 'Unknown error'}`);
         
         // 移除已处理标记，允许重试
         setProcessedX402Transactions(prev => {
@@ -658,7 +658,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         content: 'Sorry, I am unable to connect to the server at the moment. Please check if the server is running or try again later.',
         timestamp: new Date().toISOString(),
         id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        thoughts: ['服务器连接失败'],
+        thoughts: ['Server connection failed'],
         quote: null,
         swapEntities: null,
         responseData: { error: error instanceof Error ? error.message : 'Unknown error' }
