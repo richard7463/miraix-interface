@@ -158,6 +158,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         toast.success('交易已确认！');
 
         // 尝试获取代币信息并显示交易成功确认卡片
+        console.log('[X402] x402Message.responseData?.quote:', x402Message.responseData?.quote);
+
         const getSimpleTokenInfo = async (mintAddress: string, defaultSymbol: string = 'Unknown') => {
           try {
             const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
@@ -187,9 +189,18 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
         try {
           const quote = x402Message.responseData?.quote;
+          console.log('[X402] Quote 检查:', {
+            quote: !!quote,
+            inputMint: quote?.inputMint,
+            outputMint: quote?.outputMint,
+            inAmount: quote?.inAmount,
+            outAmount: quote?.outAmount
+          });
+
           if (quote?.inputMint && quote?.outputMint) {
             const fromToken = await getSimpleTokenInfo(quote.inputMint, 'SOL');
             const toToken = await getSimpleTokenInfo(quote.outputMint, 'USDC');
+            console.log('[X402] Token info:', { fromToken, toToken });
 
             // 转换金额
             const fromDecimals = fromToken.decimals || 9;
@@ -201,11 +212,13 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
             console.log('[X402] 调用 handleTransactionSuccess 显示交易成功卡片');
             await handleTransactionSuccess(signature, fromToken, toToken, fromAmount, toAmount);
+            console.log('[X402] handleTransactionSuccess 调用完成');
           } else {
+            console.warn('[X402] Quote 数据不完整,使用 fallback');
             throw new Error('Quote data not available');
           }
         } catch (error) {
-          console.warn('[X402] 无法获取详细代币信息,显示基本成功消息:', error);
+          console.error('[X402] 无法获取详细代币信息,显示基本成功消息:', error);
           // 如果无法获取代币信息，仍然显示基本成功消息
           const successMessage: ChatMessage = {
             id: Date.now().toString(),
@@ -221,6 +234,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
               toAmount: '0'
             }
           };
+          console.log('[X402] Fallback 消息已添加到消息列表');
           setMessages(prev => [...prev, successMessage]);
         }
 
