@@ -150,7 +150,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         // 确认交易
         console.log('[X402] 等待交易确认...');
         const confirmation = await connection.confirmTransaction(signature, 'confirmed');
-        
+
         if (confirmation.value.err) {
           throw new Error(`交易确认失败: ${JSON.stringify(confirmation.value.err)}`);
         }
@@ -158,8 +158,68 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         console.log('[X402] 交易确认成功');
         toast.success('交易已确认！');
 
-        // 更新消息状态（可选：更新 UI 显示交易成功）
-        // 这里可以添加逻辑来更新消息内容，显示交易签名
+        // 尝试获取代币信息并显示交易成功确认卡片
+        const getSimpleTokenInfo = async (mintAddress: string, defaultSymbol: string = 'Unknown') => {
+          try {
+            const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
+              headers: {
+                'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+              }
+            });
+
+            if (!response.ok) {
+              console.warn('[X402] 获取 token 信息失败,使用默认值');
+              return { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
+            }
+
+            const tokenDataArray = await response.json();
+            const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+
+            return tokenData ? {
+              symbol: tokenData.symbol,
+              name: tokenData.name,
+              decimals: tokenData.decimals
+            } : { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
+          } catch (error) {
+            console.warn('[X402] 获取 token 信息出错:', error);
+            return { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
+          }
+        };
+
+        try {
+          const quote = x402Message.responseData?.quote;
+          if (quote?.inputMint && quote?.outputMint) {
+            const fromToken = await getSimpleTokenInfo(quote.inputMint, 'SOL');
+            const toToken = await getSimpleTokenInfo(quote.outputMint, 'USDC');
+
+            // 转换金额
+            const fromDecimals = fromToken.decimals || 9;
+            const toDecimals = toToken.decimals || 6;
+            const fromAmount = quote.inAmount ?
+              (Number(quote.inAmount) / Math.pow(10, fromDecimals)).toFixed(6) : '0';
+            const toAmount = quote.outAmount ?
+              (Number(quote.outAmount) / Math.pow(10, toDecimals)).toFixed(6) : '0';
+
+            console.log('[X402] 调用 handleTransactionSuccess 显示交易成功卡片');
+            await handleTransactionSuccess(signature, fromToken, toToken, fromAmount, toAmount);
+          } else {
+            throw new Error('Quote data not available');
+          }
+        } catch (error) {
+          console.warn('[X402] 无法获取详细代币信息,显示基本成功消息:', error);
+          // 如果无法获取代币信息，仍然显示基本成功消息
+          const successMessage: ChatMessage = {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: `Great! Your transaction has been completed successfully. Transaction signature: ${signature}`,
+            timestamp: new Date().toISOString(),
+            transactionStatus: {
+              txid: signature,
+              status: 'confirmed'
+            }
+          };
+          setMessages(prev => [...prev, successMessage]);
+        }
 
       } catch (error: any) {
         console.error('[X402] 自动签名失败:', error);
