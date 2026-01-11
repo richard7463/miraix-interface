@@ -139,8 +139,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         console.log('[X402] 开始广播交易...');
         const rawTransaction = signedTransaction.serialize();
         const signature = await connection.sendRawTransaction(rawTransaction, {
-          skipPreflight: false,
-          preflightCommitment: 'confirmed',
+          skipPreflight: true,  // X402 模式跳过预检查,避免模拟失败
           maxRetries: 3
         });
 
