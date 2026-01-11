@@ -215,7 +215,11 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
             timestamp: new Date().toISOString(),
             transactionStatus: {
               txid: signature,
-              status: 'confirmed'
+              status: 'confirmed',
+              fromToken: { symbol: 'Unknown', name: 'Unknown' },
+              toToken: { symbol: 'Unknown', name: 'Unknown' },
+              fromAmount: '0',
+              toAmount: '0'
             }
           };
           setMessages(prev => [...prev, successMessage]);
