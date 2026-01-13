@@ -165,10 +165,6 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         // Note: X402 in this context means "auto-sign with user wallet and execute"
         // The user pays gas fees, but the transaction is signed automatically
         console.log('[X402] Step 2/3: Broadcasting signed transaction to Solana...');
-        const connection = new Connection(
-          'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
-          'confirmed'
-        );
 
         try {
           const signature = await connection.sendRawTransaction(
