@@ -107,123 +107,183 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
         console.log('[X402] 使用钱包地址:', embeddedWallet.address);
 
-        // 获取未签名的交易数据
+        // Get unsigned transaction data
         const swapTransactionBase64 = x402Message.responseData!.transaction;
-        console.log('[X402] 交易数据长度:', swapTransactionBase64.length);
+        console.log('[X402] Transaction data length:', swapTransactionBase64.length);
 
-        // 反序列化交易
+        // Deserialize transaction
         const transactionBuffer = Buffer.from(swapTransactionBase64, 'base64');
         let transaction: Transaction | VersionedTransaction;
 
         try {
           transaction = VersionedTransaction.deserialize(transactionBuffer);
-          console.log('[X402] 使用 VersionedTransaction 反序列化成功');
+          console.log('[X402] Deserialized as VersionedTransaction');
         } catch (versionedError) {
-          console.log('[X402] VersionedTransaction 反序列化失败，尝试 Legacy Transaction');
+          console.log('[X402] VersionedTransaction deserialization failed, trying Legacy Transaction');
           transaction = Transaction.from(transactionBuffer);
-          console.log('[X402] 使用 Legacy Transaction 反序列化成功');
+          console.log('[X402] Deserialized as Legacy Transaction');
         }
 
-        // 使用用户的钱包签名
-        console.log('[X402] 开始签名交易...');
+        // Step 1: Sign with user wallet
+        console.log('[X402] Step 1/3: Signing with user wallet...');
         const signedTransaction = await embeddedWallet.signTransaction(transaction);
-        console.log('[X402] 交易签名成功');
+        console.log('[X402] User wallet signature successful');
 
-        // 连接到 Solana 网络
-        const connection = new Connection(
-          'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
-          'confirmed'
-        );
-
-        // 广播交易
-        console.log('[X402] 开始广播交易...');
-        const rawTransaction = signedTransaction.serialize();
-        const signature = await connection.sendRawTransaction(rawTransaction, {
-          skipPreflight: true,  // X402 模式跳过预检查,避免模拟失败
-          maxRetries: 3
-        });
-
-        console.log('[X402] 交易已广播, signature:', signature);
-        toast.success(`X402 auto-payment successful! Transaction signature: ${signature.substring(0, 8)}...`);
-
-        // 确认交易
-        console.log('[X402] 等待交易确认...');
-        const confirmation = await connection.confirmTransaction(signature, 'confirmed');
-
-        if (confirmation.value.err) {
-          throw new Error(`Transaction confirmation failed: ${JSON.stringify(confirmation.value.err)}`);
-        }
-
-        console.log('[X402] Transaction confirmed');
-        toast.success('Transaction confirmed!');
-
-        // 尝试获取代币信息并显示交易成功确认卡片
-        console.log('[X402] x402Message.responseData?.quote:', x402Message.responseData?.quote);
-
-        const getSimpleTokenInfo = async (mintAddress: string, defaultSymbol: string = 'Unknown') => {
-          try {
-            const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
-              headers: {
-                'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
-              }
-            });
-
-            if (!response.ok) {
-              console.warn('[X402] 获取 token 信息失败,使用默认值');
-              return { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
-            }
-
-            const tokenDataArray = await response.json();
-            const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
-
-            return tokenData ? {
-              symbol: tokenData.symbol,
-              name: tokenData.name,
-              decimals: tokenData.decimals
-            } : { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
-          } catch (error) {
-            console.warn('[X402] 获取 token 信息出错:', error);
-            return { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
-          }
-        };
+        // Step 2: Send to X402 facilitator for second signature
+        console.log('[X402] Step 2/3: Sending to X402 facilitator for dual-signature...');
+        const x402FacilitatorUrl = 'https://api.x402.dev';
 
         try {
-          const quote = x402Message.responseData?.quote;
-          console.log('[X402] Quote 检查:', {
-            quote: !!quote,
-            inputMint: quote?.inputMint,
-            outputMint: quote?.outputMint,
-            inAmount: quote?.inAmount,
-            outAmount: quote?.outAmount
+          const x402Response = await fetch(`${x402FacilitatorUrl}/payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              transaction: swapTransactionBase64,
+              signedTransaction: Buffer.from(signedTransaction.serialize()).toString('base64'),
+              walletAddress: embeddedWallet.address,
+              description: `X402 auto-payment swap`,
+              amount: x402Message.responseData?.quote?.inAmount || '0'
+            })
           });
 
-          if (quote?.inputMint && quote?.outputMint) {
-            const fromToken = await getSimpleTokenInfo(quote.inputMint, 'SOL');
-            const toToken = await getSimpleTokenInfo(quote.outputMint, 'USDC');
-            console.log('[X402] Token info:', { fromToken, toToken });
-
-            // 转换金额
-            const fromDecimals = fromToken.decimals || 9;
-            const toDecimals = toToken.decimals || 6;
-            const fromAmount = quote.inAmount ?
-              (Number(quote.inAmount) / Math.pow(10, fromDecimals)).toFixed(6) : '0';
-            const toAmount = quote.outAmount ?
-              (Number(quote.outAmount) / Math.pow(10, toDecimals)).toFixed(6) : '0';
-
-            console.log('[X402] 调用 handleTransactionSuccess 显示交易成功卡片');
-            await handleTransactionSuccess(signature, fromToken, toToken, fromAmount, toAmount);
-            console.log('[X402] handleTransactionSuccess 调用完成');
-          } else {
-            console.warn('[X402] Quote 数据不完整,使用 fallback');
-            throw new Error('Quote data not available');
+          if (!x402Response.ok) {
+            throw new Error(`X402 facilitator returned status ${x402Response.status}`);
           }
-        } catch (error) {
-          console.error('[X402] 无法获取详细代币信息,显示基本成功消息:', error);
-          // 如果无法获取代币信息，仍然显示基本成功消息
-          const successMessage: ChatMessage = {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: `Great! Your transaction has been completed successfully. Transaction signature: ${signature}`,
+
+          const x402Result = await x402Response.json();
+          console.log('[X402] X402 facilitator response:', x402Result);
+
+          if (!x402Result.success) {
+            throw new Error(`X402 payment failed: ${x402Result.error || 'Unknown error'}`);
+          }
+
+          // Step 3: Transaction executed by facilitator (dual-signed)
+          console.log('[X402] Step 3/3: Dual-signature transaction executed by facilitator');
+          const signature = x402Result.signature || x402Result.transactionId;
+          console.log('[X402] Transaction signature (dual-signed):', signature);
+          toast.success(`X402 dual-signature auto-payment successful! Transaction signature: ${signature.substring(0, 8)}...`);
+
+          // Verify transaction confirmation
+          console.log('[X402] Waiting for transaction confirmation...');
+          const connection = new Connection(
+            'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
+            'confirmed'
+          );
+          const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+
+          if (confirmation.value.err) {
+            throw new Error(`Transaction confirmation failed: ${JSON.stringify(confirmation.value.err)}`);
+          }
+
+          console.log('[X402] Transaction confirmed (dual-signed)');
+          toast.success('Transaction confirmed!');
+
+          // Try to get token info and display transaction success card
+          console.log('[X402] x402Message.responseData?.quote:', x402Message.responseData?.quote);
+
+          const getSimpleTokenInfo = async (mintAddress: string, defaultSymbol: string = 'Unknown') => {
+            try {
+              const response = await fetch(`https://api.jup.ag/tokens/v2/search?query=${mintAddress}`, {
+                headers: {
+                  'x-api-key': '9dfe02ba-941a-4c4a-952b-d0cccf5c21e7'
+                }
+              });
+
+              if (!response.ok) {
+                console.warn('[X402] Failed to get token info, using default values');
+                return { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
+              }
+
+              const tokenDataArray = await response.json();
+              const tokenData = Array.isArray(tokenDataArray) && tokenDataArray.length > 0 ? tokenDataArray[0] : null;
+
+              return tokenData ? {
+                symbol: tokenData.symbol,
+                name: tokenData.name,
+                decimals: tokenData.decimals
+              } : { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
+            } catch (error) {
+              console.warn('[X402] Error getting token info:', error);
+              return { symbol: defaultSymbol, name: defaultSymbol, decimals: 9 };
+            }
+          };
+
+          try {
+            const quote = x402Message.responseData?.quote;
+            console.log('[X402] Quote check:', {
+              quote: !!quote,
+              inputMint: quote?.inputMint,
+              outputMint: quote?.outputMint,
+              inAmount: quote?.inAmount,
+              outAmount: quote?.outAmount
+            });
+
+            if (quote?.inputMint && quote?.outputMint) {
+              const fromToken = await getSimpleTokenInfo(quote.inputMint, 'SOL');
+              const toToken = await getSimpleTokenInfo(quote.outputMint, 'USDC');
+              console.log('[X402] Token info:', { fromToken, toToken });
+
+              // Convert amounts
+              const fromDecimals = fromToken.decimals || 9;
+              const toDecimals = toToken.decimals || 6;
+              const fromAmount = quote.inAmount ?
+                (Number(quote.inAmount) / Math.pow(10, fromDecimals)).toFixed(6) : '0';
+              const toAmount = quote.outAmount ?
+                (Number(quote.outAmount) / Math.pow(10, toDecimals)).toFixed(6) : '0';
+
+              console.log('[X402] Calling handleTransactionSuccess to show transaction success card');
+              await handleTransactionSuccess(signature, fromToken, toToken, fromAmount, toAmount);
+              console.log('[X402] handleTransactionSuccess completed');
+            } else {
+              console.warn('[X402] Quote data incomplete, using fallback');
+              throw new Error('Quote data not available');
+            }
+          } catch (error) {
+            console.error('[X402] Unable to get detailed token info, showing basic success message:', error);
+            // If unable to get token info, still show basic success message
+            const successMessage: ChatMessage = {
+              id: Date.now().toString(),
+              role: 'assistant',
+              content: `Great! Your transaction has been completed successfully. Transaction signature: ${signature}`,
+              timestamp: new Date().toISOString(),
+              transactionStatus: {
+                txid: signature,
+                status: 'confirmed',
+                fromToken: { symbol: 'Unknown', name: 'Unknown' },
+                toToken: { symbol: 'Unknown', name: 'Unknown' },
+                fromAmount: '0',
+                toAmount: '0'
+              }
+            };
+            console.log('[X402] Fallback message added to message list');
+            setMessages(prev => [...prev, successMessage]);
+          }
+
+        } catch (x402Error: any) {
+          console.error('[X402] X402 facilitator error:', x402Error);
+          toast.error(`X402 facilitator error: ${x402Error.message || 'Unknown error'}`);
+
+          // Remove processed flag to allow retry
+          setProcessedX402Transactions(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(x402Message.id!);
+            return newSet;
+          });
+        }
+
+      } catch (error: any) {
+        console.error('[X402] Auto-sign failed:', error);
+        toast.error(`X402 auto-sign failed: ${error.message || 'Unknown error'}`);
+
+        // Remove processed flag to allow retry
+        setProcessedX402Transactions(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(x402Message.id!);
+          return newSet;
+        });
+      }
             timestamp: new Date().toISOString(),
             transactionStatus: {
               txid: signature,
