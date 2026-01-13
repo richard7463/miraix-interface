@@ -285,18 +285,6 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           return newSet;
         });
       }
-            timestamp: new Date().toISOString(),
-            transactionStatus: {
-              txid: signature,
-              status: 'confirmed',
-              fromToken: { symbol: 'Unknown', name: 'Unknown' },
-              toToken: { symbol: 'Unknown', name: 'Unknown' },
-              fromAmount: '0',
-              toAmount: '0'
-            }
-          };
-          console.log('[X402] Fallback 消息已添加到消息列表');
-          setMessages(prev => [...prev, successMessage]);
         }
 
       } catch (error: any) {
