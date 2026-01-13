@@ -129,12 +129,12 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const signedTransaction = await embeddedWallet.signTransaction(transaction);
         console.log('[X402] User wallet signature successful');
 
-        // Step 2: Send to PayAI facilitator for second signature
-        console.log('[X402] Step 2/3: Sending to PayAI facilitator for dual-signature...');
-        const x402FacilitatorUrl = 'https://facilitator.payai.network';
+        // Step 2: Send to PayAI facilitator for second signature (via backend proxy to avoid CORS)
+        console.log('[X402] Step 2/3: Sending to PayAI facilitator for dual-signature (via backend proxy)...');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://defai-agent.vercel.app';
 
         try {
-          const x402Response = await fetch(`${x402FacilitatorUrl}/settle`, {
+          const x402Response = await fetch(`${apiUrl}/api/x402/settle`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
