@@ -54,7 +54,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
   const [thinkingDots, setThinkingDots] = useState<string>('');
   const [chatCreated, setChatCreated] = useState(false);
   const [tokenDataMap, setTokenDataMap] = useState<{[key: string]: any}>({});
-  const [processedX402Transactions, setProcessedX402Transactions] = useState<Set<string>>(new Set());
+  const processedX402TransactionsRef = useRef<Set<string>>(new Set());
 
   // Get Solana wallet address
   const getWalletAddress = () => {
@@ -80,12 +80,12 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
   useEffect(() => {
     const handleX402AutoSign = async () => {
       // Find messages that need X402 auto-signing
-      const x402Message = messages.find(msg => 
-        msg.responseData?.enableX402Payment === true && 
+      const x402Message = messages.find(msg =>
+        msg.responseData?.enableX402Payment === true &&
         msg.responseData?.phase === 'waitingForX402Signature' &&
         msg.responseData?.transaction &&
         msg.id &&
-        !processedX402Transactions.has(msg.id)
+        !processedX402TransactionsRef.current.has(msg.id)
       );
 
       if (!x402Message || !x402Message.id) {
@@ -95,7 +95,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       console.log('[X402] Detected X402 auto-sign request:', x402Message.id);
 
       // Mark as processed (prevent duplicate processing)
-      setProcessedX402Transactions(prev => new Set(prev).add(x402Message.id!));
+      processedX402TransactionsRef.current.add(x402Message.id!);
 
       try {
         // Get wallet
@@ -131,10 +131,14 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
         // Step 2: Send to PayAI facilitator for second signature (via backend proxy to avoid CORS)
         console.log('[X402] Step 2/3: Sending to PayAI facilitator for dual-signature (via backend proxy)...');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://defai-agent.vercel.app';
+        const API_BASE_URL = process.env.NODE_ENV === 'production'
+          ? 'https://langgraph-defai.vercel.app'
+          : 'http://localhost:3009';
+
+        console.log('[X402] API URL:', API_BASE_URL);
 
         try {
-          const x402Response = await fetch(`${apiUrl}/api/x402/settle`, {
+          const x402Response = await fetch(`${API_BASE_URL}/api/x402/settle`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -266,29 +270,21 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           console.error('[X402] X402 facilitator error:', x402Error);
           toast.error(`X402 facilitator error: ${x402Error.message || 'Unknown error'}`);
 
-          // Remove processed flag to allow retry
-          setProcessedX402Transactions(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(x402Message.id!);
-            return newSet;
-          });
+          // Keep message in processed set to prevent infinite retry
+          // The user can manually retry by sending a new message
         }
 
       } catch (error: any) {
         console.error('[X402] Auto-sign failed:', error);
         toast.error(`X402 auto-sign failed: ${error.message || 'Unknown error'}`);
 
-        // Remove processed flag to allow retry
-        setProcessedX402Transactions(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(x402Message.id!);
-          return newSet;
-        });
+        // Keep message in processed set to prevent infinite retry
+        // The user can manually retry by sending a new message
       }
     };
 
     handleX402AutoSign();
-  }, [messages, solanaWallets, processedX402Transactions]);
+  }, [messages, solanaWallets]);
 
   // 监听 currentChat 的变化，打印 isNew 状态
   useEffect(() => {
