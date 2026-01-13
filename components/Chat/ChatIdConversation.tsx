@@ -285,19 +285,6 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           return newSet;
         });
       }
-        }
-
-      } catch (error: any) {
-        console.error('[X402] Auto-sign failed:', error);
-        toast.error(`X402 auto-sign failed: ${error.message || 'Unknown error'}`);
-        
-        // 移除已处理标记，允许重试
-        setProcessedX402Transactions(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(x402Message.id!);
-          return newSet;
-        });
-      }
     };
 
     handleX402AutoSign();
@@ -1381,11 +1368,11 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                             <Thoughts thoughts={message.thoughts || []} />
                             <div className="bg-gray-800 rounded-lg p-4 mt-2">
                               <p className="text-sm text-gray-300">
-                                X402 Auto-payment: Transaction was processed automatically.
+                                X402 Auto-payment: {message.responseData?.success === false ? 'Transaction failed' : 'Transaction was processed automatically'}
                               </p>
-                              {message.responseData?.error && (
+                              {(message.responseData?.error || message.responseData?.message) && (
                                 <p className="text-sm text-red-400 mt-2">
-                                  Error: {message.responseData.error}
+                                  Error: {message.responseData.error || message.responseData.message}
                                 </p>
                               )}
                             </div>
