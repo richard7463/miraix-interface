@@ -107,6 +107,38 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
         console.log('[X402] Using wallet address:', embeddedWallet.address);
 
+        // Check wallet balance before proceeding
+        console.log('[X402] Checking wallet balance...');
+        const connection = new Connection(
+          'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
+          'confirmed'
+        );
+        const balance = await connection.getBalance(new PublicKey(embeddedWallet.address));
+        const balanceInSol = balance / 1_000_000_000;
+        console.log('[X402] Wallet balance:', balanceInSol.toFixed(6), 'SOL');
+
+        // Get swap amount from quote
+        const swapAmount = x402Message.responseData?.quote?.inAmount || '0';
+        const swapAmountInSol = Number(swapAmount) / 1_000_000_000;
+        console.log('[X402] Swap amount:', swapAmountInSol.toFixed(6), 'SOL');
+
+        // Estimate gas fee (0.0002 SOL)
+        const estimatedGasFee = 0.0002;
+        const totalRequired = swapAmountInSol + estimatedGasFee;
+
+        console.log('[X402] Balance check:', {
+          balance: balanceInSol.toFixed(6),
+          swapAmount: swapAmountInSol.toFixed(6),
+          estimatedGasFee: estimatedGasFee,
+          totalRequired: totalRequired.toFixed(6)
+        });
+
+        if (balanceInSol < totalRequired) {
+          toast.error(`Insufficient SOL balance. Required: ${totalRequired.toFixed(4)} SOL, Available: ${balanceInSol.toFixed(4)} SOL. Please add more SOL to your wallet.`);
+          console.error('[X402] Insufficient balance, aborting transaction');
+          return;
+        }
+
         // Get unsigned transaction data
         const swapTransactionBase64 = x402Message.responseData!.transaction;
         console.log('[X402] Transaction data length:', swapTransactionBase64.length);
