@@ -289,6 +289,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
   // X402 Merchant Payment Flow - NEW
   useEffect(() => {
     const handleMerchantPayment = async () => {
+      console.log('[X402 Merchant] Checking for merchant payment messages...', messages.length);
+
       // Find messages that need merchant payment
       const merchantPaymentMessage = messages.find(msg =>
         msg.responseData?.enableX402Payment === true &&
@@ -297,6 +299,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         msg.id &&
         !processedX402TransactionsRef.current.has(msg.id)
       );
+
+      console.log('[X402 Merchant] Found merchant payment message:', !!merchantPaymentMessage);
 
       if (!merchantPaymentMessage || !merchantPaymentMessage.id) {
         return;
