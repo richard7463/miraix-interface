@@ -129,60 +129,30 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const signedTransaction = await embeddedWallet.signTransaction(transaction);
         console.log('[X402] User wallet signature successful');
 
-        // Step 2: Send to PayAI facilitator for second signature (via backend proxy to avoid CORS)
-        console.log('[X402] Step 2/3: Sending to PayAI facilitator for dual-signature (via backend proxy)...');
-        const API_BASE_URL = process.env.NODE_ENV === 'production'
-          ? 'https://langgraph-defai.vercel.app'
-          : 'http://localhost:3009';
-
-        console.log('[X402] API URL:', API_BASE_URL);
+        // Step 2: Broadcast the signed transaction to Solana network
+        console.log('[X402] Step 2/3: Broadcasting signed transaction to Solana...');
+        const connection = new Connection(
+          'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
+          'confirmed'
+        );
 
         try {
-          const x402Response = await fetch(`${API_BASE_URL}/api/x402/settle`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              network: 'solana',
-              transaction: swapTransactionBase64,
-              signedTransaction: Buffer.from(signedTransaction.serialize()).toString('base64'),
-              walletAddress: embeddedWallet.address,
-              description: `X402 auto-payment swap`,
-              amount: x402Message.responseData?.quote?.inAmount || '0'
-            })
-          });
-
-          if (!x402Response.ok) {
-            throw new Error(`X402 facilitator returned status ${x402Response.status}`);
-          }
-
-          const x402Result = await x402Response.json();
-          console.log('[X402] X402 facilitator response:', x402Result);
-
-          if (!x402Result.success) {
-            throw new Error(`X402 payment failed: ${x402Result.error || 'Unknown error'}`);
-          }
-
-          // Step 3: Transaction executed by facilitator (dual-signed)
-          console.log('[X402] Step 3/3: Dual-signature transaction executed by facilitator');
-          const signature = x402Result.signature || x402Result.transactionId;
-          console.log('[X402] Transaction signature (dual-signed):', signature);
-          toast.success(`X402 dual-signature auto-payment successful! Transaction signature: ${signature.substring(0, 8)}...`);
+          const signature = await connection.sendRawTransaction(
+            signedTransaction.serialize(),
+            { skipPreflight: false }
+          );
+          console.log('[X402] Transaction broadcasted:', signature);
+          toast.success(`Transaction broadcasted successfully! Signature: ${signature.substring(0, 8)}...`);
 
           // Verify transaction confirmation
-          console.log('[X402] Waiting for transaction confirmation...');
-          const connection = new Connection(
-            'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
-            'confirmed'
-          );
+          console.log('[X402] Step 3/3: Waiting for transaction confirmation...');
           const confirmation = await connection.confirmTransaction(signature, 'confirmed');
 
           if (confirmation.value.err) {
             throw new Error(`Transaction confirmation failed: ${JSON.stringify(confirmation.value.err)}`);
           }
 
-          console.log('[X402] Transaction confirmed (dual-signed)');
+          console.log('[X402] Transaction confirmed');
           toast.success('Transaction confirmed!');
 
           // Try to get token info and display transaction success card
