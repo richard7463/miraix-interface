@@ -19,7 +19,7 @@ import MarketTrendCard from '@/components/MarketTrendCard';
 import CompareChart from '@/components/CompareChart';
 import SentimentChart from '@/components/SentimentChart';
 import ErrorBanner from '@/components/ErrorBanner';
-import { Connection, VersionedTransaction, Transaction } from '@solana/web3.js';
+import { Connection, VersionedTransaction, Transaction, PublicKey } from '@solana/web3.js';
 
 interface ChatIdConversationProps {
   chatId: string;
