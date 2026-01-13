@@ -56,7 +56,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
   const [tokenDataMap, setTokenDataMap] = useState<{[key: string]: any}>({});
   const [processedX402Transactions, setProcessedX402Transactions] = useState<Set<string>>(new Set());
 
-  // 获取 Solana 钱包地址
+  // Get Solana wallet address
   const getWalletAddress = () => {
     const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
     return embeddedWallet?.address || '0x1234567890123456789012345678901234567890';
@@ -76,10 +76,10 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     }
   }, [isLoading, isStreaming]);
 
-  // X402 自动签名和广播交易
+  // X402 auto-sign and broadcast transaction
   useEffect(() => {
     const handleX402AutoSign = async () => {
-      // 找到需要 X402 自动签名的消息
+      // Find messages that need X402 auto-signing
       const x402Message = messages.find(msg => 
         msg.responseData?.enableX402Payment === true && 
         msg.responseData?.phase === 'waitingForX402Signature' &&
@@ -92,20 +92,20 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         return;
       }
 
-      console.log('[X402] 检测到 X402 自动签名请求:', x402Message.id);
+      console.log('[X402] Detected X402 auto-sign request:', x402Message.id);
 
-      // 标记为已处理（防止重复处理）
+      // Mark as processed (prevent duplicate processing)
       setProcessedX402Transactions(prev => new Set(prev).add(x402Message.id!));
 
       try {
-        // 获取钱包
+        // Get wallet
         const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
         if (!embeddedWallet) {
           toast.error('Wallet not found. Please connect your wallet.');
           return;
         }
 
-        console.log('[X402] 使用钱包地址:', embeddedWallet.address);
+        console.log('[X402] Using wallet address:', embeddedWallet.address);
 
         // Get unsigned transaction data
         const swapTransactionBase64 = x402Message.responseData!.transaction;
@@ -129,17 +129,18 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const signedTransaction = await embeddedWallet.signTransaction(transaction);
         console.log('[X402] User wallet signature successful');
 
-        // Step 2: Send to X402 facilitator for second signature
-        console.log('[X402] Step 2/3: Sending to X402 facilitator for dual-signature...');
-        const x402FacilitatorUrl = 'https://api.x402.dev';
+        // Step 2: Send to PayAI facilitator for second signature
+        console.log('[X402] Step 2/3: Sending to PayAI facilitator for dual-signature...');
+        const x402FacilitatorUrl = 'https://facilitator.payai.network';
 
         try {
-          const x402Response = await fetch(`${x402FacilitatorUrl}/payment`, {
+          const x402Response = await fetch(`${x402FacilitatorUrl}/settle`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              network: 'solana',
               transaction: swapTransactionBase64,
               signedTransaction: Buffer.from(signedTransaction.serialize()).toString('base64'),
               walletAddress: embeddedWallet.address,
