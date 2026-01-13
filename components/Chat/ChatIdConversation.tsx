@@ -290,6 +290,151 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     handleX402AutoSign();
   }, [messages, solanaWallets]);
 
+  // X402 Merchant Payment Flow - NEW
+  useEffect(() => {
+    const handleMerchantPayment = async () => {
+      // Find messages that need merchant payment
+      const merchantPaymentMessage = messages.find(msg =>
+        msg.responseData?.enableX402Payment === true &&
+        msg.responseData?.phase === 'waitingForMerchantPayment' &&
+        msg.responseData?.paymentRequest &&
+        msg.id &&
+        !processedX402TransactionsRef.current.has(msg.id)
+      );
+
+      if (!merchantPaymentMessage || !merchantPaymentMessage.id) {
+        return;
+      }
+
+      console.log('[X402 Merchant] Detected merchant payment request:', merchantPaymentMessage.id);
+
+      // Mark as processed (prevent duplicate processing)
+      processedX402TransactionsRef.current.add(merchantPaymentMessage.id!);
+
+      try {
+        // Get wallet
+        const embeddedWallet = solanaWallets?.find(wallet => wallet.walletClientType === 'privy');
+        if (!embeddedWallet) {
+          toast.error('Wallet not found. Please connect your wallet.');
+          return;
+        }
+
+        const paymentRequest = merchantPaymentMessage.responseData?.paymentRequest;
+        console.log('[X402 Merchant] Payment request:', paymentRequest);
+
+        // Step 1: Pay via PayAI Facilitator
+        toast.loading('Processing payment via PayAI Facilitator...');
+        console.log('[X402 Merchant] Step 1/3: Paying via PayAI Facilitator...');
+
+        const facilitatorResponse = await fetch('https://facilitator.payai.network/settle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            network: 'solana',
+            to: paymentRequest.merchantAddress,
+            amount: paymentRequest.amount,
+            tokenMint: paymentRequest.tokenMint,
+            from: embeddedWallet.address
+          })
+        });
+
+        const facilitatorResult = await facilitatorResponse.json();
+
+        if (!facilitatorResponse.ok) {
+          throw new Error(`PayAI Facilitator error: ${facilitatorResult.error || 'Unknown error'}`);
+        }
+
+        console.log('[X402 Merchant] Payment successful:', facilitatorResult);
+        toast.success('Payment completed! Verifying...');
+
+        // Step 2: Create payment ID and verify payment
+        const paymentId = `${embeddedWallet.address}_${Date.now()}`;
+        console.log('[X402 Merchant] Step 2/3: Verifying payment...');
+
+        // Poll for payment verification
+        let verified = false;
+        let attempts = 0;
+        const maxAttempts = 60; // 2 minutes max
+
+        while (!verified && attempts < maxAttempts) {
+          // Call backend to verify payment
+          const verifyResponse = await fetch('http://localhost:3000/api/x402/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              paymentId: paymentId,
+              // Backend should verify by checking merchant wallet balance
+            })
+          });
+
+          const verifyData = await verifyResponse.json();
+          verified = verifyData.verified;
+
+          if (verified) {
+            console.log('[X402 Merchant] Payment verified!');
+            toast.success('Payment verified! Executing swap...');
+          } else {
+            attempts++;
+            if (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            }
+          }
+        }
+
+        if (!verified) {
+          throw new Error('Payment verification timeout');
+        }
+
+        // Step 3: Execute swap after payment
+        console.log('[X402 Merchant] Step 3/3: Executing swap...');
+
+        const executeResponse = await fetch('http://localhost:3000/api/x402/execute-after-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentId: paymentId,
+            threadId: chatId,
+            message: merchantPaymentMessage.content,
+            walletAddress: embeddedWallet.address,
+            mintPubkey: paymentRequest.tokenMint
+          })
+        });
+
+        const executeData = await executeResponse.json();
+
+        if (!executeResponse.ok) {
+          throw new Error(`Execute failed: ${executeData.error || 'Unknown error'}`);
+        }
+
+        console.log('[X402 Merchant] Swap completed:', executeData);
+        toast.success('Swap completed successfully!');
+
+        // Add success message to chat
+        const successMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `Great! Your swap has been completed successfully via X402 merchant payment. Transaction signature: ${executeData.result?.transaction?.value || 'N/A'}`,
+          timestamp: new Date().toISOString(),
+          responseData: {
+            ...executeData.result
+          }
+        };
+
+        setMessages(prev => [...prev, successMessage]);
+        saveMessages(chatId, [...messages, successMessage]);
+
+      } catch (error: any) {
+        console.error('[X402 Merchant] Error:', error);
+        toast.error(`X402 merchant payment failed: ${error.message || 'Unknown error'}`);
+
+        // Remove from processed set to allow retry
+        processedX402TransactionsRef.current.delete(merchantPaymentMessage.id!);
+      }
+    };
+
+    handleMerchantPayment();
+  }, [messages, solanaWallets, chatId]);
+
   // 监听 currentChat 的变化，打印 isNew 状态
   useEffect(() => {
     console.log('[ChatIdConversation] currentChat status:', {
