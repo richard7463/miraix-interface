@@ -161,47 +161,25 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const signedTransaction = await embeddedWallet.signTransaction(transaction);
         console.log('[X402] User wallet signature successful');
 
-        // Step 2: Send to PayAI Facilitator for dual-signature and broadcast
-        console.log('[X402] Step 2/3: Sending signed transaction to PayAI Facilitator for dual-signature...');
+        // Step 2: Broadcast the signed transaction to Solana network
+        // Note: X402 in this context means "auto-sign with user wallet and execute"
+        // The user pays gas fees, but the transaction is signed automatically
+        console.log('[X402] Step 2/3: Broadcasting signed transaction to Solana...');
+        const connection = new Connection(
+          'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
+          'confirmed'
+        );
 
         try {
-          // Call backend proxy to PayAI facilitator
-          const facilitatorResponse = await fetch('https://langgraph-defai.vercel.app/api/x402/settle', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              network: 'solana',
-              transaction: swapTransactionBase64,
-              signedTransaction: Buffer.from(signedTransaction.serialize()).toString('base64'),
-              walletAddress: embeddedWallet.address,
-              description: 'X402 auto-payment swap',
-              amount: swapAmount
-            })
-          });
-
-          if (!facilitatorResponse.ok) {
-            const errorData = await facilitatorResponse.json();
-            throw new Error(`PayAI Facilitator error: ${errorData.error || 'Unknown error'}`);
-          }
-
-          const result = await facilitatorResponse.json();
-          const signature = result.signature || result.txid || result.transactionSignature;
-
-          if (!signature) {
-            throw new Error('No transaction signature returned from PayAI Facilitator');
-          }
-
-          console.log('[X402] Transaction signed by PayAI and broadcasted:', signature);
-          toast.success(`Transaction completed via PayAI! Signature: ${signature.substring(0, 8)}...`);
+          const signature = await connection.sendRawTransaction(
+            signedTransaction.serialize(),
+            { skipPreflight: false }
+          );
+          console.log('[X402] Transaction broadcasted:', signature);
+          toast.success(`Transaction broadcasted successfully! Signature: ${signature.substring(0, 8)}...`);
 
           // Verify transaction confirmation
           console.log('[X402] Step 3/3: Waiting for transaction confirmation...');
-          const connection = new Connection(
-            'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
-            'confirmed'
-          );
           const confirmation = await connection.confirmTransaction(signature, 'confirmed');
 
           if (confirmation.value.err) {
@@ -1623,9 +1601,9 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                 <div className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200 ${enableX402Payment ? 'translate-x-5' : ''}`}></div>
               </div>
             </div>
-            <span className="text-sm text-gray-300">X402 Auto-Payment</span>
+            <span className="text-sm text-gray-300">Auto-Confirm</span>
             <span className="text-xs text-gray-500 ml-2">
-              {enableX402Payment ? '(Auto complete)' : '(Manual confirm)'}
+              {enableX402Payment ? '(Auto sign & broadcast)' : '(Manual confirm)'}
             </span>
           </label>
         </div>
