@@ -291,6 +291,20 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
     const handleMerchantPayment = async () => {
       console.log('[X402 Merchant] Checking for merchant payment messages...', messages.length);
 
+      // Debug: Log all messages with their status
+      messages.forEach(msg => {
+        if (msg.responseData) {
+          console.log('[X402 Merchant] Message debug:', {
+            id: msg.id,
+            role: msg.role,
+            enableX402Payment: msg.responseData.enableX402Payment,
+            phase: msg.responseData.phase,
+            hasPaymentRequest: !!msg.responseData.paymentRequest,
+            paymentRequest: msg.responseData.paymentRequest
+          });
+        }
+      });
+
       // Find messages that need merchant payment
       const merchantPaymentMessage = messages.find(msg =>
         msg.responseData?.enableX402Payment === true &&
