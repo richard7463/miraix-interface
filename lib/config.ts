@@ -1,7 +1,8 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://new-miraix-api.vercel.app';
 const LANGGRAPH_API_BASE = process.env.NEXT_PUBLIC_LANGGRAPH_API_BASE || 'https://langgraph-defai.vercel.app';
+const SOLANA_RPC_URL = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/';
 
-export { API_BASE, LANGGRAPH_API_BASE };
+export { API_BASE, LANGGRAPH_API_BASE, SOLANA_RPC_URL };
 
 export const API_ENDPOINTS = {
   CHAT: `${API_BASE}/api/chat`,

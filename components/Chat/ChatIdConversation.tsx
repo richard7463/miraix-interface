@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { ChatMessage, Persona, Chat, DefaultPersonas } from './interface'
-import { API_ENDPOINTS } from '@/lib/config'
+import { API_ENDPOINTS, SOLANA_RPC_URL } from '@/lib/config'
 import { AI_CONFIG } from '@/lib/ai-config'
 import { useChatStore } from '@/store/chatStore'
 import { useSolanaWallets } from '@privy-io/react-auth/solana'
@@ -343,7 +343,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         toast.loading('Preparing payment transaction...');
         console.log('[X402 Merchant] Step 1/3: Building x402 transaction...');
 
-        const connection = new Connection('https://api.mainnet-beta.solana.com');
+        // Use project RPC URL
+        const connection = new Connection(SOLANA_RPC_URL);
         const fromPubkey = new PublicKey(embeddedWallet.address);
         const toPubkey = new PublicKey(paymentRequest.merchantAddress);
         const tokenMintPubkey = new PublicKey(paymentRequest.tokenMint);
