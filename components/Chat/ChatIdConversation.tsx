@@ -338,15 +338,15 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const paymentRequest = merchantPaymentMessage.responseData?.paymentRequest;
         console.log('[X402 Merchant] Payment request:', paymentRequest);
 
-        // Step 1: Pay via PayAI Facilitator
+        // Step 1: Pay via PayAI Facilitator (through backend proxy to avoid CORS)
         toast.loading('Processing payment via PayAI Facilitator...');
         console.log('[X402 Merchant] Step 1/3: Paying via PayAI Facilitator...');
 
-        const facilitatorResponse = await fetch('https://facilitator.payai.network/settle', {
+        const facilitatorResponse = await fetch('/api/payai/settle', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            network: 'solana',
+            network: paymentRequest.network || 'solana',
             to: paymentRequest.merchantAddress,
             amount: paymentRequest.amount,
             tokenMint: paymentRequest.tokenMint,
@@ -358,6 +358,10 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
         if (!facilitatorResponse.ok) {
           throw new Error(`PayAI Facilitator error: ${facilitatorResult.error || 'Unknown error'}`);
+        }
+
+        if (!facilitatorResult.success) {
+          throw new Error(`Payment failed: ${facilitatorResult.error || 'Unknown error'}`);
         }
 
         console.log('[X402 Merchant] Payment successful:', facilitatorResult);
