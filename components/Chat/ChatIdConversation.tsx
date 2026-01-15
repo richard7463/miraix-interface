@@ -19,7 +19,7 @@ import MarketTrendCard from '@/components/MarketTrendCard';
 import CompareChart from '@/components/CompareChart';
 import SentimentChart from '@/components/SentimentChart';
 import ErrorBanner from '@/components/ErrorBanner';
-import { Connection, VersionedTransaction, TransactionMessage, PublicKey, TransactionInstruction, ComputeBudgetProgram } from '@solana/web3.js';
+import { Connection, VersionedTransaction, Transaction, PublicKey, TransactionInstruction, ComputeBudgetProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, createTransferCheckedInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 
 interface ChatIdConversationProps {
@@ -383,19 +383,19 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         // Get recent blockhash
         const { blockhash } = await connection.getLatestBlockhash();
 
-        // Build message and create versioned transaction
-        const message = new TransactionMessage({
-          payerKey: fromPubkey,
+        // Create legacy transaction first (will be serialized by wallet)
+        const transaction = new Transaction({
           recentBlockhash: blockhash,
-          instructions
+          feePayer: fromPubkey
         });
+        
+        // Add all instructions
+        transaction.add(...instructions);
 
-        const versionedTx = new VersionedTransaction(message);
+        console.log('[X402 Merchant] Legacy transaction created with', transaction.instructions.length, 'instructions');
 
-        console.log('[X402 Merchant] Versioned transaction created');
-
-        // Sign transaction
-        const signature = await embeddedWallet.signTransaction(versionedTx);
+        // Sign transaction - wallet will handle serialization
+        const signature = await embeddedWallet.signTransaction(transaction);
         console.log('[X402 Merchant] Transaction signed');
 
         // Serialize transaction
