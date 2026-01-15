@@ -355,7 +355,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const toTokenAccount = await getAssociatedTokenAddress(tokenMintPubkey, toPubkey);
 
         // Build transaction with 3 required instructions for x402
-        const instructions = [];
+        const instructions: TransactionInstruction[] = [];
 
         // 1. setComputeUnitLimit
         instructions.push(
