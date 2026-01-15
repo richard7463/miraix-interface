@@ -300,7 +300,9 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
             enableX402Payment: msg.responseData.enableX402Payment,
             phase: msg.responseData.phase,
             hasPaymentRequest: !!msg.responseData.paymentRequest,
-            paymentRequest: msg.responseData.paymentRequest
+            paymentRequest: msg.responseData.paymentRequest,
+            fullResponseDataKeys: Object.keys(msg.responseData),
+            responseDataData: msg.responseData.data
           });
         }
       });
@@ -1529,9 +1531,9 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                               <p className="text-sm text-gray-300">
                                 X402 Auto-payment: {message.responseData?.success === false ? 'Transaction failed' : 'Transaction was processed automatically'}
                               </p>
-                              {(message.responseData?.error || message.responseData?.message) && (
+                              {message.responseData?.error && (
                                 <p className="text-sm text-red-400 mt-2">
-                                  Error: {message.responseData.error || message.responseData.message}
+                                  Error: {message.responseData.error}
                                 </p>
                               )}
                             </div>
