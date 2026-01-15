@@ -19,7 +19,7 @@ import MarketTrendCard from '@/components/MarketTrendCard';
 import CompareChart from '@/components/CompareChart';
 import SentimentChart from '@/components/SentimentChart';
 import ErrorBanner from '@/components/ErrorBanner';
-import { Connection, VersionedTransaction, Transaction, TransactionMessage, PublicKey, TransactionInstruction, SystemProgram, ComputeBudgetProgram } from '@solana/web3.js';
+import { Connection, VersionedTransaction, TransactionMessage, PublicKey, TransactionInstruction, ComputeBudgetProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, createTransferCheckedInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 
 interface ChatIdConversationProps {
@@ -356,15 +356,15 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const toTokenAccount = await getAssociatedTokenAddress(tokenMintPubkey, toPubkey);
 
         // Build transaction with 3 required instructions for x402
-        const transaction = new Transaction();
+        const instructions = [];
 
         // 1. setComputeUnitLimit
-        transaction.add(
+        instructions.push(
           ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 })
         );
 
         // 2. setComputeUnitPrice
-        transaction.add(
+        instructions.push(
           ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 })
         );
 
@@ -377,16 +377,26 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           amount,
           decimals
         );
-        transaction.add(transferInstruction);
+        instructions.push(transferInstruction);
 
-        console.log('[X402 Merchant] Transaction instructions:', transaction.instructions.length);
+        console.log('[X402 Merchant] Transaction instructions:', instructions.length);
 
-        // Sign the transaction
+        // Get recent blockhash
         const { blockhash } = await connection.getLatestBlockhash();
-        transaction.recentBlockhash = blockhash;
-        transaction.feePayer = fromPubkey; // Initially set user as feePayer, facilitator will override
 
-        const signature = await embeddedWallet.signTransaction(transaction);
+        // Build message and create versioned transaction
+        const message = new TransactionMessage({
+          payerKey: fromPubkey,
+          recentBlockhash: blockhash,
+          instructions
+        });
+
+        const versionedTx = new VersionedTransaction(message);
+
+        console.log('[X402 Merchant] Versioned transaction created');
+
+        // Sign transaction
+        const signature = await embeddedWallet.signTransaction(versionedTx);
         console.log('[X402 Merchant] Transaction signed');
 
         // Serialize transaction
