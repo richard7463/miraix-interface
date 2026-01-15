@@ -146,15 +146,14 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
         // Deserialize transaction
         const transactionBuffer = Buffer.from(swapTransactionBase64, 'base64');
-        let transaction: Transaction | VersionedTransaction;
+        let transaction: VersionedTransaction;
 
         try {
           transaction = VersionedTransaction.deserialize(transactionBuffer);
           console.log('[X402] Deserialized as VersionedTransaction');
         } catch (versionedError) {
-          console.log('[X402] VersionedTransaction deserialization failed, trying Legacy Transaction');
-          transaction = Transaction.from(transactionBuffer);
-          console.log('[X402] Deserialized as Legacy Transaction');
+          console.error('[X402] VersionedTransaction deserialization failed:', versionedError);
+          throw new Error('Failed to deserialize transaction');
         }
 
         // Step 1: Sign with user wallet
