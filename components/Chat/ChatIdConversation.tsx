@@ -342,7 +342,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         toast.loading('Processing payment via PayAI Facilitator...');
         console.log('[X402 Merchant] Step 1/3: Paying via PayAI Facilitator...');
 
-        const facilitatorResponse = await fetch('/api/payai/settle', {
+        const facilitatorResponse = await fetch(API_ENDPOINTS.PAYAI_SETTLE, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -378,7 +378,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
 
         while (!verified && attempts < maxAttempts) {
           // Call backend to verify payment
-          const verifyResponse = await fetch('http://localhost:3000/api/x402/verify-payment', {
+          const verifyResponse = await fetch(API_ENDPOINTS.X402_VERIFY_PAYMENT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

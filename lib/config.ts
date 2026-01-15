@@ -1,6 +1,7 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://new-miraix-api.vercel.app';
+const LANGGRAPH_API_BASE = process.env.NEXT_PUBLIC_LANGGRAPH_API_BASE || 'https://langgraph-defai.vercel.app';
 
-export { API_BASE };
+export { API_BASE, LANGGRAPH_API_BASE };
 
 export const API_ENDPOINTS = {
   CHAT: `${API_BASE}/api/chat`,
@@ -11,4 +12,6 @@ export const API_ENDPOINTS = {
   REGISTER_USER: `${API_BASE}/api/auth/register`,
   USER_CHATS: `${API_BASE}/api/user/chats`,
   CHAT_INFO: (chatId: string) => `${API_BASE}/api/chats/${chatId}`,
+  PAYAI_SETTLE: `${LANGGRAPH_API_BASE}/api/payai/settle`,
+  X402_VERIFY_PAYMENT: `${LANGGRAPH_API_BASE}/api/x402/verify-payment`,
 } as const; 
