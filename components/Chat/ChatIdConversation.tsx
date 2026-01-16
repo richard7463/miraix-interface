@@ -19,7 +19,17 @@ import MarketTrendCard from '@/components/MarketTrendCard';
 import CompareChart from '@/components/CompareChart';
 import SentimentChart from '@/components/SentimentChart';
 import ErrorBanner from '@/components/ErrorBanner';
-import { Connection, VersionedTransaction, Transaction, PublicKey } from '@solana/web3.js';
+import {
+  Connection,
+  VersionedTransaction,
+  Transaction,
+  PublicKey,
+  ComputeBudgetProgram,
+  SystemProgram,
+  getAssociatedTokenAddress,
+  createTransferCheckedInstruction,
+  TOKEN_PROGRAM_ID
+} from '@solana/web3.js';
 
 interface ChatIdConversationProps {
   chatId: string;
@@ -335,22 +345,93 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         }
 
         const paymentRequest = merchantPaymentMessage.responseData?.paymentRequest;
+        const paymentRequirements = paymentRequest?.paymentRequirements;
+
         console.log('[X402 Merchant] Payment request:', paymentRequest);
+        console.log('[X402 Merchant] Payment requirements:', paymentRequirements);
 
-        // Step 1: Call PayAI Facilitator via backend proxy with simple parameters
+        if (!paymentRequirements) {
+          throw new Error('Payment requirements not found. Please try again.');
+        }
+
+        // Step 1: Build Solana transaction with 3 required instructions (x402 spec)
+        toast.loading('Building transaction...');
+        console.log('[X402 Merchant] Step 1/3: Building transaction with 3 instructions...');
+
+        const connection = new Connection(SOLANA_RPC_URL);
+        const userWalletPubkey = new PublicKey(embeddedWallet.address);
+        const merchantPubkey = new PublicKey(paymentRequirements.payTo);
+        const tokenMintPubkey = new PublicKey(paymentRequirements.asset);
+
+        // Get user's token account
+        const userTokenAccount = await getAssociatedTokenAddress(
+          userWalletPubkey,
+          tokenMintPubkey
+        );
+
+        // Get merchant's token account (derive it, don't query chain)
+        const merchantTokenAccount = await getAssociatedTokenAddress(
+          merchantPubkey,
+          tokenMintPubkey
+        );
+
+        // Parse amount and determine decimals (USDC = 6, SOL = 9)
+        const amount = BigInt(paymentRequirements.maxAmountRequired);
+        const isUSDC = paymentRequirements.asset === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+        const decimals = isUSDC ? 6 : 9;
+
+        console.log('[X402 Merchant] Transaction params:', {
+          userTokenAccount: userTokenAccount.toBase58(),
+          merchantTokenAccount: merchantTokenAccount.toBase58(),
+          amount: amount.toString(),
+          decimals
+        });
+
+        // Create transaction with EXACTLY 3 instructions (x402 spec requirement)
+        const transaction = new Transaction();
+        transaction.add(
+          ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }),
+          ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 }),
+          createTransferCheckedInstruction(
+            userTokenAccount,
+            tokenMintPubkey,
+            merchantTokenAccount,
+            userWalletPubkey,
+            amount,
+            decimals
+          )
+        );
+
+        console.log('[X402 Merchant] Transaction built with 3 instructions');
+
+        // Step 2: Sign transaction with user wallet
+        toast.loading('Please sign transaction...');
+        console.log('[X402 Merchant] Step 2/3: Signing transaction with user wallet...');
+
+        const signedTransaction = await embeddedWallet.signTransaction(transaction);
+        console.log('[X402 Merchant] Transaction signed by user');
+
+        // Step 3: Serialize to base64
+        const base64Transaction = Buffer.from(signedTransaction.serialize()).toString('base64');
+        console.log('[X402 Merchant] Transaction serialized to base64, length:', base64Transaction.length);
+
+        // Step 4: Send to PayAI Facilitator via backend proxy (x402 spec format)
         toast.loading('Processing payment via PayAI Facilitator...');
-        console.log('[X402 Merchant] Step 1/3: Sending payment request to PayAI Facilitator...');
+        console.log('[X402 Merchant] Step 3/3: Sending to PayAI Facilitator...');
 
-        // PayAI Facilitator will build the transaction and handle signing
         const facilitatorResponse = await fetch(API_ENDPOINTS.PAYAI_SETTLE, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            network: 'solana',
-            to: paymentRequest.merchantAddress,
-            amount: paymentRequest.amount,
-            tokenMint: paymentRequest.tokenMint,
-            from: embeddedWallet.address
+            paymentPayload: {
+              x402Version: 1,
+              scheme: 'exact',
+              network: 'solana',
+              payload: {
+                transaction: base64Transaction
+              }
+            },
+            paymentRequirements
           })
         });
 
@@ -358,11 +439,11 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         console.log('[X402 Merchant] Facilitator response:', facilitatorResult);
 
         if (!facilitatorResponse.ok) {
-          throw new Error(`PayAI Facilitator error: ${facilitatorResult.error || facilitatorResult.message || 'Unknown error'}`);
+          throw new Error(`PayAI Facilitator error: ${facilitatorResult.error || facilitatorResult.message || facilitatorResult.errorReason || 'Unknown error'}`);
         }
 
         if (!facilitatorResult.success) {
-          throw new Error(`Payment failed: ${facilitatorResult.error || facilitatorResult.message || 'Unknown error'}`);
+          throw new Error(`Payment failed: ${facilitatorResult.errorReason || facilitatorResult.error || 'Unknown error'}`);
         }
 
         console.log('[X402 Merchant] Payment successful:', facilitatorResult);
@@ -408,8 +489,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         console.log('[X402 Merchant] Step 3/3: Executing swap...');
         toast.success('Payment confirmed! Executing swap...');
 
-        // Call backend to execute the swap
-        const executeResponse = await fetch('http://localhost:3000/api/x402/execute-after-payment', {
+        // Call backend to execute the swap (use correct port 3009)
+        const executeResponse = await fetch('http://localhost:3009/api/x402/execute-after-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
