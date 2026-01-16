@@ -19,8 +19,7 @@ import MarketTrendCard from '@/components/MarketTrendCard';
 import CompareChart from '@/components/CompareChart';
 import SentimentChart from '@/components/SentimentChart';
 import ErrorBanner from '@/components/ErrorBanner';
-import { Connection, VersionedTransaction, Transaction, PublicKey, TransactionInstruction, ComputeBudgetProgram } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, createTransferCheckedInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
+import { Connection, VersionedTransaction, Transaction, PublicKey } from '@solana/web3.js';
 
 interface ChatIdConversationProps {
   chatId: string;
@@ -338,12 +337,12 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const paymentRequest = merchantPaymentMessage.responseData?.paymentRequest;
         console.log('[X402 Merchant] Payment request:', paymentRequest);
 
-        // Step 1: Call PayAI Facilitator directly with simple parameters
+        // Step 1: Call PayAI Facilitator via backend proxy with simple parameters
         toast.loading('Processing payment via PayAI Facilitator...');
         console.log('[X402 Merchant] Step 1/3: Sending payment request to PayAI Facilitator...');
 
         // PayAI Facilitator will build the transaction and handle signing
-        const facilitatorResponse = await fetch('https://facilitator.payai.network/settle', {
+        const facilitatorResponse = await fetch(API_ENDPOINTS.PAYAI_SETTLE, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
