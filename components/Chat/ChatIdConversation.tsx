@@ -25,11 +25,13 @@ import {
   Transaction,
   PublicKey,
   ComputeBudgetProgram,
-  SystemProgram,
+  SystemProgram
+} from '@solana/web3.js';
+import {
   getAssociatedTokenAddress,
   createTransferCheckedInstruction,
   TOKEN_PROGRAM_ID
-} from '@solana/web3.js';
+} from '@solana/spl-token';
 
 interface ChatIdConversationProps {
   chatId: string;
@@ -456,8 +458,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         // Step 2: Wait for payment confirmation on-chain
         console.log('[X402 Merchant] Step 2/3: Waiting for payment confirmation on-chain...');
 
-        // Wait for transaction confirmation
-        const connection = new Connection(SOLANA_RPC_URL);
+        // Wait for transaction confirmation (reuse existing connection)
         let confirmed = false;
         let attempts = 0;
         const maxAttempts = 30; // 1 minute max
