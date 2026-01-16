@@ -338,123 +338,46 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         const paymentRequest = merchantPaymentMessage.responseData?.paymentRequest;
         console.log('[X402 Merchant] Payment request:', paymentRequest);
 
-        // Step 1: Build and sign x402 transaction
-        toast.loading('Preparing payment transaction...');
-        console.log('[X402 Merchant] Step 1/3: Building x402 transaction...');
+        // Step 1: Call PayAI Facilitator directly with simple parameters
+        toast.loading('Processing payment via PayAI Facilitator...');
+        console.log('[X402 Merchant] Step 1/3: Sending payment request to PayAI Facilitator...');
 
-        // Use project RPC URL
-        const connection = new Connection(SOLANA_RPC_URL);
-        const fromPubkey = new PublicKey(embeddedWallet.address);
-        const toPubkey = new PublicKey(paymentRequest.merchantAddress);
-        const tokenMintPubkey = new PublicKey(paymentRequest.tokenMint);
-        const amount = BigInt(paymentRequest.amount);
-        const decimals = 6; // USDC has 6 decimals
-
-        // Get source token account
-        const fromTokenAccount = await getAssociatedTokenAddress(tokenMintPubkey, fromPubkey);
-        const toTokenAccount = await getAssociatedTokenAddress(tokenMintPubkey, toPubkey);
-
-        // Build transaction with 3 required instructions for x402
-        const instructions: TransactionInstruction[] = [];
-
-        // 1. setComputeUnitLimit
-        instructions.push(
-          ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 })
-        );
-
-        // 2. setComputeUnitPrice
-        instructions.push(
-          ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 })
-        );
-
-        // 3. createTransferCheckedInstruction
-        const transferInstruction = createTransferCheckedInstruction(
-          fromTokenAccount,
-          tokenMintPubkey,
-          toTokenAccount,
-          fromPubkey,
-          amount,
-          decimals
-        );
-        instructions.push(transferInstruction);
-
-        console.log('[X402 Merchant] Transaction instructions:', instructions.length);
-
-        // Get recent blockhash
-        const { blockhash } = await connection.getLatestBlockhash();
-
-        // Create legacy transaction first (will be serialized by wallet)
-        const transaction = new Transaction({
-          recentBlockhash: blockhash,
-          feePayer: fromPubkey
-        });
-        
-        // Add all instructions
-        transaction.add(...instructions);
-
-        console.log('[X402 Merchant] Legacy transaction created with', transaction.instructions.length, 'instructions');
-
-        // Sign transaction - wallet will handle serialization
-        const signature = await embeddedWallet.signTransaction(transaction);
-        console.log('[X402 Merchant] Transaction signed');
-
-        // Serialize transaction
-        const serializedTx = Buffer.from(signature.serialize()).toString('base64');
-        console.log('[X402 Merchant] Transaction serialized, length:', serializedTx.length);
-
-        // Step 2: Send to PayAI Facilitator via backend
-        toast.loading('Sending payment to PayAI Facilitator...');
-        console.log('[X402 Merchant] Step 2/3: Sending to PayAI Facilitator...');
-
-        const facilitatorResponse = await fetch(API_ENDPOINTS.PAYAI_SETTLE, {
+        // PayAI Facilitator will build the transaction and handle signing
+        const facilitatorResponse = await fetch('https://facilitator.payai.network/settle', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            paymentPayload: {
-              x402Version: 1,
-              scheme: 'exact',
-              network: paymentRequest.network || 'solana',
-              payload: {
-                transaction: serializedTx
-              }
-            },
-            paymentRequirements: {
-              scheme: 'exact',
-              network: paymentRequest.network || 'solana',
-              maxAmountRequired: paymentRequest.amount,
-              resource: 'https://langgraph-defai.vercel.app/api/x402/execute-after-payment',
-              description: paymentRequest.description || 'Payment for DeFi operation',
-              mimeType: 'application/json',
-              payTo: paymentRequest.merchantAddress,
-              maxTimeoutSeconds: 60,
-              asset: paymentRequest.tokenMint,
-              extra: {
-                name: 'USDC',
-                version: '2',
-                feePayer: '2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4'
-              }
-            }
+            network: 'solana',
+            to: paymentRequest.merchantAddress,
+            amount: paymentRequest.amount,
+            tokenMint: paymentRequest.tokenMint,
+            from: embeddedWallet.address
           })
         });
 
         const facilitatorResult = await facilitatorResponse.json();
+        console.log('[X402 Merchant] Facilitator response:', facilitatorResult);
 
         if (!facilitatorResponse.ok) {
-          throw new Error(`PayAI Facilitator error: ${facilitatorResult.error || 'Unknown error'}`);
+          throw new Error(`PayAI Facilitator error: ${facilitatorResult.error || facilitatorResult.message || 'Unknown error'}`);
         }
 
         if (!facilitatorResult.success) {
-          throw new Error(`Payment failed: ${facilitatorResult.error || 'Unknown error'}`);
+          throw new Error(`Payment failed: ${facilitatorResult.error || facilitatorResult.message || 'Unknown error'}`);
         }
 
         console.log('[X402 Merchant] Payment successful:', facilitatorResult);
         toast.success('Payment completed! Verifying...');
 
-        // Step 3: Wait for payment confirmation
-        const txSignature = facilitatorResult.transaction;
+        // Step 2: Wait for payment confirmation
+        const txSignature = facilitatorResult.transaction || facilitatorResult.txSignature;
         console.log('[X402 Merchant] Transaction signature:', txSignature);
 
+        // Step 2: Wait for payment confirmation on-chain
+        console.log('[X402 Merchant] Step 2/3: Waiting for payment confirmation on-chain...');
+
         // Wait for transaction confirmation
+        const connection = new Connection(SOLANA_RPC_URL);
         let confirmed = false;
         let attempts = 0;
         const maxAttempts = 30; // 1 minute max
@@ -482,8 +405,8 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           throw new Error('Payment confirmation timeout');
         }
 
-        // Step 4: Execute swap after payment
-        console.log('[X402 Merchant] Step 4/4: Executing swap...');
+        // Step 3: Execute swap after payment
+        console.log('[X402 Merchant] Step 3/3: Executing swap...');
         toast.success('Payment confirmed! Executing swap...');
 
         // Call backend to execute the swap
