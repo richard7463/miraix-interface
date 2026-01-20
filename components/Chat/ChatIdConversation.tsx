@@ -421,20 +421,25 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         toast.loading('Processing payment via PayAI Facilitator...');
         console.log('[X402 Merchant] Step 3/3: Sending to PayAI Facilitator...');
 
+        const requestBody = {
+          paymentPayload: {
+            x402Version: 1,
+            scheme: 'exact',
+            network: 'solana',
+            payload: {
+              transaction: base64Transaction
+            }
+          },
+          paymentRequirements
+        };
+
+        console.log('[X402 Merchant] Request body:', JSON.stringify(requestBody, null, 2));
+        console.log('[X402 Merchant] Sending to:', API_ENDPOINTS.PAYAI_SETTLE);
+
         const facilitatorResponse = await fetch(API_ENDPOINTS.PAYAI_SETTLE, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            paymentPayload: {
-              x402Version: 1,
-              scheme: 'exact',
-              network: 'solana',
-              payload: {
-                transaction: base64Transaction
-              }
-            },
-            paymentRequirements
-          })
+          body: JSON.stringify(requestBody)
         });
 
         const facilitatorResult = await facilitatorResponse.json();
@@ -879,6 +884,14 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           mintPubkey: mintPubkey, // 传递mintPubkey给后端
           enableX402Payment: enableX402Payment // 传递x402自动支付设置给后端
         })
+      });
+
+      console.log('[getAIResponse] Request body:', {
+        message: lastMessage,
+        walletAddress,
+        mintPubkey,
+        enableX402Payment
+      });
       });
       
       console.log('[getAIResponse] /api/chat-new response status:', response?.status);
