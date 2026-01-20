@@ -892,7 +892,6 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         mintPubkey,
         enableX402Payment
       });
-      });
       
       console.log('[getAIResponse] /api/chat-new response status:', response?.status);
       
