@@ -199,9 +199,14 @@ export const Header = () => {
 
       {isPremiumModalOpen ? (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#27272a] rounded-xl max-w-lg w-full overflow-hidden border border-[#3f3f46]">
-            <div className="flex items-center justify-between p-6 border-b border-[#3f3f46]">
-              <h3 className="text-xl font-semibold text-white/90">Upgrade to Premium</h3>
+          <div className="bg-[#27272a] rounded-xl max-w-lg w-full overflow-hidden border border-[#3f3f46] shadow-2xl">
+            <div className="flex items-start justify-between p-6 border-b border-[#3f3f46]">
+              <div className="space-y-1">
+                <h3 className="text-xl font-semibold text-white/90">Upgrade to Premium</h3>
+                <div className="text-sm text-white/60">
+                  Unlock priority infra and premium routing for the next 30 days.
+                </div>
+              </div>
               <button
                 onClick={() => setIsPremiumModalOpen(false)}
                 className="p-2 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-white/10 transition-colors"
@@ -211,17 +216,45 @@ export const Header = () => {
             </div>
 
             <div className="p-6 space-y-4">
-              <div className="space-y-2 text-sm text-white/80">
-                <div className="flex items-center justify-between">
-                  <span>Price</span>
-                  <span className="font-mono">19 USDC</span>
+              <div className="rounded-xl border border-white/10 bg-gradient-to-b from-white/10 to-transparent p-4">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-white/60">Premium Membership</div>
+                    <div className="mt-1 text-2xl font-semibold text-white/90">19 USDC</div>
+                    <div className="text-sm text-white/60">per 30 days</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-white/60">Instant activation</div>
+                    <div className="text-sm text-white/80">One click via x402</div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Duration</span>
-                  <span>30 days</span>
+
+                <div className="mt-4 space-y-2 text-sm text-white/80">
+                  <div className="flex items-start gap-2">
+                    <span className="mt-[2px] inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200">✓</span>
+                    <div>
+                      <div className="font-medium text-white/90">Priority infrastructure</div>
+                      <div className="text-white/60">Faster API response during peak load.</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="mt-[2px] inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200">✓</span>
+                    <div>
+                      <div className="font-medium text-white/90">Premium routing & quotes</div>
+                      <div className="text-white/60">Better paths and tighter execution targets.</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="mt-[2px] inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-200">✓</span>
+                    <div>
+                      <div className="font-medium text-white/90">Lower fees (coming soon)</div>
+                      <div className="text-white/60">Member-only fee tiers and priority support.</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="pt-2 text-xs text-white/60">
-                  Premium benefits (coming soon): fastest routing, lowest fees, priority infrastructure.
+
+                <div className="mt-4 text-xs text-white/50">
+                  You’re paying only for membership access. Swaps remain user-signed and executed on-chain.
                 </div>
               </div>
 
@@ -258,9 +291,9 @@ export const Header = () => {
                 <button
                   onClick={handleUpgradePremium}
                   disabled={upgradeStatus === 'paying'}
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-900 px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed font-medium text-sm"
+                  className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-gray-900 px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm"
                 >
-                  {upgradeStatus === 'paying' ? 'Paying with x402...' : 'Pay with x402'}
+                  {upgradeStatus === 'paying' ? 'Processing payment...' : 'Upgrade now (x402)'}
                 </button>
                 <button
                   onClick={() => setIsPremiumModalOpen(false)}
@@ -272,7 +305,7 @@ export const Header = () => {
 
               {!embeddedSolanaWallet?.address ? (
                 <div className="text-xs text-white/50">
-                  Connect a Solana wallet to upgrade.
+                  Connect your Solana wallet to continue. We’ll only request a signature for the x402 payment.
                 </div>
               ) : (
                 <div className="text-xs text-white/50">
