@@ -914,6 +914,21 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         throw new Error(`API request failed with status ${response?.status}: ${errorText}`);
       }
 
+      // Extract X402 payment response (if any) from headers
+      let paymentResponse: any = null;
+      try {
+        const paymentHeader = response.headers.get('PAYMENT-RESPONSE');
+        if (paymentHeader) {
+          const decoded = typeof atob !== 'undefined'
+            ? atob(paymentHeader)
+            : Buffer.from(paymentHeader, 'base64').toString();
+          paymentResponse = JSON.parse(decoded);
+          console.log('[getAIResponse] PAYMENT-RESPONSE decoded:', paymentResponse);
+        }
+      } catch (e) {
+        console.warn('[getAIResponse] Failed to decode PAYMENT-RESPONSE header:', e);
+      }
+
       const responseData = await response.json();
       console.log('[getAIResponse] Received response:', responseData);
       console.log('[getAIResponse] Response details:', {
@@ -924,6 +939,13 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
         hasError: !!responseData.error,
         message: responseData.message
       });
+
+      if (paymentResponse) {
+        responseData.payment = paymentResponse;
+        if (paymentResponse.transaction) {
+          responseData.paymentTx = paymentResponse.transaction;
+        }
+      }
       
       // 如果是staking yields请求，使用hardcode的AI回复消息
       if (isStakingYieldsRequest) {
@@ -948,7 +970,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       
       return {
         role: 'assistant' as const,
-        content: responseData.message || 'No response from AI',
+        content: `${responseData.message || 'No response from AI'}${responseData.paymentTx ? `\n\nX402 Payment Tx:\n${responseData.paymentTx}` : ''}`,
         timestamp: new Date().toISOString(),
         id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         thoughts: responseData.thoughts || [],
