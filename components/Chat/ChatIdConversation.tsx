@@ -167,6 +167,19 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
           throw new Error('Failed to deserialize transaction');
         }
 
+        // Validate required signers before signing
+        // In Solana v0 messages, the first `numRequiredSignatures` accounts are required signers.
+        const requiredSigners = transaction.message.staticAccountKeys
+          .slice(0, transaction.message.header.numRequiredSignatures)
+          .map(k => k.toBase58());
+        console.log('[X402] Required signers:', requiredSigners);
+
+        if (!requiredSigners.includes(embeddedWallet.address)) {
+          throw new Error(
+            `Swap transaction requires signer(s) that do not match the connected wallet. Connected: ${embeddedWallet.address}. Required: ${requiredSigners.join(', ')}`
+          );
+        }
+
         // Step 1: Sign with user wallet
         console.log('[X402] Step 1/3: Signing with user wallet...');
         const signedTransaction = await embeddedWallet.signTransaction(transaction);
