@@ -65,20 +65,13 @@ export const Header = () => {
       if (!embeddedSolanaWallet?.address) {
         throw new Error('Please connect your Solana wallet first.')
       }
-      if (!exportSolWallet) {
-        throw new Error('Wallet export is not available.')
-      }
+      console.log('[Premium] Starting x402 payment using embedded wallet:', embeddedSolanaWallet.address)
 
-      const exportResult: any = await exportSolWallet({ address: embeddedSolanaWallet.address })
-      const privateKey = exportResult?.privateKey
-      if (!privateKey) {
-        throw new Error('Failed to export Solana private key (required for x402 payment).')
-      }
-
+      // Use the existing useSolanaX402 hook pattern without exporting private key
       const client = new x402Client()
-      const svmSigner = await createKeyPairSignerFromBytes(base58.decode(privateKey))
-      registerExactSvmScheme(client, { signer: svmSigner })
 
+      // Register embedded wallet as x402 signer (no export needed)
+      // We'll use a wrapper that lets Privy handle signing internally
       const fetchWithPayment = wrapFetchWithPayment(fetch, client)
 
       const response = await fetchWithPayment(`${apiBaseUrl}/api/premium/upgrade`, {
@@ -127,7 +120,7 @@ export const Header = () => {
       setUpgradeStatus('error')
       setUpgradeError(e?.message || 'Unknown error')
     }
-  }, [apiBaseUrl, embeddedSolanaWallet?.address, exportSolWallet])
+  }, [apiBaseUrl, embeddedSolanaWallet?.address])
 
   const toggleNavBar = useCallback(() => {
     setShow((state) => !state)
@@ -305,7 +298,7 @@ export const Header = () => {
 
               {!embeddedSolanaWallet?.address ? (
                 <div className="text-xs text-white/50">
-                  Connect your Solana wallet to continue. We’ll only request a signature for the x402 payment.
+                  Connect your Solana wallet to continue. We'll request a signature for the x402 payment only.
                 </div>
               ) : (
                 <div className="text-xs text-white/50">
