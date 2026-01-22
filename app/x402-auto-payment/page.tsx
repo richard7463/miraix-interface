@@ -11,7 +11,7 @@ export default function X402AutoPayment() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState('');
   const [logs, setLogs] = useState<string[]>([]);
-  const [paymentStep, setPaymentStep] = useState<'idle' | 'detected' | 'paying' | 'success' | 'error'>('idle');
+  const [paymentStep, setPaymentStep] = useState<'idle' | 'processing' | 'detected' | 'paying' | 'success' | 'error'>('idle');
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
 
   const addLog = (message: string) => {
@@ -75,18 +75,11 @@ Ready for automatic payment`);
       // Import Solana libraries dynamically
       const { createKeyPairSignerFromBytes } = await import('@solana/kit');
       const { base58 } = await import('@scure/base');
-      const { createSolanaRpc, createSolanaRpcApi } = await import('@solana/rpc');
-      const { createSolanaRpcSubscriptions } = await import('@solana/rpc-subscriptions');
-      const { createSolanaRpcClient } = await import('@solana/rpc-transport');
       
       // Initialize signer
       const keypairBytes = base58.decode(privateKey);
       const signer = await createKeyPairSignerFromBytes(keypairBytes);
       addLog(`🔑 Signer initialized: ${signer.address}`);
-      
-      // Initialize RPC client
-      const rpc = createSolanaRpc('https://api.mainnet-beta.solana.com');
-      addLog('🔗 Connected to Solana mainnet');
       
       // Get USDC token info
       const usdcMint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -110,7 +103,7 @@ Ready for automatic payment`);
       // Now make the final API request with payment proof
       addLog('🔄 Making final API request with payment proof...');
       
-      const finalResponse = await fetch('http://localhost:3010/api/chat-new', {
+      const finalResponse = await fetch('http://localhost:3009/api/chat-new', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -11,7 +11,7 @@ export default function X402SimpleFlow() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState('');
   const [logs, setLogs] = useState<string[]>([]);
-  const [paymentStep, setPaymentStep] = useState<'idle' | 'detected' | 'manual'>('idle');
+  const [paymentStep, setPaymentStep] = useState<'idle' | 'processing' | 'detected' | 'manual'>('idle');
 
   const addLog = (message: string) => {
     setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);

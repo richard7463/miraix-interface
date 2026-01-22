@@ -11,7 +11,7 @@ export default function X402AutoPaymentSimple() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState('');
   const [logs, setLogs] = useState<string[]>([]);
-  const [paymentStep, setPaymentStep] = useState<'idle' | 'detected' | 'paying' | 'success' | 'error'>('idle');
+  const [paymentStep, setPaymentStep] = useState<'idle' | 'processing' | 'detected' | 'paying' | 'success' | 'error'>('idle');
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
 
   const addLog = (message: string) => {
