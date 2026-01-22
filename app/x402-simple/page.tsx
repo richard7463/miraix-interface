@@ -8,7 +8,7 @@ export default function X402SimpleTest() {
 
   const testX402 = async () => {
     try {
-      const response = await fetch('http://localhost:3010/api/chat-new', {
+      const response = await fetch('http://localhost:3009/api/chat-new', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,7 +71,10 @@ export default function X402SimpleTest() {
         </ul>
         
         <h3>Expected Result:</h3>
-        <p>Status: 402, Response: {"error":"Payment required"...}</p>
+        <p>
+          Status: 402, Response:{' '}
+          <code>{'{"error":"Payment required"...}'}</code>
+        </p>
       </div>
     </div>
   );
