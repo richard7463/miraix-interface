@@ -98,19 +98,35 @@ export const Header = () => {
       console.log('[Premium] Payment required:', paymentRequired)
 
       // Step 3: Fetch payment transaction from facilitator
-      const facilitatorUrl = paymentRequired.facilitator
-      if (!facilitatorUrl) {
-        throw new Error('Missing facilitator URL in PAYMENT-REQUIRED')
+      const acceptedPayment = paymentRequired.accepts?.[0]
+      if (!acceptedPayment) {
+        throw new Error('No accepted payment methods in PAYMENT-REQUIRED')
       }
-
-      console.log('[Premium] Step 2: Fetching payment tx from facilitator:', facilitatorUrl)
-      const facilitatorResponse = await fetch(facilitatorUrl, {
+      
+      const facilitatorUrl = 'https://facilitator.payai.network'
+      const facilitatorRequestUrl = `${facilitatorUrl}/exact/svm/transaction`
+      console.log('[Premium] Step 2: Fetching payment tx from facilitator:', facilitatorRequestUrl)
+      console.log('[Premium] Payment details:', {
+        network: acceptedPayment.network,
+        amount: acceptedPayment.amount,
+        asset: acceptedPayment.asset,
+        payTo: acceptedPayment.payTo,
+        payer: embeddedSolanaWallet.address,
+      })
+      
+      const facilitatorResponse = await fetch(facilitatorRequestUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          network: acceptedPayment.network,
+          amount: acceptedPayment.amount,
+          asset: acceptedPayment.asset,
+          payTo: acceptedPayment.payTo,
           payer: embeddedSolanaWallet.address,
+          maxTimeoutSeconds: acceptedPayment.maxTimeoutSeconds || 300,
+          extra: acceptedPayment.extra || {},
         }),
       })
 
