@@ -10,10 +10,7 @@ import { Link } from '../Link'
 import { useTheme } from '../Themes'
 import { ConnectButton } from './ConnectButton'
 import { useSolanaWallets } from '@privy-io/react-auth/solana'
-import { x402Client, wrapFetchWithPayment } from '@x402/fetch'
-import { registerExactSvmScheme } from '@x402/svm/exact/client'
-import { createKeyPairSignerFromBytes } from '@solana/kit'
-import { base58 } from '@scure/base'
+import { Connection, VersionedTransaction } from '@solana/web3.js'
 
 export const Header = () => {
   const { theme, setTheme } = useTheme()
@@ -65,24 +62,11 @@ export const Header = () => {
       if (!embeddedSolanaWallet?.address) {
         throw new Error('Please connect your Solana wallet first.')
       }
-      console.log('[Premium] Starting x402 payment using embedded wallet:', embeddedSolanaWallet.address)
+      console.log('[Premium] Starting x402 payment using Privy wallet:', embeddedSolanaWallet.address)
 
-      // Initialize x402 client
-      const client = new x402Client()
-      
-      // We need to register the embedded wallet as the x402 signer
-      // Since we can't export the private key, we'll use the address-based approach
-      // The x402 facilitator will handle the signing through Privy
-      console.log('[Premium] Registering embedded wallet for x402 payments...')
-      
-      // For now, we'll use a placeholder approach - the real solution requires
-      // the x402 SDK to support embedded wallets directly
-      // This is a limitation we need to work around
-      
-      const fetchWithPayment = wrapFetchWithPayment(fetch, client)
-
-      console.log('[Premium] Making payment request to /api/premium/upgrade...')
-      const response = await fetchWithPayment(`${apiBaseUrl}/api/premium/upgrade`, {
+      // Step 1: Make initial request to get PAYMENT-REQUIRED response
+      console.log('[Premium] Step 1: Requesting /api/premium/upgrade...')
+      const initialResponse = await fetch(`${apiBaseUrl}/api/premium/upgrade`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,37 +76,115 @@ export const Header = () => {
         }),
       })
 
-      console.log('[Premium] Response status:', response.status)
-      console.log('[Premium] Response headers:', Object.fromEntries(response.headers.entries()))
+      console.log('[Premium] Initial response status:', initialResponse.status)
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Upgrade failed: ${response.status} ${errorText}`)
+      // Check if payment is required (402 status)
+      if (initialResponse.status !== 402) {
+        throw new Error(`Expected 402 Payment Required, got ${initialResponse.status}`)
       }
 
-      const data = await response.json()
-      console.log('[Premium] Response data:', data)
-
-      // Extract payment transaction from PAYMENT-RESPONSE header
-      try {
-        const paymentHeader = response.headers.get('PAYMENT-RESPONSE')
-        console.log('[Premium] PAYMENT-RESPONSE header:', paymentHeader)
-        if (paymentHeader) {
-          const decoded = typeof atob !== 'undefined'
-            ? atob(paymentHeader)
-            : Buffer.from(paymentHeader, 'base64').toString()
-          const payment = JSON.parse(decoded)
-          console.log('[Premium] Decoded payment response:', payment)
-          if (payment?.transaction) {
-            setPaymentTx(payment.transaction)
-            console.log('[Premium] Payment transaction set:', payment.transaction)
-          }
-        } else {
-          console.warn('[Premium] No PAYMENT-RESPONSE header found')
-        }
-      } catch (e) {
-        console.warn('[Premium] Failed to decode PAYMENT-RESPONSE:', e)
+      // Step 2: Parse PAYMENT-REQUIRED header
+      const paymentRequiredHeader = initialResponse.headers.get('PAYMENT-REQUIRED')
+      if (!paymentRequiredHeader) {
+        throw new Error('Missing PAYMENT-REQUIRED header')
       }
+
+      console.log('[Premium] PAYMENT-REQUIRED header:', paymentRequiredHeader)
+      const paymentRequired = JSON.parse(
+        typeof atob !== 'undefined'
+          ? atob(paymentRequiredHeader)
+          : Buffer.from(paymentRequiredHeader, 'base64').toString()
+      )
+      console.log('[Premium] Payment required:', paymentRequired)
+
+      // Step 3: Fetch payment transaction from facilitator
+      const facilitatorUrl = paymentRequired.facilitator
+      if (!facilitatorUrl) {
+        throw new Error('Missing facilitator URL in PAYMENT-REQUIRED')
+      }
+
+      console.log('[Premium] Step 2: Fetching payment tx from facilitator:', facilitatorUrl)
+      const facilitatorResponse = await fetch(facilitatorUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          payer: embeddedSolanaWallet.address,
+        }),
+      })
+
+      if (!facilitatorResponse.ok) {
+        throw new Error(`Facilitator request failed: ${facilitatorResponse.status}`)
+      }
+
+      const facilitatorData = await facilitatorResponse.json()
+      console.log('[Premium] Facilitator response:', facilitatorData)
+
+      const paymentTxBase64 = facilitatorData.transaction
+      if (!paymentTxBase64) {
+        throw new Error('Missing transaction in facilitator response')
+      }
+
+      // Step 4: Deserialize and sign payment transaction with Privy wallet
+      console.log('[Premium] Step 3: Signing payment transaction with Privy wallet...')
+      const txBuffer = Buffer.from(paymentTxBase64, 'base64')
+      const paymentTransaction = VersionedTransaction.deserialize(txBuffer)
+
+      const signedPaymentTx = await embeddedSolanaWallet.signTransaction(paymentTransaction)
+      console.log('[Premium] Payment transaction signed')
+
+      // Step 5: Send signed payment transaction to Solana
+      console.log('[Premium] Step 4: Broadcasting payment transaction...')
+      const connection = new Connection(
+        'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
+        'confirmed'
+      )
+      const paymentSignature = await connection.sendRawTransaction(
+        signedPaymentTx.serialize(),
+        { skipPreflight: false }
+      )
+      console.log('[Premium] Payment tx broadcasted:', paymentSignature)
+      setPaymentTx(paymentSignature)
+
+      // Wait for confirmation
+      console.log('[Premium] Step 5: Waiting for payment confirmation...')
+      const confirmation = await connection.confirmTransaction(paymentSignature, 'confirmed')
+      if (confirmation.value.err) {
+        throw new Error(`Payment transaction failed: ${JSON.stringify(confirmation.value.err)}`)
+      }
+      console.log('[Premium] Payment confirmed!')
+
+      // Step 6: Retry original request with PAYMENT-RESPONSE header
+      console.log('[Premium] Step 6: Retrying /api/premium/upgrade with payment proof...')
+      const paymentProof = {
+        transaction: paymentSignature,
+        network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+      }
+      const paymentProofBase64 = typeof btoa !== 'undefined'
+        ? btoa(JSON.stringify(paymentProof))
+        : Buffer.from(JSON.stringify(paymentProof)).toString('base64')
+
+      const finalResponse = await fetch(`${apiBaseUrl}/api/premium/upgrade`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'PAYMENT-RESPONSE': paymentProofBase64,
+        },
+        body: JSON.stringify({
+          walletAddress: embeddedSolanaWallet.address,
+        }),
+      })
+
+      console.log('[Premium] Final response status:', finalResponse.status)
+
+      if (!finalResponse.ok) {
+        const errorText = await finalResponse.text()
+        throw new Error(`Upgrade failed after payment: ${finalResponse.status} ${errorText}`)
+      }
+
+      const data = await finalResponse.json()
+      console.log('[Premium] Upgrade successful:', data)
 
       if (data?.expiresAt) {
         setPremiumExpiresAt(data.expiresAt)
@@ -139,7 +201,7 @@ export const Header = () => {
       setUpgradeStatus('error')
       setUpgradeError(e?.message || 'Unknown error')
     }
-  }, [apiBaseUrl, embeddedSolanaWallet?.address])
+  }, [apiBaseUrl, embeddedSolanaWallet])
 
   const toggleNavBar = useCallback(() => {
     setShow((state) => !state)
