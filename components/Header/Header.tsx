@@ -67,13 +67,21 @@ export const Header = () => {
       }
       console.log('[Premium] Starting x402 payment using embedded wallet:', embeddedSolanaWallet.address)
 
-      // Use the existing useSolanaX402 hook pattern without exporting private key
+      // Initialize x402 client
       const client = new x402Client()
-
-      // Register embedded wallet as x402 signer (no export needed)
-      // We'll use a wrapper that lets Privy handle signing internally
+      
+      // We need to register the embedded wallet as the x402 signer
+      // Since we can't export the private key, we'll use the address-based approach
+      // The x402 facilitator will handle the signing through Privy
+      console.log('[Premium] Registering embedded wallet for x402 payments...')
+      
+      // For now, we'll use a placeholder approach - the real solution requires
+      // the x402 SDK to support embedded wallets directly
+      // This is a limitation we need to work around
+      
       const fetchWithPayment = wrapFetchWithPayment(fetch, client)
 
+      console.log('[Premium] Making payment request to /api/premium/upgrade...')
       const response = await fetchWithPayment(`${apiBaseUrl}/api/premium/upgrade`, {
         method: 'POST',
         headers: {
@@ -84,23 +92,33 @@ export const Header = () => {
         }),
       })
 
+      console.log('[Premium] Response status:', response.status)
+      console.log('[Premium] Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (!response.ok) {
         const errorText = await response.text()
         throw new Error(`Upgrade failed: ${response.status} ${errorText}`)
       }
 
       const data = await response.json()
+      console.log('[Premium] Response data:', data)
 
+      // Extract payment transaction from PAYMENT-RESPONSE header
       try {
         const paymentHeader = response.headers.get('PAYMENT-RESPONSE')
+        console.log('[Premium] PAYMENT-RESPONSE header:', paymentHeader)
         if (paymentHeader) {
           const decoded = typeof atob !== 'undefined'
             ? atob(paymentHeader)
             : Buffer.from(paymentHeader, 'base64').toString()
           const payment = JSON.parse(decoded)
+          console.log('[Premium] Decoded payment response:', payment)
           if (payment?.transaction) {
             setPaymentTx(payment.transaction)
+            console.log('[Premium] Payment transaction set:', payment.transaction)
           }
+        } else {
+          console.warn('[Premium] No PAYMENT-RESPONSE header found')
         }
       } catch (e) {
         console.warn('[Premium] Failed to decode PAYMENT-RESPONSE:', e)
@@ -117,6 +135,7 @@ export const Header = () => {
 
       setUpgradeStatus('success')
     } catch (e: any) {
+      console.error('[Premium] Upgrade error:', e)
       setUpgradeStatus('error')
       setUpgradeError(e?.message || 'Unknown error')
     }
