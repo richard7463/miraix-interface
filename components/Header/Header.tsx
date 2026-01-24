@@ -77,13 +77,18 @@ export const Header = () => {
 
       // Step 1: Request endpoint to get 402 Payment Required
       console.log('[Premium] Step 1: Requesting /api/premium/upgrade...')
-      console.log('[Premium] API URL:', `${apiBaseUrl}/api/premium/upgrade`)
-      const initialResponse = await fetch(`${apiBaseUrl}/api/premium/upgrade`, {
+      // Add timestamp to bypass ALL browser caches
+      const timestamp = Date.now()
+      const url = `${apiBaseUrl}/api/premium/upgrade?_t=${timestamp}`
+      console.log('[Premium] API URL:', url)
+      
+      const initialResponse = await fetch(url, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
+          'Expires': '0',
         },
         body: JSON.stringify({ walletAddress: connectedSolanaWallet.address }),
         cache: 'no-store',
@@ -91,6 +96,11 @@ export const Header = () => {
 
       console.log('[Premium] Initial response status:', initialResponse.status)
       console.log('[Premium] Response headers:', Object.fromEntries(initialResponse.headers.entries()))
+      
+      // Log response body for debugging
+      const responseClone = initialResponse.clone()
+      const responseText = await responseClone.text()
+      console.log('[Premium] Response body preview:', responseText.substring(0, 200))
 
       if (initialResponse.status !== 402) {
         throw new Error(`Expected 402 Payment Required, got ${initialResponse.status}`)
