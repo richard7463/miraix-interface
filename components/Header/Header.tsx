@@ -65,18 +65,32 @@ export const Header = () => {
         throw new Error('Please connect your Solana wallet first.')
       }
       
+      // Clear any cached premium status
+      try {
+        localStorage.removeItem('premium_expires_at')
+        console.log('[Premium] Cleared cached premium status')
+      } catch {}
+      
       console.log('[Premium] Starting x402 payment with wallet:', connectedSolanaWallet.address)
       console.log('[Premium] Wallet type:', connectedSolanaWallet.walletClientType)
+      console.log('[Premium] API base URL:', apiBaseUrl)
 
       // Step 1: Request endpoint to get 402 Payment Required
       console.log('[Premium] Step 1: Requesting /api/premium/upgrade...')
+      console.log('[Premium] API URL:', `${apiBaseUrl}/api/premium/upgrade`)
       const initialResponse = await fetch(`${apiBaseUrl}/api/premium/upgrade`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
         body: JSON.stringify({ walletAddress: connectedSolanaWallet.address }),
+        cache: 'no-store',
       })
 
       console.log('[Premium] Initial response status:', initialResponse.status)
+      console.log('[Premium] Response headers:', Object.fromEntries(initialResponse.headers.entries()))
 
       if (initialResponse.status !== 402) {
         throw new Error(`Expected 402 Payment Required, got ${initialResponse.status}`)
@@ -144,17 +158,21 @@ export const Header = () => {
       }
       console.log('[Premium] Payment confirmed!')
 
-      // Step 6: Retry with payment proof
-      console.log('[Premium] Step 6: Retrying with payment proof...')
-      const paymentProof = {
-        transaction: signature,
-        network: acceptedPayment.network,
+      // Step 6: Retry with PAYMENT-SIGNATURE header (x402 v2 protocol)
+      console.log('[Premium] Step 6: Retrying with PAYMENT-SIGNATURE...')
+      const paymentPayload = {
+        x402Version: 2,
+        payments: [{
+          scheme: 'exact',
+          network: acceptedPayment.network,
+          transaction: signature,
+        }],
       }
       const finalResponse = await fetch(`${apiBaseUrl}/api/premium/upgrade`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'PAYMENT-RESPONSE': btoa(JSON.stringify(paymentProof)),
+          'PAYMENT-SIGNATURE': btoa(JSON.stringify(paymentPayload)),
         },
         body: JSON.stringify({ walletAddress: connectedSolanaWallet.address }),
       })
