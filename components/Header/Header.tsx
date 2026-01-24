@@ -11,8 +11,7 @@ import { useTheme } from '../Themes'
 import { ConnectButton } from './ConnectButton'
 import { useSolanaWallets } from '@privy-io/react-auth/solana'
 import { useWallets } from '@privy-io/react-auth'
-import { x402Client, wrapFetchWithPayment } from '@x402/fetch'
-import { registerExactSvmScheme } from '@x402/svm/exact/client'
+import { Connection, VersionedTransaction } from '@solana/web3.js'
 
 export const Header = () => {
   const { theme, setTheme } = useTheme()
@@ -69,75 +68,109 @@ export const Header = () => {
       console.log('[Premium] Starting x402 payment with wallet:', connectedSolanaWallet.address)
       console.log('[Premium] Wallet type:', connectedSolanaWallet.walletClientType)
 
-      // Create x402 client with custom signer that uses the connected wallet
-      const client = new x402Client()
-      
-      // Register a custom SVM signer that delegates to the connected wallet
-      registerExactSvmScheme(client, {
-        signer: {
-          address: connectedSolanaWallet.address,
-          signTransaction: async (tx: any) => {
-            console.log('[Premium] Signing transaction with connected wallet...')
-            return await connectedSolanaWallet.signTransaction(tx)
-          },
-          signMessage: async (message: Uint8Array) => {
-            console.log('[Premium] Signing message with connected wallet...')
-            if (connectedSolanaWallet.signMessage) {
-              return await connectedSolanaWallet.signMessage(message)
-            }
-            throw new Error('Wallet does not support message signing')
-          },
-        },
+      // Step 1: Request endpoint to get 402 Payment Required
+      console.log('[Premium] Step 1: Requesting /api/premium/upgrade...')
+      const initialResponse = await fetch(`${apiBaseUrl}/api/premium/upgrade`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress: connectedSolanaWallet.address }),
       })
 
-      // Use x402 SDK to handle the entire payment flow
-      const fetchWithPayment = wrapFetchWithPayment(fetch, client)
+      console.log('[Premium] Initial response status:', initialResponse.status)
 
-      console.log('[Premium] Making request to /api/premium/upgrade with x402 payment...')
-      const response = await fetchWithPayment(`${apiBaseUrl}/api/premium/upgrade`, {
+      if (initialResponse.status !== 402) {
+        throw new Error(`Expected 402 Payment Required, got ${initialResponse.status}`)
+      }
+
+      // Step 2: Parse PAYMENT-REQUIRED header
+      const paymentRequiredHeader = initialResponse.headers.get('PAYMENT-REQUIRED')
+      if (!paymentRequiredHeader) {
+        throw new Error('Missing PAYMENT-REQUIRED header')
+      }
+
+      const paymentRequired = JSON.parse(atob(paymentRequiredHeader))
+      console.log('[Premium] Payment required:', paymentRequired)
+
+      const acceptedPayment = paymentRequired.accepts?.[0]
+      if (!acceptedPayment) {
+        throw new Error('No accepted payment methods')
+      }
+
+      // Step 3: Get payment transaction from facilitator
+      console.log('[Premium] Step 2: Fetching payment tx from facilitator...')
+      const facilitatorUrl = 'https://facilitator.payai.network/exact/svm/transaction'
+      const facilitatorResponse = await fetch(facilitatorUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          walletAddress: connectedSolanaWallet.address,
+          network: acceptedPayment.network,
+          amount: acceptedPayment.amount,
+          asset: acceptedPayment.asset,
+          payTo: acceptedPayment.payTo,
+          payer: connectedSolanaWallet.address,
+          maxTimeoutSeconds: acceptedPayment.maxTimeoutSeconds || 300,
+          extra: acceptedPayment.extra || {},
         }),
       })
 
-      console.log('[Premium] Response status:', response.status)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Upgrade failed: ${response.status} ${errorText}`)
+      if (!facilitatorResponse.ok) {
+        throw new Error(`Facilitator failed: ${facilitatorResponse.status}`)
       }
 
-      const data = await response.json()
+      const { transaction: paymentTxBase64 } = await facilitatorResponse.json()
+      if (!paymentTxBase64) {
+        throw new Error('Missing transaction from facilitator')
+      }
+
+      // Step 4: Sign and send payment transaction
+      console.log('[Premium] Step 3: Signing payment transaction...')
+      const paymentTx = VersionedTransaction.deserialize(Buffer.from(paymentTxBase64, 'base64'))
+      const signedTx = await connectedSolanaWallet.signTransaction(paymentTx)
+      
+      console.log('[Premium] Step 4: Broadcasting payment...')
+      const connection = new Connection(
+        'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
+        'confirmed'
+      )
+      const signature = await connection.sendRawTransaction(signedTx.serialize())
+      console.log('[Premium] Payment tx:', signature)
+      setPaymentTx(signature)
+
+      // Step 5: Wait for confirmation
+      console.log('[Premium] Step 5: Waiting for confirmation...')
+      const confirmation = await connection.confirmTransaction(signature, 'confirmed')
+      if (confirmation.value.err) {
+        throw new Error(`Payment failed: ${JSON.stringify(confirmation.value.err)}`)
+      }
+      console.log('[Premium] Payment confirmed!')
+
+      // Step 6: Retry with payment proof
+      console.log('[Premium] Step 6: Retrying with payment proof...')
+      const paymentProof = {
+        transaction: signature,
+        network: acceptedPayment.network,
+      }
+      const finalResponse = await fetch(`${apiBaseUrl}/api/premium/upgrade`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'PAYMENT-RESPONSE': btoa(JSON.stringify(paymentProof)),
+        },
+        body: JSON.stringify({ walletAddress: connectedSolanaWallet.address }),
+      })
+
+      if (!finalResponse.ok) {
+        throw new Error(`Upgrade failed: ${finalResponse.status}`)
+      }
+
+      const data = await finalResponse.json()
       console.log('[Premium] Upgrade successful:', data)
-
-      // Try to extract payment transaction from PAYMENT-RESPONSE header
-      try {
-        const paymentHeader = response.headers.get('PAYMENT-RESPONSE')
-        if (paymentHeader) {
-          const decoded = typeof atob !== 'undefined'
-            ? atob(paymentHeader)
-            : Buffer.from(paymentHeader, 'base64').toString()
-          const payment = JSON.parse(decoded)
-          if (payment?.transaction) {
-            setPaymentTx(payment.transaction)
-            console.log('[Premium] Payment transaction:', payment.transaction)
-          }
-        }
-      } catch (e) {
-        console.warn('[Premium] Failed to decode PAYMENT-RESPONSE:', e)
-      }
 
       if (data?.expiresAt) {
         setPremiumExpiresAt(data.expiresAt)
         try {
           localStorage.setItem('premium_expires_at', data.expiresAt)
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
 
       setUpgradeStatus('success')
