@@ -362,6 +362,16 @@ export default function WalletRoastPage() {
 
   const connectedWallet = solanaWallets?.find((wallet) => wallet.address)?.address || ''
   const pageCopy = COPY[language]
+  const shareStats = audit
+    ? [
+        { label: pageCopy.bagValue, value: formatUsd(audit.summary.totalValueUsd, language) },
+        { label: pageCopy.stablecoins, value: `${audit.summary.stablecoinPct.toFixed(1)}%` },
+        { label: pageCopy.tokens, value: String(audit.summary.tokenCount) },
+        { label: pageCopy.memeBeta, value: `${audit.summary.memePct.toFixed(1)}%` }
+      ]
+    : []
+  const shareActions = audit?.actions.slice(0, 2) || []
+  const shareRisk = audit?.risks[0]
 
   useEffect(() => {
     if (!walletAddress && connectedWallet) {
@@ -462,132 +472,142 @@ export default function WalletRoastPage() {
 
     try {
       const canvas = document.createElement('canvas')
-      canvas.width = 1600
-      canvas.height = 900
+      canvas.width = 1080
+      canvas.height = 1920
 
       const context = canvas.getContext('2d')
       if (!context) {
         throw new Error('Canvas not supported')
       }
 
-      const background = context.createLinearGradient(0, 0, 1600, 900)
+      const background = context.createLinearGradient(0, 0, 1080, 1920)
       background.addColorStop(0, '#1a1209')
-      background.addColorStop(0.55, '#120f0a')
+      background.addColorStop(0.45, '#120f0a')
       background.addColorStop(1, '#0c0a07')
       context.fillStyle = background
-      context.fillRect(0, 0, 1600, 900)
+      context.fillRect(0, 0, 1080, 1920)
 
-      const glow = context.createRadialGradient(260, 160, 60, 260, 160, 420)
+      const glow = context.createRadialGradient(220, 180, 60, 220, 180, 380)
       glow.addColorStop(0, 'rgba(255,170,88,0.36)')
       glow.addColorStop(1, 'rgba(255,170,88,0)')
       context.fillStyle = glow
-      context.fillRect(0, 0, 1600, 900)
+      context.fillRect(0, 0, 1080, 1920)
 
-      const glowTwo = context.createRadialGradient(1320, 120, 40, 1320, 120, 260)
+      const glowTwo = context.createRadialGradient(860, 140, 40, 860, 140, 240)
       glowTwo.addColorStop(0, 'rgba(255,214,110,0.22)')
       glowTwo.addColorStop(1, 'rgba(255,214,110,0)')
       context.fillStyle = glowTwo
-      context.fillRect(0, 0, 1600, 900)
+      context.fillRect(0, 0, 1080, 1920)
 
-      drawRoundedRect(context, 72, 72, 1456, 756, 40)
+      drawRoundedRect(context, 52, 52, 976, 1816, 52)
       context.fillStyle = 'rgba(255,255,255,0.06)'
       context.fill()
       context.strokeStyle = 'rgba(255,255,255,0.08)'
       context.lineWidth = 2
       context.stroke()
 
-      drawRoundedRect(context, 96, 96, 270, 52, 26)
+      drawRoundedRect(context, 84, 84, 360, 56, 28)
       context.fillStyle = 'rgba(255,180,106,0.12)'
       context.fill()
       context.strokeStyle = 'rgba(255,180,106,0.36)'
       context.stroke()
       context.fillStyle = '#ffd79f'
       context.font = '600 22px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(pageCopy.cardBadge, 122, 129)
+      context.fillText(pageCopy.cardBadge, 110, 120)
 
       context.fillStyle = '#fef4df'
-      context.font = '700 66px Georgia, serif'
-      context.fillText(pageCopy.badge, 96, 230)
+      context.font = '700 58px Georgia, serif'
+      context.fillText(pageCopy.badge, 84, 220)
 
       context.fillStyle = '#d9c9ad'
-      context.font = '500 28px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(shortenWallet(audit.walletAddress), 96, 278)
+      context.font = '500 26px ui-sans-serif, system-ui, sans-serif'
+      context.fillText(shortenWallet(audit.walletAddress), 84, 264)
 
-      const scoreGradient = context.createLinearGradient(0, 0, 0, 240)
+      const scoreGradient = context.createLinearGradient(0, 0, 0, 220)
       scoreGradient.addColorStop(0, '#ffd56f')
       scoreGradient.addColorStop(1, '#ff9a3c')
-      drawRoundedRect(context, 1180, 102, 250, 250, 34)
+      drawRoundedRect(context, 770, 92, 220, 220, 36)
       context.fillStyle = 'rgba(11,10,8,0.35)'
       context.fill()
       context.strokeStyle = 'rgba(255,255,255,0.08)'
       context.stroke()
 
       context.fillStyle = scoreGradient
-      context.font = '700 130px ui-sans-serif, system-ui, sans-serif'
+      context.font = '700 112px ui-sans-serif, system-ui, sans-serif'
       context.textAlign = 'center'
-      context.fillText(String(audit.score), 1305, 250)
+      context.fillText(String(audit.score), 880, 238)
       context.textAlign = 'start'
 
       context.fillStyle = '#ffcf88'
-      context.font = '700 24px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(audit.verdict, 1180, 320)
+      context.font = '700 22px ui-sans-serif, system-ui, sans-serif'
+      context.fillText(audit.verdict, 770, 344)
 
       context.fillStyle = '#fff4df'
-      context.font = '700 34px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(scoreLabel(audit.score, language), 96, 370)
+      context.font = '700 46px ui-sans-serif, system-ui, sans-serif'
+      context.fillText(scoreLabel(audit.score, language), 84, 380)
 
       context.fillStyle = '#e3d4bb'
-      context.font = '500 34px ui-sans-serif, system-ui, sans-serif'
-      wrapCanvasText(context, audit.roast, 96, 424, 980, 46, 4)
+      context.font = '500 30px ui-sans-serif, system-ui, sans-serif'
+      wrapCanvasText(context, audit.roast, 84, 440, 912, 42, 5)
 
-      const statCards = [
-        { label: pageCopy.bagValue, value: formatUsd(audit.summary.totalValueUsd, language) },
-        { label: pageCopy.stablecoins, value: `${audit.summary.stablecoinPct.toFixed(1)}%` },
-        { label: pageCopy.tokens, value: String(audit.summary.tokenCount) },
-        { label: pageCopy.memeBeta, value: `${audit.summary.memePct.toFixed(1)}%` }
-      ]
+      if (shareRisk) {
+        drawRoundedRect(context, 84, 680, 912, 170, 30)
+        context.fillStyle = 'rgba(0,0,0,0.22)'
+        context.fill()
+        context.strokeStyle = 'rgba(255,255,255,0.08)'
+        context.stroke()
+        context.fillStyle = '#ffcf88'
+        context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
+        context.fillText(pageCopy.mainRisks, 110, 730)
+        context.fillStyle = '#fff4df'
+        context.font = '700 26px ui-sans-serif, system-ui, sans-serif'
+        context.fillText(shareRisk.title, 110, 776)
+        context.fillStyle = '#d3c3a6'
+        context.font = '500 22px ui-sans-serif, system-ui, sans-serif'
+        wrapCanvasText(context, shareRisk.detail, 110, 814, 860, 30, 2)
+      }
 
-      statCards.forEach((item, index) => {
-        const x = 96 + index * 258
-        drawRoundedRect(context, x, 566, 228, 120, 28)
+      shareStats.forEach((item, index) => {
+        const x = 84 + (index % 2) * 456
+        const y = 888 + Math.floor(index / 2) * 156
+        drawRoundedRect(context, x, y, 440, 132, 28)
         context.fillStyle = 'rgba(0,0,0,0.22)'
         context.fill()
         context.strokeStyle = 'rgba(255,255,255,0.08)'
         context.stroke()
         context.fillStyle = '#af9b7d'
         context.font = '600 18px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(item.label, x + 24, 612)
+        context.fillText(item.label, x + 24, y + 42)
         context.fillStyle = '#fff4df'
         context.font = '700 34px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(item.value, x + 24, 656)
+        context.fillText(item.value, x + 24, y + 92)
       })
 
-      drawRoundedRect(context, 1180, 392, 320, 294, 28)
+      drawRoundedRect(context, 84, 1228, 912, 476, 32)
       context.fillStyle = 'rgba(0,0,0,0.24)'
       context.fill()
       context.strokeStyle = 'rgba(255,255,255,0.08)'
       context.stroke()
       context.fillStyle = '#ffcf88'
       context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(pageCopy.actionQueue, 1206, 434)
+      context.fillText(pageCopy.actionQueue, 110, 1278)
 
-      context.fillStyle = '#fff4df'
-      context.font = '700 24px ui-sans-serif, system-ui, sans-serif'
-      audit.actions.slice(0, 2).forEach((action, index) => {
-        const y = 490 + index * 94
-        context.fillText(action.title, 1206, y)
-        context.fillStyle = '#d3c3a6'
-        context.font = '500 18px ui-sans-serif, system-ui, sans-serif'
-        wrapCanvasText(context, action.command, 1206, y + 36, 262, 26, 2)
+      let actionY = 1338
+      shareActions.forEach((action) => {
         context.fillStyle = '#fff4df'
-        context.font = '700 24px ui-sans-serif, system-ui, sans-serif'
+        context.font = '700 28px ui-sans-serif, system-ui, sans-serif'
+        context.fillText(action.title, 110, actionY)
+        context.fillStyle = '#d3c3a6'
+        context.font = '500 22px ui-sans-serif, system-ui, sans-serif'
+        const lineCount = wrapCanvasText(context, action.command, 110, actionY + 36, 850, 30, 2)
+        actionY += 78 + lineCount * 30
       })
 
       context.fillStyle = '#cfbe9f'
       context.font = '600 20px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(pageCopy.cardFooter, 96, 766)
+      context.fillText(pageCopy.cardFooter, 84, 1794)
       context.textAlign = 'right'
-      context.fillText('app.miraix.fun/wallet-roast', 1494, 766)
+      context.fillText('app.miraix.fun/wallet-roast', 996, 1794)
       context.textAlign = 'start'
 
       const link = document.createElement('a')
@@ -763,43 +783,58 @@ export default function WalletRoastPage() {
                     </button>
                   </div>
 
-                  <div className="mt-5 overflow-hidden rounded-[30px] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(255,168,86,0.28),transparent_32%),linear-gradient(180deg,#17120d_0%,#0f0c09_100%)] p-6">
-                    <div className="inline-flex rounded-full border border-[#ffb46a]/30 bg-[#ffb46a]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ffd79f]">
-                      {pageCopy.cardBadge}
-                    </div>
-                    <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="max-w-2xl">
-                        <p className="text-sm text-[#bba98a]">{shortenWallet(audit.walletAddress)}</p>
-                        <h3 className="mt-2 text-3xl font-semibold text-[#fff4df]">{audit.verdict}</h3>
-                        <p className="mt-3 text-base leading-7 text-[#e2d3bb]">{audit.roast}</p>
+                  <div className="mt-5 mx-auto w-full max-w-[380px] overflow-hidden rounded-[32px] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(255,168,86,0.28),transparent_32%),linear-gradient(180deg,#17120d_0%,#0f0c09_100%)] p-5">
+                    <div className="flex min-h-[675px] flex-col">
+                      <div className="inline-flex self-start rounded-full border border-[#ffb46a]/30 bg-[#ffb46a]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ffd79f]">
+                        {pageCopy.cardBadge}
                       </div>
-                      <div className={`inline-flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br ${scoreTone(audit.score)} text-4xl font-semibold text-[#1a1109] shadow-[0_20px_80px_rgba(255,162,82,0.28)]`}>
-                        {audit.score}
-                      </div>
-                    </div>
 
-                    <div className="mt-6 grid gap-3 md:grid-cols-4">
-                      <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#af9b7d]">{pageCopy.bagValue}</p>
-                        <p className="mt-2 text-xl font-semibold text-[#fff5e4]">{formatUsd(audit.summary.totalValueUsd, language)}</p>
+                      <div className="mt-4 flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-sm text-[#bba98a]">{shortenWallet(audit.walletAddress)}</p>
+                          <h3 className="mt-2 text-2xl font-semibold text-[#fff4df]">{audit.verdict}</h3>
+                          <p className="mt-2 text-lg font-medium text-[#ffcf88]">{scoreLabel(audit.score, language)}</p>
+                        </div>
+                        <div className={`inline-flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${scoreTone(audit.score)} text-4xl font-semibold text-[#1a1109] shadow-[0_20px_80px_rgba(255,162,82,0.28)]`}>
+                          {audit.score}
+                        </div>
                       </div>
-                      <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#af9b7d]">{pageCopy.stablecoins}</p>
-                        <p className="mt-2 text-xl font-semibold text-[#fff5e4]">{audit.summary.stablecoinPct.toFixed(1)}%</p>
-                      </div>
-                      <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#af9b7d]">{pageCopy.tokens}</p>
-                        <p className="mt-2 text-xl font-semibold text-[#fff5e4]">{audit.summary.tokenCount}</p>
-                      </div>
-                      <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#af9b7d]">{pageCopy.memeBeta}</p>
-                        <p className="mt-2 text-xl font-semibold text-[#fff5e4]">{audit.summary.memePct.toFixed(1)}%</p>
-                      </div>
-                    </div>
 
-                    <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/8 pt-4 text-sm text-[#cdbd9f]">
-                      <span>{pageCopy.cardFooter}</span>
-                      <span>app.miraix.fun/wallet-roast</span>
+                      <p className="mt-5 text-sm leading-7 text-[#e2d3bb]">{audit.roast}</p>
+
+                      {shareRisk ? (
+                        <div className="mt-5 rounded-3xl border border-white/8 bg-black/20 p-4">
+                          <p className="text-xs uppercase tracking-[0.18em] text-[#ffcf88]">{pageCopy.mainRisks}</p>
+                          <p className="mt-2 text-sm font-semibold text-[#fff4df]">{shareRisk.title}</p>
+                          <p className="mt-2 text-sm leading-6 text-[#cbbca1]">{shareRisk.detail}</p>
+                        </div>
+                      ) : null}
+
+                      <div className="mt-5 grid grid-cols-2 gap-3">
+                        {shareStats.map((item) => (
+                          <div key={item.label} className="rounded-2xl border border-white/8 bg-black/20 p-4">
+                            <p className="text-[11px] uppercase tracking-[0.18em] text-[#af9b7d]">{item.label}</p>
+                            <p className="mt-2 text-lg font-semibold text-[#fff5e4]">{item.value}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-5 rounded-3xl border border-white/8 bg-black/20 p-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-[#ffcf88]">{pageCopy.actionQueue}</p>
+                        <div className="mt-3 space-y-3">
+                          {shareActions.map((action) => (
+                            <div key={action.command}>
+                              <p className="text-sm font-semibold text-[#fff4de]">{action.title}</p>
+                              <p className="mt-1 font-mono text-xs leading-6 text-[#d2c2a4]">{action.command}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/8 pt-4 text-xs text-[#cdbd9f]">
+                        <span>{pageCopy.cardFooter}</span>
+                        <span>app.miraix.fun/wallet-roast</span>
+                      </div>
                     </div>
                   </div>
                 </div>
