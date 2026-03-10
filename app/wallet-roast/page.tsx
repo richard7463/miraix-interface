@@ -6,6 +6,7 @@ import { useSolanaWallets } from '@privy-io/react-auth/solana'
 import { AlertTriangle, ArrowRight, BookOpen, Copy, Download, Flame, Loader2, Sparkles } from 'lucide-react'
 import { DefaultPersonas } from '@/components/Chat/interface'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
+import { getWalletRoastShareScene } from '@/lib/walletRoastShare'
 import { useChatStore } from '@/store/chatStore'
 
 interface AuditRisk {
@@ -398,6 +399,15 @@ const drawRoundedRect = (
   context.closePath()
 }
 
+const loadCanvasImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new window.Image()
+    image.crossOrigin = 'anonymous'
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('Image rendering failed'))
+    image.src = src
+  })
+
 export default function WalletRoastPage() {
   const router = useRouter()
   const copyToClipboard = useCopyToClipboard()
@@ -423,6 +433,7 @@ export default function WalletRoastPage() {
   const shareActions = audit?.actions.slice(0, 2) || []
   const shareRisk = audit?.risks[0]
   const shareMemeTier = audit ? getMemeTier(audit.score, audit.summary.memePct, language) : null
+  const shareScene = audit ? getWalletRoastShareScene(audit.score, language) : null
 
   useEffect(() => {
     if (!walletAddress && connectedWallet) {
@@ -515,7 +526,7 @@ export default function WalletRoastPage() {
   }
 
   const handleDownloadShareCard = async () => {
-    if (!audit) {
+    if (!audit || !shareScene) {
       return
     }
 
@@ -604,51 +615,65 @@ export default function WalletRoastPage() {
       context.font = '700 46px ui-sans-serif, system-ui, sans-serif'
       context.fillText(scoreLabel(audit.score, language), 84, 380)
 
+      const shareArt = await loadCanvasImage(shareScene.artDataUrl)
+
+      drawRoundedRect(context, 84, 412, 912, 360, 30)
+      context.save()
+      context.clip()
+      context.drawImage(shareArt, 84, 412, 912, 360)
+      context.restore()
+      context.strokeStyle = 'rgba(255,255,255,0.08)'
+      context.stroke()
+
+      drawRoundedRect(context, 84, 792, 260, 54, 22)
+      context.fillStyle = shareScene.accentSoft
+      context.fill()
+      context.strokeStyle = `${shareScene.accent}66`
+      context.stroke()
+      context.fillStyle = shareScene.accentText
+      context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
+      context.fillText(shareScene.title, 108, 826)
+
       if (shareMemeTier) {
-        drawRoundedRect(context, 84, 412, 310, 54, 22)
+        drawRoundedRect(context, 362, 792, 300, 54, 22)
         context.fillStyle = 'rgba(255,180,106,0.14)'
         context.fill()
         context.strokeStyle = 'rgba(255,180,106,0.34)'
         context.stroke()
         context.fillStyle = '#ffd79f'
         context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(`${pageCopy.memeTier}: ${shareMemeTier.label}`, 108, 446)
-
-        drawRoundedRect(context, 410, 412, 586, 54, 22)
-        context.fillStyle = 'rgba(255,255,255,0.08)'
-        context.fill()
-        context.strokeStyle = 'rgba(255,255,255,0.08)'
-        context.stroke()
-        context.fillStyle = '#d7c8ad'
-        context.font = '600 18px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(shareMemeTier.signal, 436, 446)
+        context.fillText(`${pageCopy.memeTier}: ${shareMemeTier.label}`, 386, 826)
       }
 
+      context.fillStyle = '#d7c8ad'
+      context.font = '600 20px ui-sans-serif, system-ui, sans-serif'
+      wrapCanvasText(context, shareScene.caption, 84, 890, 912, 30, 2)
+
       context.fillStyle = '#e3d4bb'
-      context.font = '500 30px ui-sans-serif, system-ui, sans-serif'
-      wrapCanvasText(context, audit.roast, 84, 526, 912, 42, 5)
+      context.font = '500 28px ui-sans-serif, system-ui, sans-serif'
+      wrapCanvasText(context, audit.roast, 84, 968, 912, 38, 4)
 
       if (shareRisk) {
-        drawRoundedRect(context, 84, 756, 912, 170, 30)
+        drawRoundedRect(context, 84, 1144, 912, 148, 30)
         context.fillStyle = 'rgba(0,0,0,0.22)'
         context.fill()
         context.strokeStyle = 'rgba(255,255,255,0.08)'
         context.stroke()
         context.fillStyle = '#ffcf88'
         context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(pageCopy.mainRisks, 110, 806)
+        context.fillText(pageCopy.mainRisks, 110, 1194)
         context.fillStyle = '#fff4df'
-        context.font = '700 26px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(shareRisk.title, 110, 852)
+        context.font = '700 24px ui-sans-serif, system-ui, sans-serif'
+        context.fillText(shareRisk.title, 110, 1238)
         context.fillStyle = '#d3c3a6'
-        context.font = '500 22px ui-sans-serif, system-ui, sans-serif'
-        wrapCanvasText(context, shareRisk.detail, 110, 890, 860, 30, 2)
+        context.font = '500 21px ui-sans-serif, system-ui, sans-serif'
+        wrapCanvasText(context, shareRisk.detail, 110, 1274, 860, 28, 2)
       }
 
       shareStats.forEach((item, index) => {
         const x = 84 + (index % 2) * 456
-        const y = 972 + Math.floor(index / 2) * 156
-        drawRoundedRect(context, x, y, 440, 132, 28)
+        const y = 1326 + Math.floor(index / 2) * 144
+        drawRoundedRect(context, x, y, 440, 120, 28)
         context.fillStyle = 'rgba(0,0,0,0.22)'
         context.fill()
         context.strokeStyle = 'rgba(255,255,255,0.08)'
@@ -657,28 +682,28 @@ export default function WalletRoastPage() {
         context.font = '600 18px ui-sans-serif, system-ui, sans-serif'
         context.fillText(item.label, x + 24, y + 42)
         context.fillStyle = '#fff4df'
-        context.font = '700 34px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(item.value, x + 24, y + 92)
+        context.font = '700 31px ui-sans-serif, system-ui, sans-serif'
+        context.fillText(item.value, x + 24, y + 86)
       })
 
-      drawRoundedRect(context, 84, 1312, 912, 392, 32)
+      drawRoundedRect(context, 84, 1630, 912, 154, 32)
       context.fillStyle = 'rgba(0,0,0,0.24)'
       context.fill()
       context.strokeStyle = 'rgba(255,255,255,0.08)'
       context.stroke()
       context.fillStyle = '#ffcf88'
       context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(pageCopy.actionQueue, 110, 1362)
+      context.fillText(pageCopy.actionQueue, 110, 1680)
 
-      let actionY = 1422
+      let actionY = 1732
       shareActions.forEach((action) => {
         context.fillStyle = '#fff4df'
-        context.font = '700 28px ui-sans-serif, system-ui, sans-serif'
+        context.font = '700 24px ui-sans-serif, system-ui, sans-serif'
         context.fillText(action.title, 110, actionY)
         context.fillStyle = '#d3c3a6'
-        context.font = '500 22px ui-sans-serif, system-ui, sans-serif'
-        const lineCount = wrapCanvasText(context, action.command, 110, actionY + 36, 850, 30, 2)
-        actionY += 78 + lineCount * 30
+        context.font = '500 20px ui-sans-serif, system-ui, sans-serif'
+        const lineCount = wrapCanvasText(context, action.command, 110, actionY + 32, 850, 26, 1)
+        actionY += 56 + lineCount * 24
       })
 
       context.fillStyle = '#cfbe9f'
@@ -883,12 +908,33 @@ export default function WalletRoastPage() {
                         </div>
                       </div>
 
-                      {shareMemeTier ? (
-                        <div className="mt-4 grid gap-2">
-                          <div className="inline-flex self-start rounded-full border border-[#ffb46a]/30 bg-[#ffb46a]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#ffd79f]">
-                            {pageCopy.memeTier}: {shareMemeTier.label}
+                      {shareScene ? (
+                        <div className="mt-4">
+                          <div className="overflow-hidden rounded-[28px] border border-white/10 bg-black/20">
+                            <img
+                              src={shareScene.artDataUrl}
+                              alt={shareScene.title}
+                              className="h-56 w-full object-cover"
+                            />
                           </div>
-                          <p className="text-sm leading-6 text-[#d7c8ad]">{shareMemeTier.signal}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <div
+                              className="inline-flex self-start rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
+                              style={{
+                                borderColor: `${shareScene.accent}66`,
+                                background: shareScene.accentSoft,
+                                color: shareScene.accentText
+                              }}
+                            >
+                              {shareScene.title}
+                            </div>
+                            {shareMemeTier ? (
+                              <div className="inline-flex self-start rounded-full border border-[#ffb46a]/30 bg-[#ffb46a]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#ffd79f]">
+                                {pageCopy.memeTier}: {shareMemeTier.label}
+                              </div>
+                            ) : null}
+                          </div>
+                          <p className="mt-3 text-sm leading-6 text-[#d7c8ad]">{shareScene.caption}</p>
                         </div>
                       ) : null}
 

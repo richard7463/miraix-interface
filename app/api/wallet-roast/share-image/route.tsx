@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { LANGGRAPH_API_BASE } from '@/lib/config'
+import { getWalletRoastShareScene } from '@/lib/walletRoastShare'
 
 export const runtime = 'nodejs'
 
@@ -91,6 +92,7 @@ export async function GET(request: Request) {
   }
 
   const memeTier = getMemeTier(audit.score, audit.summary.memePct, language)
+  const shareScene = getWalletRoastShareScene(audit.score, language)
   const primaryRisk = audit.risks?.[0]
   const actions = audit.actions?.slice(0, 2) || []
 
@@ -189,26 +191,76 @@ export async function GET(request: Request) {
               alignSelf: 'flex-start',
               marginTop: 22,
               borderRadius: 999,
-              border: '1px solid rgba(255,180,106,0.32)',
-              background: 'rgba(255,180,106,0.12)',
-              color: '#ffd79f',
+              border: `1px solid ${shareScene.accent}66`,
+              background: shareScene.accentSoft,
+              color: shareScene.accentText,
               padding: '10px 16px',
               fontWeight: 700,
               fontSize: 18
             }}
           >
-            {(language === 'zh' ? 'Meme 等级' : 'Meme tier')}: {memeTier.label}
+            {shareScene.title}
           </div>
 
           <div style={{ display: 'flex', marginTop: 12, fontSize: 20, color: '#d7c8ad' }}>
-            {memeTier.signal}
+            {shareScene.caption}
           </div>
 
           <div
             style={{
               display: 'flex',
-              marginTop: 28,
-              fontSize: 32,
+              marginTop: 24,
+              borderRadius: 34,
+              overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(0,0,0,0.2)'
+            }}
+          >
+            <img
+              alt={shareScene.title}
+              src={shareScene.artDataUrl}
+              width="912"
+              height="460"
+              style={{
+                width: '100%',
+                height: 460,
+                objectFit: 'cover'
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              marginTop: 18
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                borderRadius: 999,
+                border: '1px solid rgba(255,180,106,0.32)',
+                background: 'rgba(255,180,106,0.12)',
+                color: '#ffd79f',
+                padding: '8px 14px',
+                fontWeight: 700,
+                fontSize: 16
+              }}
+            >
+              {(language === 'zh' ? 'Meme 等级' : 'Meme tier')}: {memeTier.label}
+            </div>
+            <div style={{ display: 'flex', fontSize: 16, color: '#d7c8ad' }}>
+              {memeTier.signal}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              marginTop: 24,
+              fontSize: 28,
               color: '#e3d4bb',
               lineHeight: 1.4
             }}
@@ -221,7 +273,7 @@ export async function GET(request: Request) {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                marginTop: 28,
+                marginTop: 24,
                 borderRadius: 28,
                 border: '1px solid rgba(255,255,255,0.08)',
                 background: 'rgba(0,0,0,0.22)',
@@ -240,7 +292,7 @@ export async function GET(request: Request) {
             </div>
           ) : null}
 
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 28 }}>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 24 }}>
             {[
               {
                 label: language === 'zh' ? '仓位总值' : 'Bag value',
@@ -285,7 +337,7 @@ export async function GET(request: Request) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              marginTop: 28,
+              marginTop: 24,
               borderRadius: 28,
               border: '1px solid rgba(255,255,255,0.08)',
               background: 'rgba(0,0,0,0.24)',
