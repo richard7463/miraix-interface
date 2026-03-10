@@ -7,6 +7,7 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
 const PUBLIC_APP_ORIGIN = 'https://app.miraix.fun'
 const PUBLIC_AUDIT_ENDPOINT = `${PUBLIC_APP_ORIGIN}/api/wallet-audit`
+const PUBLIC_SHARE_IMAGE_ENDPOINT = `${PUBLIC_APP_ORIGIN}/api/wallet-roast/share-image`
 const EXAMPLE_WALLET = 'BaCvvheB3evgWR1jLGYuyh66dui8wouXdXckKHXnFyJn'
 
 const installPrompt = `为我创建一个本地 helper，名字叫 miraix-wallet-roast。
@@ -17,6 +18,8 @@ const installPrompt = `为我创建一个本地 helper，名字叫 miraix-wallet
 3. Body 使用 {"walletAddress":"<solana钱包地址>","language":"zh"}
 4. 返回后总结 score、verdict、roast、risks、actions
 5. 如果我要求发帖文案，再基于返回结果生成一段适合发 X 的中文文案
+6. 如果我要求分享截图、海报或图片，直接返回这个图片地址：
+${PUBLIC_SHARE_IMAGE_ENDPOINT}?walletAddress=<solana钱包地址>&language=zh
 
 先帮我完成这个 helper，然后告诉我怎么调用它。`
 

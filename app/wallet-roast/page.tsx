@@ -93,8 +93,11 @@ const COPY = {
     copyShareText: 'Copy share text',
     downloadImage: 'Download image',
     downloadingImage: 'Rendering...',
+    okxLogoText: 'OKX',
     cardBadge: 'Powered by OKX OnchainOS',
     cardFooter: 'Roast by Miraix',
+    memeTier: 'Meme tier',
+    memeSignal: 'Memecoin signal',
     topHoldings: 'Top holdings',
     riskBadge: 'Risk',
     tokenUnit: 'tokens',
@@ -157,8 +160,11 @@ const COPY = {
     copyShareText: '复制分享文案',
     downloadImage: '下载图片',
     downloadingImage: '生成中...',
+    okxLogoText: 'OKX',
     cardBadge: 'Powered by OKX OnchainOS',
     cardFooter: 'Miraix 钱包 Roast',
+    memeTier: 'Meme 等级',
+    memeSignal: 'Memecoin 信号',
     topHoldings: '主要持仓',
     riskBadge: '风险',
     tokenUnit: '个代币',
@@ -222,8 +228,11 @@ const COPY = {
     copyShareText: string
     downloadImage: string
     downloadingImage: string
+    okxLogoText: string
     cardBadge: string
     cardFooter: string
+    memeTier: string
+    memeSignal: string
     topHoldings: string
     riskBadge: string
     tokenUnit: string
@@ -267,6 +276,47 @@ const formatUsd = (value: number, language: Language) => {
     currency: 'USD',
     maximumFractionDigits: value >= 100 ? 0 : 2
   }).format(value || 0)
+}
+
+const getMemeTier = (
+  score: number,
+  memePct: number,
+  language: Language
+) => {
+  if (score >= 80) {
+    return {
+      label: language === 'zh' ? '香槟蛙' : 'Champagne Frog',
+      signal: language === 'zh' ? '这张图可以直接发，甚至有点凡尔赛。' : 'Post it. This one flexes cleanly.'
+    }
+  }
+
+  if (score >= 60) {
+    return {
+      label: language === 'zh' ? 'BONK 幸存者' : 'BONK Survivor',
+      signal:
+        language === 'zh'
+          ? '仓位还算能打，但还是有一点 memecoin 余味。'
+          : 'Still tradeable, but the memecoin fumes are noticeable.'
+    }
+  }
+
+  if (score >= 40) {
+    return {
+      label: language === 'zh' ? 'Pepe 打工蛙' : 'Pepe Fry Cook',
+      signal:
+        language === 'zh'
+          ? `meme 暴露 ${memePct.toFixed(1)}%，截图够戏剧化，适合传播。`
+          : `${memePct.toFixed(1)}% meme exposure. Messy enough to travel on the timeline.`
+    }
+  }
+
+  return {
+    label: language === 'zh' ? '接盘吉祥物' : 'Exit Liquidity Mascot',
+    signal:
+      language === 'zh'
+        ? `这已经不是仓位，是 memecoin 情绪现场。`
+        : 'This is no longer allocation. It is memecoin theater.'
+  }
 }
 
 const shortenWallet = (value: string) => {
@@ -372,6 +422,7 @@ export default function WalletRoastPage() {
     : []
   const shareActions = audit?.actions.slice(0, 2) || []
   const shareRisk = audit?.risks[0]
+  const shareMemeTier = audit ? getMemeTier(audit.score, audit.summary.memePct, language) : null
 
   useEffect(() => {
     if (!walletAddress && connectedWallet) {
@@ -506,14 +557,21 @@ export default function WalletRoastPage() {
       context.lineWidth = 2
       context.stroke()
 
-      drawRoundedRect(context, 84, 84, 360, 56, 28)
+      drawRoundedRect(context, 84, 84, 112, 56, 20)
+      context.fillStyle = '#ffffff'
+      context.fill()
+      context.fillStyle = '#111111'
+      context.font = '800 26px ui-sans-serif, system-ui, sans-serif'
+      context.fillText(pageCopy.okxLogoText, 108, 120)
+
+      drawRoundedRect(context, 212, 84, 420, 56, 28)
       context.fillStyle = 'rgba(255,180,106,0.12)'
       context.fill()
       context.strokeStyle = 'rgba(255,180,106,0.36)'
       context.stroke()
       context.fillStyle = '#ffd79f'
       context.font = '600 22px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(pageCopy.cardBadge, 110, 120)
+      context.fillText(pageCopy.cardBadge, 238, 120)
 
       context.fillStyle = '#fef4df'
       context.font = '700 58px Georgia, serif'
@@ -546,30 +604,50 @@ export default function WalletRoastPage() {
       context.font = '700 46px ui-sans-serif, system-ui, sans-serif'
       context.fillText(scoreLabel(audit.score, language), 84, 380)
 
+      if (shareMemeTier) {
+        drawRoundedRect(context, 84, 412, 310, 54, 22)
+        context.fillStyle = 'rgba(255,180,106,0.14)'
+        context.fill()
+        context.strokeStyle = 'rgba(255,180,106,0.34)'
+        context.stroke()
+        context.fillStyle = '#ffd79f'
+        context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
+        context.fillText(`${pageCopy.memeTier}: ${shareMemeTier.label}`, 108, 446)
+
+        drawRoundedRect(context, 410, 412, 586, 54, 22)
+        context.fillStyle = 'rgba(255,255,255,0.08)'
+        context.fill()
+        context.strokeStyle = 'rgba(255,255,255,0.08)'
+        context.stroke()
+        context.fillStyle = '#d7c8ad'
+        context.font = '600 18px ui-sans-serif, system-ui, sans-serif'
+        context.fillText(shareMemeTier.signal, 436, 446)
+      }
+
       context.fillStyle = '#e3d4bb'
       context.font = '500 30px ui-sans-serif, system-ui, sans-serif'
-      wrapCanvasText(context, audit.roast, 84, 440, 912, 42, 5)
+      wrapCanvasText(context, audit.roast, 84, 526, 912, 42, 5)
 
       if (shareRisk) {
-        drawRoundedRect(context, 84, 680, 912, 170, 30)
+        drawRoundedRect(context, 84, 756, 912, 170, 30)
         context.fillStyle = 'rgba(0,0,0,0.22)'
         context.fill()
         context.strokeStyle = 'rgba(255,255,255,0.08)'
         context.stroke()
         context.fillStyle = '#ffcf88'
         context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(pageCopy.mainRisks, 110, 730)
+        context.fillText(pageCopy.mainRisks, 110, 806)
         context.fillStyle = '#fff4df'
         context.font = '700 26px ui-sans-serif, system-ui, sans-serif'
-        context.fillText(shareRisk.title, 110, 776)
+        context.fillText(shareRisk.title, 110, 852)
         context.fillStyle = '#d3c3a6'
         context.font = '500 22px ui-sans-serif, system-ui, sans-serif'
-        wrapCanvasText(context, shareRisk.detail, 110, 814, 860, 30, 2)
+        wrapCanvasText(context, shareRisk.detail, 110, 890, 860, 30, 2)
       }
 
       shareStats.forEach((item, index) => {
         const x = 84 + (index % 2) * 456
-        const y = 888 + Math.floor(index / 2) * 156
+        const y = 972 + Math.floor(index / 2) * 156
         drawRoundedRect(context, x, y, 440, 132, 28)
         context.fillStyle = 'rgba(0,0,0,0.22)'
         context.fill()
@@ -583,16 +661,16 @@ export default function WalletRoastPage() {
         context.fillText(item.value, x + 24, y + 92)
       })
 
-      drawRoundedRect(context, 84, 1228, 912, 476, 32)
+      drawRoundedRect(context, 84, 1312, 912, 392, 32)
       context.fillStyle = 'rgba(0,0,0,0.24)'
       context.fill()
       context.strokeStyle = 'rgba(255,255,255,0.08)'
       context.stroke()
       context.fillStyle = '#ffcf88'
       context.font = '700 20px ui-sans-serif, system-ui, sans-serif'
-      context.fillText(pageCopy.actionQueue, 110, 1278)
+      context.fillText(pageCopy.actionQueue, 110, 1362)
 
-      let actionY = 1338
+      let actionY = 1422
       shareActions.forEach((action) => {
         context.fillStyle = '#fff4df'
         context.font = '700 28px ui-sans-serif, system-ui, sans-serif'
@@ -785,8 +863,13 @@ export default function WalletRoastPage() {
 
                   <div className="mt-5 mx-auto w-full max-w-[380px] overflow-hidden rounded-[32px] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(255,168,86,0.28),transparent_32%),linear-gradient(180deg,#17120d_0%,#0f0c09_100%)] p-5">
                     <div className="flex min-h-[675px] flex-col">
-                      <div className="inline-flex self-start rounded-full border border-[#ffb46a]/30 bg-[#ffb46a]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ffd79f]">
-                        {pageCopy.cardBadge}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="inline-flex items-center rounded-2xl bg-white px-3 py-1 text-xs font-black tracking-[0.24em] text-[#111111]">
+                          {pageCopy.okxLogoText}
+                        </div>
+                        <div className="inline-flex rounded-full border border-[#ffb46a]/30 bg-[#ffb46a]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#ffd79f]">
+                          {pageCopy.cardBadge}
+                        </div>
                       </div>
 
                       <div className="mt-4 flex items-start justify-between gap-4">
@@ -799,6 +882,15 @@ export default function WalletRoastPage() {
                           {audit.score}
                         </div>
                       </div>
+
+                      {shareMemeTier ? (
+                        <div className="mt-4 grid gap-2">
+                          <div className="inline-flex self-start rounded-full border border-[#ffb46a]/30 bg-[#ffb46a]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#ffd79f]">
+                            {pageCopy.memeTier}: {shareMemeTier.label}
+                          </div>
+                          <p className="text-sm leading-6 text-[#d7c8ad]">{shareMemeTier.signal}</p>
+                        </div>
+                      ) : null}
 
                       <p className="mt-5 text-sm leading-7 text-[#e2d3bb]">{audit.roast}</p>
 
