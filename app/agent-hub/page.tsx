@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useTheme } from "@/components/Themes";
+import { useRouter } from "next/navigation";
 
 const categories = [
   "All",
@@ -15,12 +16,22 @@ const categories = [
 
 const mockAgents = [
   {
+    id: "0",
+    name: "100U FOMO Copilot",
+    description: "Ask Miraix what to do with 100 USDC. Free preview first, then unlock the full OKX basket with fxUSD on Base.",
+    tags: ["Trading", "Live", "Base"],
+    status: "live",
+    category: "Trading",
+    href: "/fomo-copilot"
+  },
+  {
     id: "1",
     name: "ApexLiquid",
     description: "Trade perps on Hyperliquid. Track & analyze wallet performance. Copy top smart money trades.",
     tags: ["Trading", "Info"],
     status: "soon",
-    category: "Trading"
+    category: "Trading",
+    href: null
   },
   {
     id: "2",
@@ -28,7 +39,8 @@ const mockAgents = [
     description: "Recurrent intelligent buys.",
     tags: ["Trading"],
     status: "soon",
-    category: "Trading"
+    category: "Trading",
+    href: null
   },
   {
     id: "3",
@@ -36,7 +48,8 @@ const mockAgents = [
     description: "Intelligent Portfolio Management — Smart Vaults.",
     tags: ["DeFi", "Yield"],
     status: "soon",
-    category: "DeFi"
+    category: "DeFi",
+    href: null
   },
   {
     id: "4",
@@ -44,7 +57,8 @@ const mockAgents = [
     description: "Research any blockchain project with very detailed real-time insight.",
     tags: ["Info"],
     status: "soon",
-    category: "Info"
+    category: "Info",
+    href: null
   },
   {
     id: "5",
@@ -52,7 +66,8 @@ const mockAgents = [
     description: "Analyzes and improves your social performance.",
     tags: ["Social", "Info"],
     status: "soon",
-    category: "Social"
+    category: "Social",
+    href: null
   },
   {
     id: "6",
@@ -60,7 +75,8 @@ const mockAgents = [
     description: "Ask about any token, crypto, get insights and technical analysis.",
     tags: ["Trading", "Info"],
     status: "soon",
-    category: "Trading"
+    category: "Trading",
+    href: null
   },
   {
     id: "7",
@@ -68,7 +84,8 @@ const mockAgents = [
     description: "Wall Street meets crypto. Let Warden manage your portfolio.",
     tags: ["Trading"],
     status: "soon",
-    category: "Trading"
+    category: "Trading",
+    href: null
   },
   {
     id: "8",
@@ -76,12 +93,14 @@ const mockAgents = [
     description: "Your favourite private and uncensored AI chatbot.",
     tags: ["Info", "Chat"],
     status: "soon",
-    category: "Chat"
+    category: "Chat",
+    href: null
   }
 ];
 
 export default function AgentHubPage() {
   const { theme } = useTheme();
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [hoveredAgent, setHoveredAgent] = useState<string | null>(null);
 
@@ -148,6 +167,7 @@ export default function AgentHubPage() {
               }`}
               onMouseEnter={() => setHoveredAgent(agent.id)}
               onMouseLeave={() => setHoveredAgent(null)}
+              onClick={() => agent.href && router.push(agent.href)}
             >
               {/* Card decoration */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#4C94E5]/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -180,8 +200,14 @@ export default function AgentHubPage() {
                       </span>
                     ))}
                   </div>
-                  <div className="px-3 py-1 rounded-full text-xs font-medium transition-colors duration-300 bg-yellow-500/10 text-yellow-500">
-                    Coming soon
+                  <div
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-300 ${
+                      agent.status === "live"
+                        ? "bg-emerald-500/10 text-emerald-600"
+                        : "bg-yellow-500/10 text-yellow-500"
+                    }`}
+                  >
+                    {agent.status === "live" ? "Open now" : "Coming soon"}
                   </div>
                 </div>
               </div>
