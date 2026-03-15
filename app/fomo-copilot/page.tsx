@@ -729,7 +729,7 @@ export default function FomoCopilotPage() {
       setFundingStatus(status);
 
       if (!status.hasEnoughUsdc || !status.hasEnoughSol) {
-        const reasons = [];
+        const reasons: string[] = [];
         if (!status.hasEnoughUsdc) {
           reasons.push(`至少 ${normalizedBudgetUsd} USDC`);
         }

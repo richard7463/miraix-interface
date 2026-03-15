@@ -11,7 +11,7 @@ import { useTheme } from '../Themes'
 import { ConnectButton } from './ConnectButton'
 import { useSolanaWallets } from '@privy-io/react-auth/solana'
 import { useWallets } from '@privy-io/react-auth'
-import { Connection, VersionedTransaction } from '@solana/web3.js'
+import { Connection, TransactionInstruction, VersionedTransaction } from '@solana/web3.js'
 
 export const Header = () => {
   const { theme, setTheme } = useTheme()
@@ -50,9 +50,12 @@ export const Header = () => {
   }, [premiumExpiresAt])
 
   const apiBaseUrl = useMemo(() => {
-    return process.env.NODE_ENV === 'production'
-      ? 'https://langgraph-defai.vercel.app'
-      : 'http://localhost:3009'
+    // Force local backend for x402 testing
+    // TODO: Change back to production URL after x402 is deployed to Vercel
+    return 'http://localhost:3009'
+    // return process.env.NODE_ENV === 'production'
+    //   ? 'https://langgraph-defai.vercel.app'
+    //   : 'http://localhost:3009'
   }, [])
 
   const handleUpgradePremium = useCallback(async () => {
@@ -120,42 +123,115 @@ export const Header = () => {
         throw new Error('No accepted payment methods')
       }
 
-      // Step 3: Get payment transaction from facilitator
-      console.log('[Premium] Step 2: Fetching payment tx from facilitator...')
-      const facilitatorUrl = 'https://facilitator.payai.network/exact/svm/transaction'
-      const facilitatorResponse = await fetch(facilitatorUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          network: acceptedPayment.network,
-          amount: acceptedPayment.amount,
-          asset: acceptedPayment.asset,
-          payTo: acceptedPayment.payTo,
-          payer: connectedSolanaWallet.address,
-          maxTimeoutSeconds: acceptedPayment.maxTimeoutSeconds || 300,
-          extra: acceptedPayment.extra || {},
-        }),
+      // Step 3: Create USDC transfer transaction directly
+      console.log('[Premium] Step 2: Creating USDC transfer transaction...')
+      console.log('[Premium] Payment details:', {
+        from: connectedSolanaWallet.address,
+        to: acceptedPayment.payTo,
+        amount: acceptedPayment.amount,
+        asset: acceptedPayment.asset,
       })
 
-      if (!facilitatorResponse.ok) {
-        throw new Error(`Facilitator failed: ${facilitatorResponse.status}`)
-      }
+      // Import Solana web3 modules
+      const { PublicKey, TransactionMessage, SystemProgram } = await import('@solana/web3.js')
+      const { 
+        TOKEN_PROGRAM_ID, 
+        createTransferCheckedInstruction, 
+        getAssociatedTokenAddress,
+        createAssociatedTokenAccountInstruction,
+        getAccount
+      } = await import('@solana/spl-token')
 
-      const { transaction: paymentTxBase64 } = await facilitatorResponse.json()
-      if (!paymentTxBase64) {
-        throw new Error('Missing transaction from facilitator')
-      }
-
-      // Step 4: Sign and send payment transaction
-      console.log('[Premium] Step 3: Signing payment transaction...')
-      const paymentTx = VersionedTransaction.deserialize(Buffer.from(paymentTxBase64, 'base64'))
-      const signedTx = await connectedSolanaWallet.signTransaction(paymentTx)
-      
-      console.log('[Premium] Step 4: Broadcasting payment...')
       const connection = new Connection(
         'https://special-yolo-tent.solana-mainnet.quiknode.pro/f6e8a1ac41cfcd90c3837b93f190923fd8b89d8f/',
         'confirmed'
       )
+
+      // USDC mint address (mainnet)
+      const usdcMint = new PublicKey(acceptedPayment.asset)
+      const payerPubkey = new PublicKey(connectedSolanaWallet.address)
+      const recipientPubkey = new PublicKey(acceptedPayment.payTo)
+
+      // Get associated token accounts
+      const payerAta = await getAssociatedTokenAddress(usdcMint, payerPubkey)
+      const recipientAta = await getAssociatedTokenAddress(usdcMint, recipientPubkey)
+
+      console.log('[Premium] Payer ATA:', payerAta.toString())
+      console.log('[Premium] Recipient ATA:', recipientAta.toString())
+
+      // Check if payer has USDC
+      let payerAtaExists = false
+      let payerBalance = BigInt(0)
+      try {
+        const payerTokenAccount = await getAccount(connection, payerAta)
+        payerAtaExists = true
+        payerBalance = payerTokenAccount.amount
+        console.log('[Premium] Payer USDC balance:', Number(payerBalance) / 1e6, 'USDC')
+      } catch (e) {
+        console.log('[Premium] Payer ATA does not exist or has no USDC')
+      }
+
+      if (!payerAtaExists || payerBalance < BigInt(acceptedPayment.amount)) {
+        throw new Error(
+          `Insufficient USDC balance. Required: ${Number(acceptedPayment.amount) / 1e6} USDC, ` +
+          `Available: ${Number(payerBalance) / 1e6} USDC. Please add USDC to your wallet first.`
+        )
+      }
+
+      // Check if recipient ATA exists, create if not
+      const instructions: TransactionInstruction[] = []
+      let recipientAtaExists = false
+      try {
+        await getAccount(connection, recipientAta)
+        recipientAtaExists = true
+        console.log('[Premium] Recipient ATA exists')
+      } catch (e) {
+        console.log('[Premium] Recipient ATA does not exist, will create it')
+      }
+
+      if (!recipientAtaExists) {
+        instructions.push(
+          createAssociatedTokenAccountInstruction(
+            payerPubkey,
+            recipientAta,
+            recipientPubkey,
+            usdcMint
+          )
+        )
+      }
+
+      // Create transfer instruction
+      instructions.push(
+        createTransferCheckedInstruction(
+          payerAta,
+          usdcMint,
+          recipientAta,
+          payerPubkey,
+          BigInt(acceptedPayment.amount),
+          6, // USDC decimals
+          [],
+          TOKEN_PROGRAM_ID
+        )
+      )
+
+      // Get recent blockhash
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed')
+
+      // Create transaction message
+      const messageV0 = new TransactionMessage({
+        payerKey: payerPubkey,
+        recentBlockhash: blockhash,
+        instructions,
+      }).compileToV0Message()
+
+      // Create versioned transaction
+      const paymentTx = new VersionedTransaction(messageV0)
+
+      // Step 4: Sign transaction
+      console.log('[Premium] Step 3: Signing payment transaction...')
+      const signedTx = await connectedSolanaWallet.signTransaction(paymentTx)
+      
+      console.log('[Premium] Step 4: Broadcasting payment...')
       const signature = await connection.sendRawTransaction(signedTx.serialize())
       console.log('[Premium] Payment tx:', signature)
       setPaymentTx(signature)
