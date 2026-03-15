@@ -523,6 +523,10 @@ export default function FomoCopilotPage() {
     if (!shareImagePath || typeof window === "undefined") return shareImagePath;
     return new URL(shareImagePath, window.location.origin).toString();
   }, [shareImagePath]);
+  const basePaymentHistoryUrl = useMemo(() => {
+    if (!embeddedEvmWallet?.address) return null;
+    return `https://basescan.org/address/${embeddedEvmWallet.address}#tokentxns`;
+  }, [embeddedEvmWallet?.address]);
 
   const selectedPaymentLabel = paymentLabelFor(
     selectedPaymentAsset,
@@ -1288,6 +1292,17 @@ export default function FomoCopilotPage() {
                   >
                     <ArrowUpRight className="h-4 w-4" />
                     打开图片
+                  </a>
+                )}
+                {basePaymentHistoryUrl && (
+                  <a
+                    href={basePaymentHistoryUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
+                  >
+                    <ArrowUpRight className="h-4 w-4" />
+                    查看交易
                   </a>
                 )}
                 </div>
