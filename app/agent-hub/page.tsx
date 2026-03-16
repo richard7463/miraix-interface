@@ -8,94 +8,109 @@ const categories = [
   "All",
   "DeFi",
   "Trading",
+  "Security",
   "Yield",
   "Social",
   "Info",
-  "Chat"
+  "Chat",
 ];
 
 const mockAgents = [
   {
     id: "0",
     name: "100U FOMO Copilot",
-    description: "Ask Miraix what to do with 100 USDC. Free preview first, then unlock the full OKX basket with fxUSD on Base.",
+    description:
+      "Ask Miraix what to do with 100 USDC. Free preview first, then unlock the full OKX basket with fxUSD on Base.",
     tags: ["Trading", "Live", "Base"],
     status: "live",
     category: "Trading",
-    href: "/fomo-copilot"
+    href: "/fomo-copilot",
   },
   {
     id: "1",
-    name: "ApexLiquid",
-    description: "Trade perps on Hyperliquid. Track & analyze wallet performance. Copy top smart money trades.",
-    tags: ["Trading", "Info"],
-    status: "soon",
-    category: "Trading",
-    href: null
+    name: "Binance Agent Firewall",
+    description:
+      "Judge an AI trading prompt before it touches your Binance account. Live market data, permission fencing, and Pass / Warn / Block verdicts.",
+    tags: ["Security", "Binance", "Live"],
+    status: "live",
+    category: "Security",
+    href: "/binance-agent-firewall",
   },
   {
     id: "2",
+    name: "ApexLiquid",
+    description:
+      "Trade perps on Hyperliquid. Track & analyze wallet performance. Copy top smart money trades.",
+    tags: ["Trading", "Info"],
+    status: "soon",
+    category: "Trading",
+    href: null,
+  },
+  {
+    id: "3",
     name: "Intelligent DCA",
     description: "Recurrent intelligent buys.",
     tags: ["Trading"],
     status: "soon",
     category: "Trading",
-    href: null
+    href: null,
   },
   {
-    id: "3",
+    id: "4",
     name: "Levva",
     description: "Intelligent Portfolio Management — Smart Vaults.",
     tags: ["DeFi", "Yield"],
     status: "soon",
     category: "DeFi",
-    href: null
-  },
-  {
-    id: "4",
-    name: "Messari Deep Research",
-    description: "Research any blockchain project with very detailed real-time insight.",
-    tags: ["Info"],
-    status: "soon",
-    category: "Info",
-    href: null
+    href: null,
   },
   {
     id: "5",
+    name: "Messari Deep Research",
+    description:
+      "Research any blockchain project with very detailed real-time insight.",
+    tags: ["Info"],
+    status: "soon",
+    category: "Info",
+    href: null,
+  },
+  {
+    id: "6",
     name: "KaiBot",
     description: "Analyzes and improves your social performance.",
     tags: ["Social", "Info"],
     status: "soon",
     category: "Social",
-    href: null
-  },
-  {
-    id: "6",
-    name: "The Quantfather",
-    description: "Ask about any token, crypto, get insights and technical analysis.",
-    tags: ["Trading", "Info"],
-    status: "soon",
-    category: "Trading",
-    href: null
+    href: null,
   },
   {
     id: "7",
+    name: "The Quantfather",
+    description:
+      "Ask about any token, crypto, get insights and technical analysis.",
+    tags: ["Trading", "Info"],
+    status: "soon",
+    category: "Trading",
+    href: null,
+  },
+  {
+    id: "8",
     name: "Warden Bufett",
     description: "Wall Street meets crypto. Let Warden manage your portfolio.",
     tags: ["Trading"],
     status: "soon",
     category: "Trading",
-    href: null
+    href: null,
   },
   {
-    id: "8",
+    id: "9",
     name: "Venice",
     description: "Your favourite private and uncensored AI chatbot.",
     tags: ["Info", "Chat"],
     status: "soon",
     category: "Chat",
-    href: null
-  }
+    href: null,
+  },
 ];
 
 export default function AgentHubPage() {
@@ -106,12 +121,16 @@ export default function AgentHubPage() {
 
   // Filter by category
   const filteredAgents = mockAgents.filter(
-    (agent) => selectedCategory === "All" || agent.category === selectedCategory
+    (agent) =>
+      selectedCategory === "All" || agent.category === selectedCategory,
   );
 
   // Helper: get logo url (use local svg by agent name)
   const getAgentLogo = (agent: any) => {
-    const fileName = agent.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const fileName = agent.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
     return `/agent-logos/${fileName}.svg`;
   };
 
@@ -132,7 +151,8 @@ export default function AgentHubPage() {
             Agent Hub
           </h1>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Select an agent to manage, swap, earn and much more, using a simple chat.
+            Select an agent to manage, swap, earn and much more, using a simple
+            chat.
           </p>
         </div>
 
@@ -195,7 +215,10 @@ export default function AgentHubPage() {
                 <div className="flex items-center justify-between pt-4">
                   <div className="flex items-center gap-2 flex-wrap">
                     {agent.tags.map((tag) => (
-                      <span key={tag} className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#4C94E5]/10 to-[#3d7bc4]/10 text-[#4C94E5] mr-2 mb-1">
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-[#4C94E5]/10 to-[#3d7bc4]/10 text-[#4C94E5] mr-2 mb-1"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -217,17 +240,23 @@ export default function AgentHubPage() {
 
         {/* Invite block (hidden) */}
         {false && (
-        <div className="fixed md:absolute left-0 right-0 bottom-[104px] md:bottom-4 md:left-4 md:right-4 z-50 pointer-events-none backdrop-blur-sm">
-          <div className="flex flex-row items-center justify-between bg-gradient-to-r from-[#2A8C7A] to-[#368B8B] rounded-[12px] py-3 px-4  m-2 md:m-0 shadow-lg pointer-events-auto">
-            <div>
-              <p className="text-white text-base font-light">Invite friends</p>
-              <div className="text-white/60 text-xs font-light">Your invite code <span className="font-bold">TGYJ6</span></div>
+          <div className="fixed md:absolute left-0 right-0 bottom-[104px] md:bottom-4 md:left-4 md:right-4 z-50 pointer-events-none backdrop-blur-sm">
+            <div className="flex flex-row items-center justify-between bg-gradient-to-r from-[#2A8C7A] to-[#368B8B] rounded-[12px] py-3 px-4  m-2 md:m-0 shadow-lg pointer-events-auto">
+              <div>
+                <p className="text-white text-base font-light">
+                  Invite friends
+                </p>
+                <div className="text-white/60 text-xs font-light">
+                  Your invite code <span className="font-bold">TGYJ6</span>
+                </div>
+              </div>
+              <button className="flex items-center justify-center px-4 py-1.5 bg-white text-black rounded-full shadow-md transition hover:bg-gray-100 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed font-inter text-[16px] font-semibold leading-6 capitalize">
+                Invite
+              </button>
             </div>
-            <button className="flex items-center justify-center px-4 py-1.5 bg-white text-black rounded-full shadow-md transition hover:bg-gray-100 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed font-inter text-[16px] font-semibold leading-6 capitalize">Invite</button>
           </div>
-        </div>
         )}
       </div>
     </main>
   );
-} 
+}
