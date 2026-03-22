@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
     console.log('[FOMO Premium Proxy] Backend response:', {
       status: response.status,
       hasPaymentRequired: Boolean(outgoingPaymentRequired),
-      hasPaymentResponse: Boolean(outgoingPaymentResponse)
+      hasPaymentResponse: Boolean(outgoingPaymentResponse),
+      payloadPreview: response.ok ? undefined : payload.slice(0, 600),
     })
 
     for (const headerName of PAYMENT_HEADERS) {

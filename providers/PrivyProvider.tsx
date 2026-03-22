@@ -3,6 +3,7 @@
 
 import {PrivyProvider} from '@privy-io/react-auth';
 import {toSolanaWalletConnectors} from "@privy-io/react-auth/solana";
+import { base, xLayer } from 'viem/chains';
 
 export default function Providers({children}: {children: React.ReactNode}) {
   return (
@@ -10,6 +11,8 @@ export default function Providers({children}: {children: React.ReactNode}) {
       appId={"cm9o068p3010nky0lp4w3plj1"}
       clientId={process.env.NEXT_PUBLIC_PRIVY_APP_CLIENT_ID!}
       config={{
+        defaultChain: xLayer,
+        supportedChains: [xLayer, base],
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {
           ethereum: {

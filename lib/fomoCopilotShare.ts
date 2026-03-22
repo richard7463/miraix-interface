@@ -10,6 +10,12 @@ export interface FomoShareLeg {
   txReady: boolean
 }
 
+export interface FomoShareAgent {
+  name: string
+  status: 'ready' | 'watch' | 'pending'
+  verdict: string
+}
+
 export interface FomoSharePayload {
   budgetUsd: number
   riskMode: FomoRiskMode
@@ -24,7 +30,13 @@ export interface FomoSharePayload {
   estimatedSlippagePct: number
   estimatedFeesUsd: number
   preparedSwapCount: number
+  executedSwapCount: number
   totalSwapCount: number
+  paymentReference?: string | null
+  paymentExplorerUrl?: string | null
+  tradeHashes?: string[]
+  approvalHashes?: string[]
+  agentLoop: FomoShareAgent[]
   legs: FomoShareLeg[]
 }
 

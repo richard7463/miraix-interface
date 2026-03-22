@@ -13,6 +13,12 @@ const percentFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2
 })
 
+function truncateHash(value: string | null | undefined, start = 8, end = 6) {
+  if (!value) return 'Pending'
+  if (value.length <= start + end + 3) return value
+  return `${value.slice(0, start)}...${value.slice(-end)}`
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url)
   const payload = parseFomoSharePayload(url.searchParams.get('payload'))
@@ -124,10 +130,10 @@ export async function GET(request: Request) {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28 }}>
             <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 650 }}>
               <div style={{ display: 'flex', fontSize: 18, color: '#cbd5e1' }}>
-                Miraix FOMO Copilot
+                Miraix X Layer Rotation Desk
               </div>
               <div style={{ display: 'flex', marginTop: 10, fontSize: 56, fontWeight: 800 }}>
-                {payload.title || "Today's 100U Play"}
+                {payload.title || 'X Layer Rotation Desk'}
               </div>
               <div style={{ display: 'flex', marginTop: 12, fontSize: 30, color: '#f8fafc', fontWeight: 700 }}>
                 {payload.theme}
@@ -218,7 +224,7 @@ export async function GET(request: Request) {
             }}
           >
             <div style={{ display: 'flex', fontSize: 18, color: '#f8fafc', fontWeight: 700 }}>
-              100U allocation
+              Execution basket
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 18 }}>
               {payload.legs.map((leg) => (
@@ -285,10 +291,30 @@ export async function GET(request: Request) {
                 Execution state
               </div>
               <div style={{ display: 'flex', marginTop: 10, fontSize: 34, fontWeight: 800 }}>
-                {payload.preparedSwapCount} / {payload.totalSwapCount}
+                {payload.executedSwapCount} / {payload.totalSwapCount}
               </div>
               <div style={{ display: 'flex', marginTop: 10, fontSize: 18, color: '#cbd5e1', lineHeight: 1.4 }}>
-                Next step: request wallet signature for the prepared OKX swap payloads.
+                {payload.paymentReference
+                  ? `Payment ${payload.paymentReference.slice(0, 8)}... confirmed.`
+                  : 'Share this after payment to prove the premium loop was settled.'}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  marginTop: 14
+                }}
+              >
+                <div style={{ display: 'flex', fontSize: 15, color: '#cbd5e1' }}>
+                  Payment tx: {truncateHash(payload.paymentReference)}
+                </div>
+                <div style={{ display: 'flex', fontSize: 15, color: '#cbd5e1' }}>
+                  Approval txs: {payload.approvalHashes?.length || 0}
+                </div>
+                <div style={{ display: 'flex', fontSize: 15, color: '#cbd5e1' }}>
+                  Swap tx: {truncateHash(payload.tradeHashes?.[0] || null)}
+                </div>
               </div>
             </div>
 
@@ -304,10 +330,36 @@ export async function GET(request: Request) {
               }}
             >
               <div style={{ display: 'flex', fontSize: 18, color: '#f8fafc', fontWeight: 700 }}>
-                Routing
+                Agent loop
               </div>
-              <div style={{ display: 'flex', marginTop: 12, fontSize: 18, color: '#cbd5e1', lineHeight: 1.4 }}>
-                {payload.provider || 'OKX OnchainOS'} handles market data, quote, route discovery and execution prep.
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                  marginTop: 12,
+                }}
+              >
+                {(payload.agentLoop || []).slice(0, 3).map((agent) => (
+                  <div
+                    key={agent.name}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderRadius: 18,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.05)',
+                      padding: '12px 14px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', fontSize: 16, fontWeight: 800 }}>
+                      {agent.name}
+                    </div>
+                    <div style={{ display: 'flex', marginTop: 6, fontSize: 14, color: '#cbd5e1', lineHeight: 1.4 }}>
+                      {agent.verdict}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -324,7 +376,7 @@ export async function GET(request: Request) {
             }}
           >
             <div style={{ display: 'flex' }}>app.miraix.fun/fomo-copilot</div>
-            <div style={{ display: 'flex' }}>Miraix strategy + OKX execution + fxUSD settlement</div>
+            <div style={{ display: 'flex' }}>Strategist + Risk + Execution agents on X Layer</div>
           </div>
         </div>
       </div>
