@@ -134,3 +134,48 @@
 .border-\[\#888888ff\] {
     border-color: rgba(136, 136, 136, 1);
 }
+
+@layer components {
+  .circle-mark-base {
+    @apply flex items-center justify-center rounded-full text-base font-semibold;
+  }
+
+  .btn-arena-primary {
+    @apply inline-flex items-center gap-3 rounded-full bg-destructive px-7 py-4 text-base font-semibold text-white shadow-arena-create-agent-shadow transition-all duration-200 hover:scale-105 hover:bg-red-600 active:scale-95;
+  }
+
+  .btn-arena-secondary {
+    @apply inline-flex items-center gap-3 rounded-full border border-arena-manage-agent-border bg-arena-manage-agent-bg px-7 py-4 text-base font-medium text-white transition-all duration-200 hover:scale-105 hover:bg-white/15 active:scale-95;
+  }
+
+  .card-arena-base {
+    @apply rounded-[34px] border border-border bg-card-DEFAULT shadow-[0_24px_60px_rgba(23,29,45,0.05)];
+  }
+
+  .modal-arena-base {
+    @apply w-full rounded-[32px] p-7;
+    border: 1px solid #eadfce;
+    background: #fff8ef;
+    box-shadow: 0 36px 100px rgba(12, 18, 28, 0.32);
+  }
+
+  .table-arena-row {
+    @apply grid gap-5 border-t border-arena-divider-light px-6 py-6 first:border-t-0 xl:grid-cols-[260px_140px_140px_140px_minmax(0,1fr)_160px_140px] xl:items-center;
+  }
+
+  .card-base {
+    @apply rounded-[22px] border border-arena-rank-card-border bg-arena-rank-card-bg shadow-[0_20px_50px_rgba(23,29,45,0.04)] transition-all duration-200 hover:border-arena-link-hover-border hover:bg-white;
+  }
+
+  .agent-card-layout {
+    @apply flex flex-col gap-4 p-5; /* 基础布局，可根据需要调整 */
+  }
+
+  .watchlist-card-layout {
+    @apply flex flex-col gap-4 p-6; /* 基础布局，可根据需要调整 */
+  }
+
+  .status-badge {
+    @apply inline-flex rounded-full px-3 py-1 text-xs font-medium;
+  }
+}

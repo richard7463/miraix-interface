@@ -12,7 +12,7 @@ import {
 } from 'react'
 import { Flex, Heading, IconButton, ScrollArea, Tooltip } from '@radix-ui/themes'
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ContentEditable from 'react-contenteditable'
 import toast from 'react-hot-toast'
 import { AiOutlineClear, AiOutlineLoading3Quarters, AiOutlineUnorderedList } from 'react-icons/ai'
@@ -77,6 +77,7 @@ const postChatOrQuestion = async (chat: Chat, messages: any[], input: string) =>
 
 const Chat = (props: ChatProps, ref: any) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [currentMessage, setCurrentMessage] = useState<string>('');
@@ -113,6 +114,13 @@ const Chat = (props: ChatProps, ref: any) => {
       }))
     });
   }, [ready, authenticated, solanaWallets]);
+
+  useEffect(() => {
+    const inputParam = searchParams?.get('input');
+    if (inputParam && inputParam !== message) {
+      setMessage(inputParam);
+    }
+  }, [searchParams, message]);
 
   // 初始化聊天 - 移除登录检查，只在用户发送消息时检查
   useEffect(() => {
