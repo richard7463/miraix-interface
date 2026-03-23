@@ -10,11 +10,15 @@ import {
   fetchLivePortfolioContext,
   submitArenaDemoOrder,
 } from "@/lib/okxAgentTradeKit";
+import { maybeProxyArenaRequest } from "@/lib/agentArenaRemote";
 
 export async function POST(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   const { agentId } = await context.params;
   const storedAgent = await getStoredArenaAgent(agentId);
   const agent = storedAgent?.agent ?? getArenaAgent(agentId);

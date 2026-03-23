@@ -4,14 +4,18 @@ import {
   getDemoCopyTradeSummary,
   stopDemoCopyFollower,
 } from "@/lib/agentArenaCopyStore";
+import { maybeProxyArenaRequest } from "@/lib/agentArenaRemote";
 import { listOkxFollowerProfileViews } from "@/lib/okxFollowerProfiles";
 import { getStoredArenaAgent } from "@/lib/agentArenaStore";
 import { ensureArenaDemoRunner, getSubmittedAgentWithRuntime, runArenaRunnerCycleOnce } from "@/lib/agentArenaRunner";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   const { agentId } = await context.params;
   const stored = await getStoredArenaAgent(agentId);
   if (!stored) {
@@ -26,6 +30,9 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   ensureArenaDemoRunner();
 
   const { agentId } = await context.params;
@@ -66,6 +73,9 @@ export async function DELETE(
   request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   const { agentId } = await context.params;
   const stored = await getStoredArenaAgent(agentId);
   if (!stored) {

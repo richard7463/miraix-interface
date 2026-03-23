@@ -11,6 +11,7 @@ import {
   runArenaRunnerCycleOnce,
 } from "@/lib/agentArenaRunner";
 import { listPerformanceCurve } from "@/lib/agentArenaRuntimeStore";
+import { maybeProxyArenaRequest } from "@/lib/agentArenaRemote";
 import {
   buildArenaIntegrationState,
   fetchLiveMarketContext,
@@ -18,9 +19,12 @@ import {
 } from "@/lib/okxAgentTradeKit";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   ensureArenaDemoRunner();
 
   const { agentId } = await context.params;
@@ -148,9 +152,12 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   const { agentId } = await context.params;
   const deleted = await deleteStoredArenaAgent(agentId);
 

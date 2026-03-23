@@ -5,6 +5,7 @@ import {
   isFollowingAgent,
   unfollowAgent,
 } from "@/lib/agentArenaFollowStore";
+import { maybeProxyArenaRequest } from "@/lib/agentArenaRemote";
 import { getStoredArenaAgent } from "@/lib/agentArenaStore";
 
 async function assertAgentExists(agentId: string) {
@@ -14,9 +15,12 @@ async function assertAgentExists(agentId: string) {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   const { agentId } = await context.params;
   const exists = await assertAgentExists(agentId);
   if (!exists) {
@@ -30,9 +34,12 @@ export async function GET(
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   const { agentId } = await context.params;
   const exists = await assertAgentExists(agentId);
   if (!exists) {
@@ -47,9 +54,12 @@ export async function POST(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   const { agentId } = await context.params;
   const exists = await assertAgentExists(agentId);
   if (!exists) {

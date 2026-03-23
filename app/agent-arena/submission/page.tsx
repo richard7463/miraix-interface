@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -11,10 +12,6 @@ import {
   LineChart,
   ShieldCheck,
 } from "lucide-react";
-import { listStoredArenaAgents } from "@/lib/agentArenaStore";
-import { ensureArenaDemoRunner, getSubmittedAgentWithRuntime, runArenaRunnerCycleOnce } from "@/lib/agentArenaRunner";
-import { fetchLiveMarketContext, fetchTradeExecutionEvidence } from "@/lib/okxAgentTradeKit";
-import { withArenaLiveState } from "@/lib/agentArena";
 
 function compactUsd(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -72,29 +69,42 @@ function buildSparkline(points: number[], width = 920, height = 240) {
   };
 }
 
-export default async function AgentArenaSubmissionPage() {
-  ensureArenaDemoRunner();
-
-  const storedAgents = await listStoredArenaAgents();
-  if (storedAgents.length > 0) {
-    await runArenaRunnerCycleOnce();
+async function getRequestOrigin() {
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") || headerStore.get("host");
+  if (!host) {
+    throw new Error("Missing host header");
   }
 
-  const hydrated = await Promise.all(
-    storedAgents.map(async (entry) => {
-      const { agent, runtime } = await getSubmittedAgentWithRuntime(entry);
-      return { entry, agent, runtime };
-    }),
-  );
+  const proto =
+    headerStore.get("x-forwarded-proto") ||
+    (host.includes("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
 
-  const selected = hydrated
-    .sort((left, right) => {
-      const fillDelta = right.runtime.totalFills - left.runtime.totalFills;
-      if (fillDelta !== 0) return fillDelta;
-      const snapshotDelta = right.runtime.snapshots.length - left.runtime.snapshots.length;
-      if (snapshotDelta !== 0) return snapshotDelta;
-      return new Date(right.runtime.updatedAt).getTime() - new Date(left.runtime.updatedAt).getTime();
-    })[0];
+  return `${proto}://${host}`;
+}
+
+export default async function AgentArenaSubmissionPage() {
+  const origin = await getRequestOrigin();
+  const response = await fetch(`${origin}/api/agent-arena/submission`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to load submission payload (${response.status})`);
+  }
+
+  const payload = await response.json();
+  const selected = payload.selected as
+    | {
+        agent: any;
+        runtime: any;
+        submission: {
+          pairCode: string;
+          strategyBrief: string;
+        };
+        createdAt: string;
+      }
+    | null;
 
   if (!selected) {
     return (
@@ -118,18 +128,7 @@ export default async function AgentArenaSubmissionPage() {
     );
   }
 
-  const { entry, agent: runtimeAgent, runtime } = selected;
-  const [marketResult, execution] = await Promise.all([
-    fetchLiveMarketContext(entry.agent.symbol),
-    fetchTradeExecutionEvidence(entry.agent.symbol),
-  ]);
-
-  const agent =
-    marketResult.integration.status === "live"
-      ? withArenaLiveState(runtimeAgent, {
-          market: marketResult.market,
-        })
-      : runtimeAgent;
+  const { agent, runtime, submission, createdAt } = selected;
 
   const latestOrder = runtime.orders[0] ?? null;
   const latestFill = runtime.fills[0] ?? null;
@@ -192,7 +191,7 @@ export default async function AgentArenaSubmissionPage() {
               <div>
                 <div className="text-[12px] uppercase tracking-[0.2em] text-[#9a8d7b]">Selected live submission</div>
                 <h2 className="mt-3 text-[42px] font-semibold tracking-[-0.06em] text-[#1F2937]">{agent.name}</h2>
-                <div className="mt-3 text-[18px] text-[#6b7280]">{entry.submission.strategyBrief}</div>
+                <div className="mt-3 text-[18px] text-[#6b7280]">{submission.strategyBrief}</div>
               </div>
               <div className="rounded-full bg-[#eef7f0] px-4 py-2 text-sm font-medium text-[#1a8b55]">
                 {agent.status}
@@ -254,7 +253,7 @@ export default async function AgentArenaSubmissionPage() {
               {[
                 {
                   title: "1. Agent submitted to Arena",
-                  body: `Pair code ${entry.submission.pairCode} created a persistent Arena record at ${formatDateTime(runtime.createdAt)}.`,
+                  body: `Pair code ${submission.pairCode} created a persistent Arena record at ${formatDateTime(createdAt)}.`,
                 },
                 {
                   title: "2. Demo runner registered",
@@ -313,7 +312,7 @@ export default async function AgentArenaSubmissionPage() {
               <div className="rounded-[22px] border border-[#efe7dc] bg-[#fcfaf7] px-5 py-5">
                 <div className="text-sm text-[#9b9184]">Trading environment</div>
                 <div className="mt-3 text-[18px] font-semibold tracking-[-0.04em] text-[#171d2d]">
-                  {execution.demoMode ? "OKX demo" : "Read-only"}
+                  {runtime.totalOrders > 0 ? "OKX demo" : "Waiting for first order"}
                 </div>
               </div>
               <div className="rounded-[22px] border border-[#efe7dc] bg-[#fcfaf7] px-5 py-5">

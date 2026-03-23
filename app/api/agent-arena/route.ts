@@ -11,12 +11,16 @@ import {
   getArenaAgentWithRuntime,
   runArenaRunnerCycleOnce,
 } from "@/lib/agentArenaRunner";
+import { maybeProxyArenaRequest } from "@/lib/agentArenaRemote";
 import {
   buildArenaIntegrationState,
   fetchLiveMarketContext,
 } from "@/lib/okxAgentTradeKit";
 
 export async function GET(request: Request) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   ensureArenaDemoRunner();
 
   const { searchParams } = new URL(request.url);

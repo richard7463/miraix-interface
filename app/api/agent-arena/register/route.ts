@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { maybeProxyArenaRequest } from "@/lib/agentArenaRemote";
 import {
   ensureArenaDemoRunner,
   runArenaRunnerCycleOnce,
@@ -41,6 +42,9 @@ function validateBody(body: Partial<ArenaSubmissionInput>) {
 }
 
 export async function POST(request: Request) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   try {
     const body = (await request.json()) as Partial<ArenaSubmissionInput>;
     validateBody(body);

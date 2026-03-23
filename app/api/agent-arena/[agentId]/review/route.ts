@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { maybeProxyArenaRequest } from "@/lib/agentArenaRemote";
 import { runStoredArenaReview } from "@/lib/agentArenaStore";
 
 export async function POST(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ agentId: string }> },
 ) {
+  const proxied = await maybeProxyArenaRequest(request);
+  if (proxied) return proxied;
+
   try {
     const { agentId } = await context.params;
     const stored = await runStoredArenaReview(agentId);

@@ -1,6 +1,7 @@
 import { getArenaAgent, getArenaAgents, type ArenaAgent } from "@/lib/agentArena";
 import { listStoredArenaAgents, type StoredArenaAgent } from "@/lib/agentArenaStore";
 import { syncDemoCopyFollowers } from "@/lib/agentArenaCopyStore";
+import { shouldAutoStartArenaRunner } from "@/lib/agentArenaDeployment";
 import {
   appendArenaRunnerEvent,
   applyRunnerRuntimeToAgent,
@@ -561,6 +562,10 @@ export async function runArenaRunnerCycleOnce() {
 }
 
 export function ensureArenaDemoRunner() {
+  if (!shouldAutoStartArenaRunner()) {
+    return;
+  }
+
   const state = getRunnerState();
   if (state.started) {
     return;
