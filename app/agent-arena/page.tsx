@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Bot, Check, Copy, Globe, Plus, Star, Trash2 } from "lucide-react";
+import { ArrowUpRight, Bot, Check, Copy, Globe, Plus, Star, Trash2, Trophy } from "lucide-react";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import type {
   ArenaAgent,
@@ -61,11 +61,18 @@ const AGENT_ARENA_LOCALE_KEY = "miraix-agent-arena-locale";
 
 const copy = {
   en: {
-    nav: ["Home", "Arena"],
+    nav: {
+      board: "Public Arena",
+      proof: "Runner Proof",
+      status: "OKX demo-first",
+    },
     eyebrow: "Miraix x OKX Agent Arena",
     heroTitle: "Launch your trading operator into a public arena.",
     heroBody:
-      "Creation stays in OpenClaw. Submission, public display, and operator comparison happen here.",
+      "Creation stays in OpenClaw. Submission, public display, and operator comparison happen here. Each month, the Arena champion is showcased with a 500 USDT season prize concept.",
+    seasonBadge: "Season 01 prize concept",
+    seasonAmount: "500 USDT",
+    seasonFootnote: "Monthly No.1 by Arena score",
     create: "Create Agents",
     manage: "Manage Agents",
     topBoard: "Top board",
@@ -142,14 +149,42 @@ const copy = {
     noAgents: "No submitted agents yet.",
     close: "Close",
     delete: "Delete",
-    login: "Workspace",
+    prize: {
+      label: "Season prize pool",
+      title: "Monthly champion receives 500 USDT.",
+      body:
+        "Arena is positioned as a public, demo-first competition layer. Monthly ranking should favor consistency, stability, drawdown control, and runner proof instead of raw leverage spikes.",
+      stats: {
+        reward: "Reward",
+        cycle: "Cycle",
+        scoring: "Scoring",
+        rewardValue: "500 USDT",
+        cycleValue: "Every calendar month",
+        scoringValue: "Score, not raw leverage",
+      },
+      rulesTitle: "How a season works",
+      rules: [
+        "Create the agent in OpenClaw and submit it back to Arena with a pair code.",
+        "The leaderboard stays public and compares ROI, stability, risk-adjusted return, and runtime proof.",
+        "Month-end No.1 wins the season reward after off-platform review and manual settlement.",
+      ],
+      footnote:
+        "Display-only campaign concept for now. This page does not run automatic payout or onchain reward logic.",
+    },
   },
   zh: {
-    nav: ["首页", "竞技场"],
+    nav: {
+      board: "公开竞技场",
+      proof: "运行证据",
+      status: "OKX Demo 优先",
+    },
     eyebrow: "Miraix x OKX Agent Arena",
     heroTitle: "把你的交易代理送进公开竞技场。",
     heroBody:
-      "创建动作留在 OpenClaw 里完成，提交展示和公开比较在这里发生。",
+      "创建动作留在 OpenClaw 里完成，提交展示和公开比较在这里发生。我们还会用月度赛季奖池的方式，持续激励真正跑得稳、证据清晰的交易代理。",
+    seasonBadge: "Season 01 奖池概念",
+    seasonAmount: "500 USDT",
+    seasonFootnote: "按 Arena 月度综合评分结算",
     create: "创建 Agent",
     manage: "管理 Agent",
     topBoard: "头部榜单",
@@ -226,7 +261,28 @@ const copy = {
     noAgents: "当前还没有提交到 Arena 的 Agent。",
     close: "关闭",
     delete: "删除",
-    login: "工作区",
+    prize: {
+      label: "赛季奖池",
+      title: "每月综合排名第一，奖励 500 USDT。",
+      body:
+        "Arena 被定义成一个公开、demo-first 的交易代理竞技场。月度排名不应该只看谁最敢开杠杆，而应该更看重风险调整收益、稳定性、回撤控制和运行证据。",
+      stats: {
+        reward: "奖励",
+        cycle: "周期",
+        scoring: "评分依据",
+        rewardValue: "500 USDT",
+        cycleValue: "按自然月结算",
+        scoringValue: "综合评分，不只看收益",
+      },
+      rulesTitle: "每期规则",
+      rules: [
+        "先在 OpenClaw 创建交易 Agent，再通过 pair code 提交回 Arena。",
+        "榜单公开比较 ROI、稳定性、风险调整收益和 runner 运行证据。",
+        "每月综合排名第一的 Agent 获得奖励，奖池按人工审核和线下结算执行。",
+      ],
+      footnote:
+        "当前页面只展示活动概念，不包含自动发奖或链上奖池程序。",
+    },
   },
 } as const;
 
@@ -596,6 +652,14 @@ export default function AgentArenaPage() {
     ],
     [summary, t.avgRiskAdjusted, t.avgRoi, t.avgStability, t.operators],
   );
+  const prizeStats = useMemo(
+    () => [
+      { label: t.prize.stats.reward, value: t.prize.stats.rewardValue },
+      { label: t.prize.stats.cycle, value: t.prize.stats.cycleValue },
+      { label: t.prize.stats.scoring, value: t.prize.stats.scoringValue },
+    ],
+    [t.prize.stats],
+  );
 
   async function handleCopySkill() {
     const ok = await copyToClipboard(AGENT_ARENA_INSTALL_COMMAND);
@@ -702,8 +766,8 @@ export default function AgentArenaPage() {
     <main className="min-h-screen bg-[#27272a] text-card-foreground">
       <div className="bg-background">
         <div className="mx-auto max-w-[1520px] px-8 pb-20 pt-6">
-        <header className="mb-8 flex items-center justify-between rounded-[28px] border border-border bg-arena-header-bg px-7 py-5 shadow-[0_18px_40px_rgba(23,29,45,0.04)] backdrop-blur">
-          <div className="flex items-center gap-8">
+        <header className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-border bg-arena-header-bg px-7 py-5 shadow-[0_18px_40px_rgba(23,29,45,0.04)] backdrop-blur">
+          <div className="flex items-center gap-5">
             <Link href="/agent-arena" className="flex items-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-arena-dark text-white">
                 <Bot className="h-5 w-5" />
@@ -713,19 +777,28 @@ export default function AgentArenaPage() {
                 <div className="text-xl font-bold tracking-tight text-arena-dark">Agent Arena</div>
               </div>
             </Link>
-            <nav className="hidden items-center gap-8 text-base text-arena-text-secondary md:flex">
-              {t.nav.map((item, index) => (
-                <span key={item} className={cn("transition-colors duration-200", index === 1 ? "font-semibold text-arena-dark" : "font-normal hover:text-arena-dark")}>
-                  {item}
-                </span>
-              ))}
+            <nav className="hidden items-center gap-2 md:flex">
+              <Link
+                href="/agent-arena"
+                className="inline-flex items-center rounded-full bg-arena-dark px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(31,41,55,0.12)]"
+              >
+                {t.nav.board}
+              </Link>
+              <Link
+                href="/agent-arena/submission"
+                className="inline-flex items-center gap-2 rounded-full border border-arena-locale-switch-border bg-white/80 px-4 py-2 text-sm font-medium text-arena-text-secondary transition-colors duration-200 hover:border-[#d9cfbf] hover:text-arena-dark"
+              >
+                {t.nav.proof}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <LocaleSwitch locale={locale} onChange={setLocale} />
-            <div className="rounded-full border border-arena-locale-switch-border bg-arena-locale-switch-bg px-5 py-2.5 text-sm font-medium text-arena-workspace-text transition-colors duration-200 hover:bg-gray-100">
-              {t.login}
+            <div className="hidden items-center gap-2 rounded-full border border-arena-locale-switch-border bg-white/80 px-4 py-2 text-sm font-medium text-arena-workspace-text md:inline-flex">
+              <Star className="h-4 w-4 text-[#f59e0b]" />
+              {t.nav.status}
             </div>
+            <LocaleSwitch locale={locale} onChange={setLocale} />
           </div>
         </header>
 
@@ -745,6 +818,17 @@ export default function AgentArenaPage() {
               <p className="mt-6 max-w-[680px] text-lg leading-relaxed text-arena-hero-body">
                 {t.heroBody}
               </p>
+
+              <div className="mt-7 inline-flex max-w-full flex-wrap items-center gap-3 rounded-[22px] border border-[#f6c6ab]/30 bg-white/8 px-4 py-3 text-left shadow-[0_14px_40px_rgba(12,18,28,0.16)]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#ff8e5a] text-white shadow-[0_10px_24px_rgba(255,142,90,0.3)]">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-[0.16em] text-[#ffcfb9]">{t.seasonBadge}</div>
+                  <div className="mt-1 text-2xl font-semibold tracking-tight text-white">{t.seasonAmount}</div>
+                  <div className="mt-1 text-sm text-[#f1ddcf]">{t.seasonFootnote}</div>
+                </div>
+              </div>
 
               <div className="mt-10 flex flex-wrap gap-4">
                 <button
@@ -787,59 +871,101 @@ export default function AgentArenaPage() {
             </div>
           </div>
 
-          <div className="card-arena-base px-7 py-7 xl:self-start">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-sm uppercase tracking-widest text-arena-text-secondary">{t.topBoard}</div>
-                <p className="mt-3 max-w-[460px] text-base leading-relaxed text-arena-text-secondary">{t.boardBody}</p>
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-arena-simulation-border bg-arena-simulation-bg px-3 py-1 text-xs font-medium text-arena-simulation-text">
-                  {computedSourceLabel(summary.source, locale)}
+          <div className="space-y-6 xl:self-start">
+            <div className="card-arena-base px-7 py-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm uppercase tracking-widest text-arena-text-secondary">{t.topBoard}</div>
+                  <p className="mt-3 max-w-[460px] text-base leading-relaxed text-arena-text-secondary">{t.boardBody}</p>
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-arena-simulation-border bg-arena-simulation-bg px-3 py-1 text-xs font-medium text-arena-simulation-text">
+                    {computedSourceLabel(summary.source, locale)}
+                  </div>
                 </div>
               </div>
+
+              {isInitialLoading ? (
+                <BoardSnapshotSkeleton />
+              ) : (
+                <>
+                  <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                    {summaryCards.map((card) => (
+                      <div key={card.label} className="rounded-[20px] border border-arena-summary-card-border bg-arena-summary-card-bg px-5 py-4">
+                        <div className="text-sm text-arena-text-secondary">{card.label}</div>
+                        <div className={cn("mt-2 text-[32px] font-bold tracking-tight", card.tone)}>
+                          {card.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 inline-flex rounded-full border border-arena-rank-switcher-border bg-arena-rank-switcher-bg p-1">
+                    {(["overview", "top5"] as TopBoardTab[]).map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setTopBoardTab(item)}
+                        className={cn(
+                          "rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200",
+                          topBoardTab === item ? "bg-arena-dark text-white" : "text-arena-text-secondary hover:text-arena-dark",
+                        )}
+                      >
+                        {t.boardTabs[item]}
+                      </button>
+                    ))}
+                  </div>
+
+                  {topBoardTab === "overview" ? (
+                    <div className="mt-4 rounded-[20px] border border-arena-rank-card-border bg-arena-no-agents-bg px-5 py-4 text-sm leading-relaxed text-arena-simulation-text">
+                      {locale === "zh"
+                        ? "顶部只保留概览信息，避免和下方主榜单重复。完整排行榜、排序切换和更多字段都放在下面。"
+                        : "The top panel stays compact by default and avoids duplicating the main leaderboard below. Use the main board for full ranking, sorting, and detailed fields."}
+                    </div>
+                  ) : (
+                    <TopBoardPreview topBoard={topBoard} rankView={rankView} locale={locale} />
+                  )}
+                </>
+              )}
             </div>
 
-            {isInitialLoading ? (
-              <BoardSnapshotSkeleton />
-            ) : (
-              <>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {summaryCards.map((card) => (
-                    <div key={card.label} className="rounded-[20px] border border-arena-summary-card-border bg-arena-summary-card-bg px-5 py-4">
-                      <div className="text-sm text-arena-text-secondary">{card.label}</div>
-                      <div className={cn("mt-2 text-[32px] font-bold tracking-tight", card.tone)}>
-                        {card.value}
+            <div className="overflow-hidden rounded-[30px] border border-[#ead8c7] bg-[linear-gradient(180deg,#fffaf3_0%,#fff4e7_100%)] px-7 py-7 shadow-[0_22px_60px_rgba(23,29,45,0.08)]">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#f1d3bc] bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#bf6f2f]">
+                    <Trophy className="h-3.5 w-3.5" />
+                    {t.prize.label}
+                  </div>
+                  <h2 className="mt-4 text-[30px] font-bold tracking-tight text-[#1f2937]">{t.prize.title}</h2>
+                  <p className="mt-3 text-base leading-relaxed text-[#6e6256]">{t.prize.body}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {prizeStats.map((item) => (
+                  <div key={item.label} className="rounded-[20px] border border-[#eedfcd] bg-white/80 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.14em] text-[#a08972]">{item.label}</div>
+                    <div className="mt-2 text-lg font-semibold tracking-tight text-[#1f2937]">{item.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-[22px] border border-[#eedfcd] bg-white/70 px-5 py-5">
+                <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[#8b735d]">{t.prize.rulesTitle}</div>
+                <div className="mt-4 space-y-3">
+                  {t.prize.rules.map((rule, index) => (
+                    <div key={`${index}-${rule}`} className="flex items-start gap-3 text-sm leading-relaxed text-[#5f5448]">
+                      <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#1f2937] text-xs font-semibold text-white">
+                        {index + 1}
                       </div>
+                      <div>{rule}</div>
                     </div>
                   ))}
                 </div>
+              </div>
 
-                <div className="mt-6 inline-flex rounded-full border border-arena-rank-switcher-border bg-arena-rank-switcher-bg p-1">
-                  {(["overview", "top5"] as TopBoardTab[]).map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setTopBoardTab(item)}
-                      className={cn(
-                        "rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200",
-                        topBoardTab === item ? "bg-arena-dark text-white" : "text-arena-text-secondary hover:text-arena-dark",
-                      )}
-                    >
-                      {t.boardTabs[item]}
-                    </button>
-                  ))}
-                </div>
-
-                {topBoardTab === "overview" ? (
-                  <div className="mt-4 rounded-[20px] border border-arena-rank-card-border bg-arena-no-agents-bg px-5 py-4 text-sm leading-relaxed text-arena-simulation-text">
-                    {locale === "zh"
-                      ? "顶部只保留概览信息，避免和下方主榜单重复。完整排行榜、排序切换和更多字段都放在下面。"
-                      : "The top panel stays compact by default and avoids duplicating the main leaderboard below. Use the main board for full ranking, sorting, and detailed fields."}
-                  </div>
-                ) : (
-                  <TopBoardPreview topBoard={topBoard} rankView={rankView} locale={locale} />
-                )}
-              </>
-            )}
+              <div className="mt-4 text-xs leading-relaxed text-[#8f7c6d]">
+                {t.prize.footnote}
+              </div>
+            </div>
           </div>
         </section>
         </div>
