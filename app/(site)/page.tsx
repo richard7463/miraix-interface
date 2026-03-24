@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Shield, Flame, Wallet } from "lucide-react";
+import { TodaysOrdersLanding } from "@/components/TodaysOrders/TodaysOrdersLanding";
+import { isTodaysOrdersVariant } from "@/lib/siteVariant";
 
 const featuredPages = [
   {
@@ -13,8 +15,8 @@ const featuredPages = [
     text: "text-[#fff0b8]",
   },
   {
-    title: "100U FOMO Copilot",
-    description: "一键把“我有 100U 今天该买什么”变成可执行的策略和分享结果。",
+    title: "Miraix Rotation Desk",
+    description: "把“我有 100U 今天该怎么做”拆成策略、风控、执行三层 agent，并在 X Layer 上完成付款与广播。",
     href: "/fomo-copilot",
     icon: Flame,
     accent: "from-[#38bdf8]/16 via-[#0ea5e9]/10 to-transparent",
@@ -34,6 +36,10 @@ const featuredPages = [
 ] as const;
 
 export default function Home() {
+  if (isTodaysOrdersVariant) {
+    return <TodaysOrdersLanding standalone />;
+  }
+
   return (
     <main className="min-h-screen overflow-y-auto bg-[#07070a] text-[#fff7e6]">
       <div className="relative isolate">
