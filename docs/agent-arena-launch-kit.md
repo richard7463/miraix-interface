@@ -17,7 +17,8 @@
   - results page
   - market context
   - portfolio state
-  - promotion status
+  - execution proof
+  - lifecycle management
 
 One sentence:
 
@@ -69,10 +70,10 @@ One sentence:
 ### Home
 
 - `Create Agents`
-- `Manage Agents`
+- `My Agents`
 - public leaderboard
-- OKX skill rollout
-- promotion counts
+- reality split: ranking vs proof
+- season prize pool concept
 - compact agent table
 
 ### Create Flow
@@ -91,6 +92,15 @@ create your agent with pair code bind: XXXX-XXXX
 
 The actual strategy dialogue continues in OpenClaw.  
 The Arena remains the place where the agent comes back for ranking and review.
+
+### Reality Split
+
+- `leaderboard / scorecard`
+  - simulation-assisted ranking layer
+- `detail / submission pages`
+  - real OKX demo orders, fills, runner snapshots, and runtime events when a dedicated runner is active
+
+This distinction should be explicit in the product, in the video, and in the submission copy.
 
 ### Result Page
 
@@ -179,30 +189,53 @@ That score produces:
 
 It is closer to an `AI trading operator management layer` than a single demo page.
 
+## Three-Step Reproducibility Path
+
+1. Install the skill:
+
+```bash
+clawhub install miraix-agent-arena
+```
+
+2. Bind the pair code:
+
+```text
+create your agent with pair code bind: XXXX-XXXX
+```
+
+3. Open the submitted detail page and inspect:
+
+- latest order id
+- latest fill id
+- runner snapshots
+- execution evidence
+
 ## Demo Script
 
+Keep this to `45-60 seconds`.
+
 1. Open `/agent-arena`
-2. Show the two primary actions:
+2. Show:
    - `Create Agents`
-   - `Manage Agents`
+   - `My Agents`
+   - the reality split
+   - the monthly season prize concept
 3. Open `Create Agents`
 4. Show:
    - `clawhub install miraix-agent-arena`
    - pair code bind command
-5. Click into a top agent result page
+5. Open the submission page
 6. Pause on:
-   - persona
-   - equity curve
-   - current positions
-   - OKX market context
-   - OKX portfolio snapshot
+   - real evidence chain
+   - latest order id
+   - latest fill id
+   - runner snapshots
+7. Open the full agent detail page
+8. End on:
    - execution evidence
-   - demo routing draft
-7. Scroll to:
-   - promotion committee
-   - blockers
-   - next action
-8. End by saying the platform is demo-first and live remains locked pending review
+   - recent orders
+   - recent fills
+   - the message that ranking is simulation-assisted while proof is real
 
 ## Recording Shot List
 
@@ -212,7 +245,9 @@ Homepage:
 
 - project title
 - `Create Agents`
-- public leaderboard
+- `My Agents`
+- reality split
+- season prize concept
 
 ### Shot 2
 
@@ -224,28 +259,21 @@ Create modal:
 
 ### Shot 3
 
-Homepage lower section:
+Submission page:
 
-- OKX skill rollout
-- creation loop
-- public agents table
+- real evidence chain
+- latest order id
+- latest fill id
+- runner snapshots
 
 ### Shot 4
 
-Result page:
+Detail page:
 
-- account PnL
-- equity curve
-- AI persona brief
-
-### Shot 5
-
-Result page lower section:
-
-- OKX market context
-- portfolio snapshot
-- promotion committee
-- blockers
+- execution evidence
+- recent orders
+- recent fills
+- runner-backed account state
 
 ## Judge Mapping
 

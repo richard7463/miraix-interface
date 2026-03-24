@@ -134,6 +134,21 @@ export default async function AgentArenaSubmissionPage() {
   const latestFill = runtime.fills[0] ?? null;
   const currentPosition = agent.positions[0] ?? null;
   const chart = buildSparkline(runtime.snapshots.map((snapshot) => snapshot.totalPnlUsd));
+  const realitySplit = [
+    {
+      title: "Ranking layer",
+      body: "Leaderboard and scorecards can stay simulation-assisted. This page is reserved for runner-backed proof only.",
+    },
+    {
+      title: "Proof layer",
+      body: "Orders, fills, timestamps, and equity snapshots below come from the submitted agent's dedicated OKX demo runtime.",
+    },
+  ];
+  const demoPath = [
+    "Open `/agent-arena` and show the create loop from OpenClaw to Arena.",
+    "Open this page and stop on the execution evidence chain and latest order/fill ids.",
+    "Open the full detail page and end on runner-backed orders, fills, and equity snapshots.",
+  ];
 
   const criteria = [
     {
@@ -184,6 +199,37 @@ export default async function AgentArenaSubmissionPage() {
             <ArrowUpRight className="h-4 w-4" />
           </Link>
         </header>
+
+        <section className="mt-8 grid gap-6 xl:grid-cols-2">
+          <div className="rounded-[30px] border border-[#eadfce] bg-white px-7 py-7 shadow-[0_20px_50px_rgba(23,29,45,0.05)]">
+            <div className="text-[12px] uppercase tracking-[0.2em] text-[#9a8d7b]">Reality split</div>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {realitySplit.map((item) => (
+                <div key={item.title} className="rounded-[22px] border border-[#efe7dc] bg-[#fcfaf7] px-5 py-5">
+                  <div className="text-[18px] font-semibold tracking-[-0.04em] text-[#1F2937]">{item.title}</div>
+                  <div className="mt-3 text-[16px] leading-7 text-[#5b6270]">{item.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[30px] border border-[#eadfce] bg-white px-7 py-7 shadow-[0_20px_50px_rgba(23,29,45,0.05)]">
+            <div className="text-[12px] uppercase tracking-[0.2em] text-[#9a8d7b]">60-second demo path</div>
+            <div className="mt-4 text-[18px] leading-8 text-[#5b6270]">
+              Keep the walkthrough short. This page should help a judge reach execution proof in under a minute.
+            </div>
+            <div className="mt-5 space-y-3">
+              {demoPath.map((item, index) => (
+                <div key={`${index}-${item}`} className="flex items-start gap-3 rounded-[20px] border border-[#efe7dc] bg-[#fcfaf7] px-4 py-4">
+                  <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#1F2937] text-xs font-semibold text-white">
+                    {index + 1}
+                  </div>
+                  <div className="text-[15px] leading-7 text-[#4b5563]">{item}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[1.06fr_0.94fr]">
           <div className="rounded-[34px] border border-[#eadfce] bg-white px-8 py-8 shadow-[0_24px_60px_rgba(23,29,45,0.06)]">

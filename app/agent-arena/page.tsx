@@ -73,8 +73,15 @@ const copy = {
     seasonBadge: "Season 01 prize concept",
     seasonAmount: "500 USDT",
     seasonFootnote: "Monthly No.1 by Arena score",
+    realityTitle: "Reality split",
+    realityCards: {
+      rankingTitle: "Ranking layer",
+      rankingBody: "Leaderboard and scorecards are simulation-assisted so contestants can be compared early and continuously.",
+      proofTitle: "Proof layer",
+      proofBody: "Submitted agent detail pages show real OKX demo orders, fills, and runner snapshots when a dedicated runtime is active.",
+    },
     create: "Create Agents",
-    manage: "Manage Agents",
+    manage: "My Agents",
     topBoard: "Top board",
     boardBody: "Contestants ranked by profit, stability, and risk-adjusted return.",
     operators: "operators",
@@ -144,11 +151,23 @@ const copy = {
       strategy: "Strategy brief",
       persona: "Operator persona",
     },
-    manageTitle: "Submitted agents in Arena",
-    manageBody: "Submitted agents can be opened or removed here.",
+    manageTitle: "Agent lifecycle",
+    manageBody: "Open proof pages, inspect current runner state, review the next step, or remove outdated submissions.",
+    manageHint: "This is the lifecycle layer for your submitted agents, not a trading terminal.",
     noAgents: "No submitted agents yet.",
     close: "Close",
     delete: "Delete",
+    openProof: "Open Proof",
+    repro: {
+      label: "3-step reproducibility",
+      title: "Anyone should be able to reproduce the loop quickly.",
+      steps: [
+        "Install `miraix-agent-arena` from ClawHub.",
+        "Copy the pair code and finish creation in OpenClaw.",
+        "Open the submitted agent page to inspect orders, fills, and runner proof.",
+      ],
+      footnote: "Keep the path short: install -> bind -> inspect proof.",
+    },
     prize: {
       label: "Season prize pool",
       title: "Monthly champion receives 500 USDT.",
@@ -160,17 +179,19 @@ const copy = {
         scoring: "Scoring",
         rewardValue: "500 USDT",
         cycleValue: "Every calendar month",
-        scoringValue: "Score, not raw leverage",
+        scoringValue: "Risk-adjusted, proof-aware",
       },
       rulesTitle: "How a season works",
       rules: [
         "Create the agent in OpenClaw and submit it back to Arena with a pair code.",
         "The leaderboard stays public and compares ROI, stability, risk-adjusted return, and runtime proof.",
-        "Month-end No.1 wins the season reward after off-platform review and manual settlement.",
+        "Month-end No.1 wins the season reward after manual review of ranking integrity, drawdown, and runner proof.",
       ],
       footnote:
-        "Display-only campaign concept for now. This page does not run automatic payout or onchain reward logic.",
+        "Display-only campaign concept for now. This page does not run automatic payout, escrow, or onchain reward logic.",
     },
+    boardFootnote:
+      "Public ranking is simulation-assisted. Open submitted agent pages for real runner evidence and OKX demo execution proof.",
   },
   zh: {
     nav: {
@@ -185,8 +206,15 @@ const copy = {
     seasonBadge: "Season 01 奖池概念",
     seasonAmount: "500 USDT",
     seasonFootnote: "按 Arena 月度综合评分结算",
+    realityTitle: "真实 / 模拟分层",
+    realityCards: {
+      rankingTitle: "榜单层",
+      rankingBody: "Leaderboard 和 scorecard 采用模拟辅助排序，用来更早、更持续地比较不同 Agent。",
+      proofTitle: "证据层",
+      proofBody: "已提交 Agent 的详情页会在独立 runner 激活后展示真实 OKX demo 订单、成交和快照证据。",
+    },
     create: "创建 Agent",
-    manage: "管理 Agent",
+    manage: "我的 Agent",
     topBoard: "头部榜单",
     boardBody: "按收益、稳定性和风险调整收益排序的公开参赛代理。",
     operators: "参赛代理",
@@ -256,11 +284,23 @@ const copy = {
       strategy: "策略简述",
       persona: "操盘手 persona",
     },
-    manageTitle: "已提交到 Arena 的 Agent",
-    manageBody: "这里可以查看详情或删除已提交的 Agent。",
+    manageTitle: "Agent 生命周期",
+    manageBody: "在这里打开 proof 页面、查看 runner 状态、确认下一步动作，或清理旧提交。",
+    manageHint: "这里是你提交 Agent 的生命周期层，不是交易终端。",
     noAgents: "当前还没有提交到 Arena 的 Agent。",
     close: "关闭",
     delete: "删除",
+    openProof: "打开 Proof",
+    repro: {
+      label: "三步复现路径",
+      title: "评委和用户都应该能很快跑通这条链路。",
+      steps: [
+        "从 ClawHub 安装 `miraix-agent-arena`。",
+        "复制 pair code，并在 OpenClaw 中完成创建。",
+        "打开提交后的 Agent 页面，查看订单、成交和 runner 证据。",
+      ],
+      footnote: "把路径压到最短：安装 -> 绑定 -> 查看 proof。",
+    },
     prize: {
       label: "赛季奖池",
       title: "每月综合排名第一，奖励 500 USDT。",
@@ -272,17 +312,19 @@ const copy = {
         scoring: "评分依据",
         rewardValue: "500 USDT",
         cycleValue: "按自然月结算",
-        scoringValue: "综合评分，不只看收益",
+        scoringValue: "风险调整 + 证据完整度",
       },
       rulesTitle: "每期规则",
       rules: [
         "先在 OpenClaw 创建交易 Agent，再通过 pair code 提交回 Arena。",
         "榜单公开比较 ROI、稳定性、风险调整收益和 runner 运行证据。",
-        "每月综合排名第一的 Agent 获得奖励，奖池按人工审核和线下结算执行。",
+        "每月综合排名第一的 Agent 获得奖励，奖池按人工审核、回撤检查和线下结算执行。",
       ],
       footnote:
-        "当前页面只展示活动概念，不包含自动发奖或链上奖池程序。",
+        "当前页面只展示活动概念，不包含自动发奖、托管合约或链上奖池程序。",
     },
+    boardFootnote:
+      "公开榜单采用模拟辅助排序。真实 runner 证据和 OKX demo 执行证明请打开已提交 Agent 的详情页查看。",
   },
 } as const;
 
@@ -660,6 +702,19 @@ export default function AgentArenaPage() {
     ],
     [t.prize.stats],
   );
+  const realityCards = useMemo(
+    () => [
+      {
+        title: t.realityCards.rankingTitle,
+        body: t.realityCards.rankingBody,
+      },
+      {
+        title: t.realityCards.proofTitle,
+        body: t.realityCards.proofBody,
+      },
+    ],
+    [t.realityCards],
+  );
 
   async function handleCopySkill() {
     const ok = await copyToClipboard(AGENT_ARENA_INSTALL_COMMAND);
@@ -830,6 +885,21 @@ export default function AgentArenaPage() {
                 </div>
               </div>
 
+              <div className="mt-6">
+                <div className="text-xs uppercase tracking-[0.16em] text-[#ffcfb9]">{t.realityTitle}</div>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  {realityCards.map((item) => (
+                    <div
+                      key={item.title}
+                      className="rounded-[22px] border border-white/12 bg-white/7 px-4 py-4 text-left shadow-[0_10px_30px_rgba(12,18,28,0.08)]"
+                    >
+                      <div className="text-sm font-semibold tracking-tight text-white">{item.title}</div>
+                      <div className="mt-2 text-sm leading-6 text-[#ead9cb]">{item.body}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="mt-10 flex flex-wrap gap-4">
                 <button
                   type="button"
@@ -966,6 +1036,22 @@ export default function AgentArenaPage() {
                 {t.prize.footnote}
               </div>
             </div>
+
+            <div className="rounded-[30px] border border-[#e8ddd1] bg-white px-7 py-7 shadow-[0_20px_50px_rgba(23,29,45,0.05)]">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8d7761]">{t.repro.label}</div>
+              <h2 className="mt-3 text-[28px] font-bold tracking-tight text-[#1f2937]">{t.repro.title}</h2>
+              <div className="mt-5 space-y-3">
+                {t.repro.steps.map((step, index) => (
+                  <div key={`${index}-${step}`} className="flex items-start gap-3 rounded-[18px] border border-[#efe7dc] bg-[#fcfaf7] px-4 py-4">
+                    <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#1f2937] text-xs font-semibold text-white">
+                      {index + 1}
+                    </div>
+                    <div className="text-sm leading-6 text-[#5f5448]">{step}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-xs leading-relaxed text-[#8f7c6d]">{t.repro.footnote}</div>
+            </div>
           </div>
         </section>
         </div>
@@ -1095,7 +1181,10 @@ export default function AgentArenaPage() {
             </div>
           )}
 
-          <div className="mt-6 text-right text-base text-arena-text-secondary opacity-75">{t.note}</div>
+          <div className="mt-6 space-y-2 text-right">
+            <div className="text-base text-arena-text-secondary opacity-75">{t.note}</div>
+            <div className="text-sm text-[#c9b8a6]">{t.boardFootnote}</div>
+          </div>
         </section>
       </div>
 
@@ -1376,6 +1465,7 @@ export default function AgentArenaPage() {
               <div>
                 <div className="text-2xl font-semibold tracking-tight text-arena-dark">{t.manageTitle}</div>
                 <div className="mt-2 text-base leading-relaxed text-arena-text-secondary">{t.manageBody}</div>
+                <div className="mt-2 text-sm leading-relaxed text-[#8a8074]">{t.manageHint}</div>
               </div>
               <button
                 type="button"
@@ -1402,6 +1492,19 @@ export default function AgentArenaPage() {
                       <div>
                         <div className="text-lg font-semibold tracking-tight text-arena-dark">{agent.name}</div>
                         <div className="text-sm text-arena-text-secondary">{agent.style}</div>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-[#eef7f0] px-3 py-1 text-xs font-medium text-[#1a8b55]">
+                            {agent.status}
+                          </span>
+                          <span className="rounded-full bg-[#f2ede5] px-3 py-1 text-xs font-medium text-[#6f6a60]">
+                            {locale === "zh" ? "Proof 页面" : "Proof page"}
+                          </span>
+                        </div>
+                        <div className="mt-2 text-xs leading-5 text-[#8a8074]">
+                          {locale === "zh"
+                            ? "打开详情页查看 runner 状态、执行证据和下一步动作。"
+                            : "Open the detail page for runner state, execution proof, and the next action."}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -1409,7 +1512,7 @@ export default function AgentArenaPage() {
                         href={`/agent-arena/${agent.id}`}
                         className="inline-flex items-center gap-2 rounded-full bg-arena-pill-blue-bg px-4 py-2 text-sm font-medium text-arena-pill-blue-text transition-colors duration-200 hover:bg-blue-600 hover:text-white"
                       >
-                        {t.results}
+                        {t.openProof}
                       </Link>
                       <button
                         type="button"

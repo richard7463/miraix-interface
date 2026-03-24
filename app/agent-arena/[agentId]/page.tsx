@@ -60,7 +60,11 @@ const AGENT_ARENA_LOCALE_KEY = "miraix-agent-arena-locale";
 
 const copy = {
   en: {
-    nav: ["Home", "Arena"],
+    nav: {
+      board: "Public Arena",
+      results: "Agent Results",
+      status: "OKX demo-first",
+    },
     back: "Back",
     missing: "Agent not found",
     persona: "Operator Brief",
@@ -113,7 +117,11 @@ const copy = {
     loading: "Loading arena results...",
   },
   zh: {
-    nav: ["首页", "竞技场"],
+    nav: {
+      board: "公开竞技场",
+      results: "结果详情",
+      status: "OKX Demo 优先",
+    },
     back: "返回",
     missing: "没有找到这个 Agent",
     persona: "操盘手简介",
@@ -788,6 +796,39 @@ export default function AgentArenaDetailPage() {
         ? "当前页只把实时 OKX 公共市场数据接到官方策略档案上。账户快照、当前持仓和执行证据仅对已提交且拥有独立 runner 的代理显示真实数据。"
         : "This page only attaches live OKX public market data to the official strategy profile. Real account snapshots, positions, and execution evidence are only shown for submitted agents with their own runner.";
   const runtimeEvents = runtime?.events ?? [];
+  const realityPanels = hasRuntimeLedger
+    ? [
+        {
+          title: locale === "zh" ? "榜单层" : "Ranking layer",
+          body:
+            locale === "zh"
+              ? "公开榜单和 scorecard 仍然用于模拟辅助排序，方便持续比较不同 Agent 的综合表现。"
+              : "The public leaderboard and scorecards remain simulation-assisted so contestants can be compared continuously.",
+        },
+        {
+          title: locale === "zh" ? "证据层" : "Proof layer",
+          body:
+            locale === "zh"
+              ? "本页展示的订单、成交、账户快照和 runner 事件，来自这个 Agent 的真实 OKX demo runtime。"
+              : "The orders, fills, account snapshots, and runner events on this page come from this agent's real OKX demo runtime.",
+        },
+      ]
+    : [
+        {
+          title: locale === "zh" ? "榜单层" : "Ranking layer",
+          body:
+            locale === "zh"
+              ? "这个页面仍然可以被公开比较，但排名层主要用于模拟辅助比较，而不是独立真实账户排名。"
+              : "This page can still be compared publicly, but the ranking layer is used for simulation-assisted comparison rather than dedicated live account ranking.",
+        },
+        {
+          title: locale === "zh" ? "证据层" : "Proof layer",
+          body:
+            locale === "zh"
+              ? "当前没有独立 runner 账本，所以这里只展示 OKX 公共市场上下文，不把样本档案伪装成真实私有账户。"
+              : "There is no dedicated runner ledger yet, so this page only shows OKX public market context and does not present a sample profile as a real private account.",
+        },
+      ];
 
   if (isLoading) {
     return (
@@ -814,8 +855,8 @@ export default function AgentArenaDetailPage() {
   return (
     <main className="min-h-screen bg-[#F9FAFB] text-[#1F2937]">
       <div className="mx-auto max-w-[1520px] px-8 pb-16 pt-6">
-        <header className="mb-10 flex items-center justify-between border-b border-[#e1d8ca] pb-5">
-          <div className="flex items-center gap-8">
+        <header className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b border-[#e1d8ca] pb-5">
+          <div className="flex items-center gap-5">
             <Link href="/agent-arena" className="flex items-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#1F2937] text-white shadow-[0_12px_24px_rgba(29,39,66,0.14)]">
                 <Bot className="h-5 w-5" />
@@ -825,15 +866,23 @@ export default function AgentArenaDetailPage() {
                 <div className="text-[18px] font-semibold tracking-[-0.03em] text-[#1F2937]">Agent Arena</div>
               </div>
             </Link>
-            <nav className="hidden items-center gap-8 text-[16px] text-[#81786d] md:flex">
-              {t.nav.map((item, index) => (
-                <span key={item} className={index === 1 ? "font-medium text-[#1F2937]" : ""}>
-                  {item}
-                </span>
-              ))}
+            <nav className="hidden items-center gap-2 md:flex">
+              <Link
+                href="/agent-arena"
+                className="inline-flex items-center rounded-full border border-[#ded4c6] bg-white px-4 py-2 text-sm font-medium text-[#6B7280] transition-colors duration-200 hover:border-[#d2c6b4] hover:text-[#1F2937]"
+              >
+                {t.nav.board}
+              </Link>
+              <span className="inline-flex items-center rounded-full bg-[#1F2937] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(31,41,55,0.12)]">
+                {t.nav.results}
+              </span>
             </nav>
           </div>
           <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 rounded-full border border-[#ded4c6] bg-[#fbf8f2] px-4 py-2 text-sm font-medium text-[#5d5860] md:inline-flex">
+              <Sparkles className="h-4 w-4 text-[#f59e0b]" />
+              {t.nav.status}
+            </div>
             <LocaleSwitch locale={locale} onChange={setLocale} />
             <button className="inline-flex items-center gap-2 rounded-full border border-[#ded4c6] bg-[#fbf8f2] px-5 py-2.5 text-sm font-medium text-[#5d5860]">
               <Globe className="h-4 w-4" />
@@ -922,6 +971,18 @@ export default function AgentArenaDetailPage() {
               </button>
             </div>
           </div>
+        </section>
+
+        <section className="mt-6 grid gap-4 lg:grid-cols-2">
+          {realityPanels.map((panel) => (
+            <div
+              key={panel.title}
+              className="rounded-[24px] border border-[#e8e0d5] bg-white px-6 py-5 shadow-[0_18px_45px_rgba(23,29,45,0.04)]"
+            >
+              <div className="text-[12px] uppercase tracking-[0.18em] text-[#8c8377]">{panel.title}</div>
+              <div className="mt-3 text-[16px] leading-7 text-[#5f5963]">{panel.body}</div>
+            </div>
+          ))}
         </section>
 
         <section className="mt-8 grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
@@ -1212,11 +1273,11 @@ export default function AgentArenaDetailPage() {
             <details className="rounded-[34px] border border-[#e8e0d5] bg-white px-8 py-7 shadow-[0_24px_60px_rgba(23,29,45,0.05)]">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
                 <div>
-                  <div className="text-[14px] uppercase tracking-[0.16em] text-[#8c8377]">
-                    {locale === "zh" ? "高级信息" : "Advanced"}
+                <div className="text-[14px] uppercase tracking-[0.16em] text-[#8c8377]">
+                    {locale === "zh" ? "生命周期层" : "Lifecycle layer"}
                   </div>
                   <div className="mt-2 text-[26px] font-semibold tracking-[-0.05em] text-[#1F2937]">
-                    {locale === "zh" ? "提交配置、运行记录和跟单" : "Submission, runtime, and copy trade"}
+                    {locale === "zh" ? "提交配置、运行状态和跟单" : "Submission, runtime, and copy trade"}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center justify-end gap-2">
@@ -1238,7 +1299,7 @@ export default function AgentArenaDetailPage() {
                 <div className="space-y-5">
                   <div className="rounded-[24px] border border-[#efe7dc] bg-[#fcfaf7] p-5">
                     <div className="text-sm text-[#9b9184]">
-                      {locale === "zh" ? "提交配置" : "Submission config"}
+                      {locale === "zh" ? "生命周期配置" : "Lifecycle config"}
                     </div>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       {[
