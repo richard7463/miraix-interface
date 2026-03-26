@@ -927,6 +927,17 @@ export default function FomoCopilotPage() {
     ],
   );
 
+  const previewRequestPayload = useMemo(
+    () => ({
+      budgetUsd: normalizedBudgetUsd,
+      riskMode,
+      timeHorizon,
+      language: "zh" as const,
+      paymentAsset: selectedPaymentAsset,
+    }),
+    [normalizedBudgetUsd, riskMode, selectedPaymentAsset, timeHorizon],
+  );
+
   const paymentReference = useMemo(
     () => findPaymentReference(lastPayment || premiumPlan?.payment || null),
     [lastPayment, premiumPlan?.payment],
@@ -1105,7 +1116,7 @@ export default function FomoCopilotPage() {
       const response = await fetch("/api/fomo/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestPayload),
+        body: JSON.stringify(previewRequestPayload),
       });
 
       const data = (await response.json()) as PreviewResponse & {
@@ -1121,9 +1132,16 @@ export default function FomoCopilotPage() {
       }
 
       if (embeddedEvmWallet?.address) {
-        await refreshFundingStatus(
-          stableSymbolForPaymentAsset(selectedPaymentAsset),
-        );
+        try {
+          await refreshFundingStatus(
+            stableSymbolForPaymentAsset(selectedPaymentAsset),
+          );
+        } catch (fundingError) {
+          console.error(
+            "[FomoCopilot] Funding refresh failed after preview:",
+            fundingError,
+          );
+        }
       }
     } catch (requestError: any) {
       setError(requestError?.message || "Failed to generate preview");
