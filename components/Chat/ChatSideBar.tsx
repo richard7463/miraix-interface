@@ -15,6 +15,7 @@ import {
   FiZap,
   FiShield,
   FiAward,
+  FiTrendingUp,
 } from "react-icons/fi";
 import { RiRobot2Line } from "react-icons/ri";
 import { useTheme } from "../Themes";
@@ -211,6 +212,23 @@ export const ChatSideBar = () => {
                   <div className="flex items-center gap-2">
                     <FiClock className="h-4 w-4 text-green-400" />
                     <h1 className="text-sm font-semibold">Auto Tasks</h1>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <div className="w-full border border-gray-600 rounded-lg">
+              <button
+                onClick={() => router.push("/meme-rotation-desk")}
+                className="peer/menu-button gap-2 overflow-hidden rounded-lg p-2 text-left outline-none duration-300 ease-in-out focus-visible:ring-2 focus-visible:ring-blue-500/50 active:text-sidebar-foreground-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 data-[active=true]:font-medium data-[active=true]:text-sidebar-active data-[state=open]:hover:bg-gray-700/50 data-[state=open]:hover:text-sidebar-active group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-gray-700/50 hover:text-sidebar-active h-8 text-sm flex items-center font-medium transition-all group justify-between w-full text-gray-300 hover:text-gray-100"
+                type="button"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <FiTrendingUp className="h-4 w-4 text-emerald-400" />
+                    <h1 className="text-sm font-semibold">
+                      Meme Rotation Desk
+                    </h1>
                   </div>
                 </div>
               </button>

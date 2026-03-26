@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Shield, Flame, Wallet } from "lucide-react";
+import { ArrowRight, Shield, Flame, Wallet, TrendingUp } from "lucide-react";
 import { TodaysOrdersLanding } from "@/components/TodaysOrders/TodaysOrdersLanding";
 import { isTodaysOrdersVariant } from "@/lib/siteVariant";
 
@@ -13,6 +13,16 @@ const featuredPages = [
     accent: "from-[#facc15]/20 via-[#f59e0b]/10 to-transparent",
     border: "border-[#facc15]/20",
     text: "text-[#fff0b8]",
+  },
+  {
+    title: "Meme Rotation Desk",
+    description:
+      "Bitget Wallet 赛道版本：让 Scout、Risk、Trader 三个 agent 只批准一笔有纪律的 Solana meme trade。",
+    href: "/meme-rotation-desk",
+    icon: TrendingUp,
+    accent: "from-[#34d399]/16 via-[#10b981]/10 to-transparent",
+    border: "border-emerald-300/18",
+    text: "text-emerald-100",
   },
   {
     title: "Miraix Rotation Desk",
@@ -55,8 +65,9 @@ export default function Home() {
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-[#d3c09b] md:text-lg">
               这里放的是 Miraix
-              当前最能打的三条产品线：传播型钱包分析、可执行交易 copilots，
-              以及这次专门为 Binance 场景准备的 Agent Firewall。
+              当前最能打的几条产品线：Bitget 赛道的 Meme Rotation Desk、
+              传播型钱包分析、可执行交易 copilots，以及专门为 Binance
+              场景准备的 Agent Firewall。
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -76,7 +87,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-3">
+          <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {featuredPages.map((page) => {
               const Icon = page.icon;
 
