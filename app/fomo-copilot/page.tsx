@@ -25,7 +25,7 @@ import { usePremiumActionX402 } from "@/src/usePremiumActionX402";
 
 type RiskMode = "safe" | "balanced" | "degen";
 type TimeHorizon = "today" | "3d" | "7d";
-type PaymentAsset = "fxUSD" | "USDT" | "USDC";
+type PaymentAsset = "USDT" | "USDC";
 
 type ExecutionTransaction = {
   to: string;
@@ -207,6 +207,14 @@ const XLAYER_USDT_ADDRESS =
   "0x779ded0c9e1022225f8e0630b35a9b54be713736" as const;
 const XLAYER_USDC_ADDRESS =
   "0x74b7f16337b8972027f6196a17a631ac6de26d22" as const;
+const DEFAULT_XLAYER_PAYMENT_OPTIONS: Array<{
+  assetSymbol: PaymentAsset;
+  displayPrice: string;
+  network: string;
+}> = [
+  { assetSymbol: "USDT", displayPrice: "0.05 USDT", network: "X Layer" },
+  { assetSymbol: "USDC", displayPrice: "0.05 USDC", network: "X Layer" },
+];
 const MIN_OKB_GAS_BUFFER = 0.001;
 const MIN_EXECUTABLE_LEG_USD = 1;
 
@@ -873,10 +881,19 @@ export default function FomoCopilotPage() {
 
   const paymentOptions = useMemo(() => {
     if (preview?.paymentRail.options?.length) {
-      return preview.paymentRail.options;
+      const normalizedOptions = preview.paymentRail.options.filter(
+        (option): option is (typeof DEFAULT_XLAYER_PAYMENT_OPTIONS)[number] =>
+          option.assetSymbol === "USDT" || option.assetSymbol === "USDC",
+      );
+      if (normalizedOptions.length) {
+        return normalizedOptions;
+      }
     }
 
-    if (preview?.paymentRail.assetSymbol) {
+    if (
+      preview?.paymentRail.assetSymbol === "USDT" ||
+      preview?.paymentRail.assetSymbol === "USDC"
+    ) {
       return [
         {
           assetSymbol: preview.paymentRail.assetSymbol as PaymentAsset,
@@ -884,6 +901,10 @@ export default function FomoCopilotPage() {
           network: preview.paymentRail.network,
         },
       ];
+    }
+
+    if (preview) {
+      return DEFAULT_XLAYER_PAYMENT_OPTIONS;
     }
 
     return [] as Array<{

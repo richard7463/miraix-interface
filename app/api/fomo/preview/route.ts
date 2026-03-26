@@ -11,6 +11,10 @@ const getBackendBase = () => {
 
 const OKX_BASE_URL = process.env.OKX_AGENT_TRADE_BASE || 'https://www.okx.com'
 const OKX_MARKET_TIMEOUT_MS = 3000
+const XLAYER_PAYMENT_OPTIONS = [
+  { assetSymbol: 'USDT', displayPrice: '0.05 USDT', network: 'X Layer' },
+  { assetSymbol: 'USDC', displayPrice: '0.05 USDC', network: 'X Layer' },
+] as const
 
 type OkxTickerRow = {
   instId: string
@@ -21,6 +25,99 @@ type OkxTickerRow = {
   open24h?: string
   sodUtc0?: string
   ts: string
+}
+
+type PreviewPayload = {
+  success?: boolean
+  paymentRail?: {
+    enabled?: boolean
+    assetSymbol?: string
+    network?: string
+    displayPrice?: string
+    options?: Array<{
+      assetSymbol?: string
+      displayPrice?: string
+      network?: string
+    }>
+  }
+  [key: string]: unknown
+}
+
+function buildDefaultPaymentRail(preferredAsset?: string) {
+  const fallbackAsset = preferredAsset === 'USDC' ? 'USDC' : 'USDT'
+  const preferredOption =
+    XLAYER_PAYMENT_OPTIONS.find((option) => option.assetSymbol === fallbackAsset) ||
+    XLAYER_PAYMENT_OPTIONS[0]
+
+  return {
+    enabled: true,
+    assetSymbol: preferredOption.assetSymbol,
+    network: 'X Layer',
+    displayPrice: preferredOption.displayPrice,
+    options: [...XLAYER_PAYMENT_OPTIONS],
+  }
+}
+
+function normalizePreviewPayload(
+  payload: PreviewPayload,
+  preferredAsset?: string,
+): PreviewPayload {
+  const normalizedRail = buildDefaultPaymentRail(preferredAsset)
+  const currentRail = payload.paymentRail
+  const hasLegacySignals =
+    typeof currentRail?.network === 'string' &&
+      currentRail.network.toLowerCase() === 'base' ||
+    typeof currentRail?.displayPrice === 'string' &&
+      currentRail.displayPrice.toLowerCase().includes('fxusd') ||
+    currentRail?.assetSymbol === 'fxUSD' ||
+    Boolean(
+      currentRail?.options?.some(
+        (option) =>
+          option.assetSymbol === 'fxUSD' ||
+          option.network?.toLowerCase() === 'base',
+      ),
+    )
+
+  if (!currentRail || currentRail.enabled !== true || hasLegacySignals) {
+    return {
+      ...payload,
+      paymentRail: normalizedRail,
+    }
+  }
+
+  const normalizedOptions = currentRail.options?.filter(
+    (option): option is (typeof XLAYER_PAYMENT_OPTIONS)[number] =>
+      option.assetSymbol === 'USDT' || option.assetSymbol === 'USDC',
+  )
+
+  if (!normalizedOptions?.length) {
+    return {
+      ...payload,
+      paymentRail: normalizedRail,
+    }
+  }
+
+  const selectedAsset =
+    currentRail.assetSymbol === 'USDC' || currentRail.assetSymbol === 'USDT'
+      ? currentRail.assetSymbol
+      : normalizedRail.assetSymbol
+  const selectedOption =
+    normalizedOptions.find((option) => option.assetSymbol === selectedAsset) ||
+    normalizedOptions[0]
+
+  return {
+    ...payload,
+    paymentRail: {
+      enabled: true,
+      assetSymbol: selectedOption.assetSymbol,
+      network: 'X Layer',
+      displayPrice: selectedOption.displayPrice,
+      options: normalizedOptions.map((option) => ({
+        ...option,
+        network: 'X Layer',
+      })),
+    },
+  }
 }
 
 async function fetchOkxMarketPulse(symbols: string[]): Promise<
@@ -213,13 +310,29 @@ export async function POST(request: NextRequest) {
     })
 
     if (response.ok) {
-      const payload = await response.text()
-      return new NextResponse(payload, {
-        status: response.status,
-        headers: {
-          'Content-Type': response.headers.get('content-type') || 'application/json',
-        },
-      })
+      const payloadText = await response.text()
+
+      try {
+        const payload = JSON.parse(payloadText) as PreviewPayload
+        const normalizedPayload = normalizePreviewPayload(
+          payload,
+          typeof previewBody.paymentAsset === 'string' ? previewBody.paymentAsset : undefined,
+        )
+
+        return NextResponse.json(normalizedPayload, {
+          status: response.status,
+          headers: {
+            'Content-Type': response.headers.get('content-type') || 'application/json',
+          },
+        })
+      } catch {
+        return new NextResponse(payloadText, {
+          status: response.status,
+          headers: {
+            'Content-Type': response.headers.get('content-type') || 'application/json',
+          },
+        })
+      }
     }
 
     // LangGraph returned an error — fall through to fallback
