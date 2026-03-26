@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Copy,
   Download,
+  Globe,
   Loader2,
   RefreshCcw,
   ShieldCheck,
@@ -213,16 +214,24 @@ const budgetPresets = [50, 100, 300];
 const MIN_BUDGET_USD = 1;
 const MAX_BUDGET_USD = 10000;
 
-const riskOptions: Array<{ value: RiskMode; label: string; detail: string }> = [
-  { value: "safe", label: "保守", detail: "优先留缓冲仓" },
-  { value: "balanced", label: "平衡", detail: "两条进攻腿 + 一条对冲腿" },
-  { value: "degen", label: "激进", detail: "更高部署率，不留稳定币仓" },
+const riskOptions: Array<{
+  value: RiskMode;
+  labelKey: string;
+  detailKey: string;
+}> = [
+  { value: "safe", labelKey: "riskSafe", detailKey: "riskSafeDetail" },
+  {
+    value: "balanced",
+    labelKey: "riskBalanced",
+    detailKey: "riskBalancedDetail",
+  },
+  { value: "degen", labelKey: "riskDegen", detailKey: "riskDegenDetail" },
 ];
 
-const horizonOptions: Array<{ value: TimeHorizon; label: string }> = [
-  { value: "today", label: "今天" },
-  { value: "3d", label: "3 天" },
-  { value: "7d", label: "7 天" },
+const horizonOptions: Array<{ value: TimeHorizon; labelKey: string }> = [
+  { value: "today", labelKey: "horizonToday" },
+  { value: "3d", labelKey: "horizon3d" },
+  { value: "7d", labelKey: "horizon7d" },
 ];
 
 const usdFormatter = new Intl.NumberFormat("en-US", {
@@ -231,13 +240,219 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
+type Lang = "en" | "zh";
+
+const i18n: Record<Lang, Record<string, string>> = {
+  en: {
+    // Hero
+    heroSubtitle: "Miraix Rotation Desk",
+    heroHeadline: "Three Agents. One Rotation.\nFully On-Chain.",
+    heroDesc:
+      "Strategist proposes a basket. Risk Agent can OVERRIDE. Execution Agent broadcasts on X Layer. Every step is powered by OKX OnchainOS and gated by x402 micropayment.",
+    hackathonBadge: "X Layer Onchain OS AI Hackathon",
+    archFlowTitle: "Agent Collaboration Architecture",
+    archStep1: "OKX Market API",
+    archStep2: "Strategist Agent",
+    archStep3: "Risk Agent",
+    archStep4: "Execution Agent",
+    archStep5: "X Layer Broadcast",
+    archOverride: "can OVERRIDE",
+    archDexRoute: "OKX DEX Aggregator",
+    archPayment: "x402 Payment Gate",
+    scoreIntegration: "Integration",
+    scoreUtility: "Utility",
+    scoreInnovation: "Innovation",
+    scoreReproducibility: "Reproducibility",
+    techXLayer: "X Layer (Chain 196)",
+    techOnchainOS: "OKX OnchainOS",
+    techX402: "x402 Protocol",
+    techLangGraph: "LangGraph Multi-Agent",
+    // Config section
+    budget: "Budget",
+    budgetMin: "Minimum 1 USDT.",
+    budgetMinApplied: "Auto-adjusted to minimum 1 USDT.",
+    riskMode: "Risk Mode",
+    riskSafe: "Conservative",
+    riskSafeDetail: "Prioritize reserve buffer",
+    riskBalanced: "Balanced",
+    riskBalancedDetail: "Two attack legs + one hedge leg",
+    riskDegen: "Aggressive",
+    riskDegenDetail: "Higher deploy rate, no stablecoin reserve",
+    horizon: "Horizon",
+    horizonToday: "Today",
+    horizon3d: "3 Days",
+    horizon7d: "7 Days",
+    generatePreview: "Generate Free Preview",
+    // Wallet panel
+    walletAndRail: "Wallet & Rails",
+    notConnected: "Not connected",
+    waitingPreview: "Waiting for preview",
+    loginPrivy: "Login & Connect Privy Wallet",
+    openWalletExplorer: "Open X Layer Wallet",
+    // Preview empty state
+    previewEmptyTitle: "Generate a Free Preview First",
+    previewEmptyDesc:
+      "This area will show strategy direction, agent assignments, and rail structure before you unlock and execute.",
+    // Preview section
+    freePreview: "Free Preview",
+    // Payment section
+    payNowTitle: "Pay & Execute Now",
+    payNowDesc:
+      "x402 payment unlocks premium action, then the same EVM wallet broadcasts on X Layer.",
+    preExecCheck: "Pre-execution Check",
+    walletBalanceLabel: "X Layer wallet has",
+    insufficientBalance: "Insufficient balance — fund wallet before paying.",
+    loginAndPay: "Login & Pay",
+    executingLabel: "Executing...",
+    fundFirst: "Fund wallet first",
+    payAndExecute: "Pay {price} & Execute",
+    railWaiting: "Waiting for rail selection",
+    railPayExec: "{network} payment → X Layer execution",
+    // Premium plan section
+    txCompleted: "Transactions Completed",
+    partialBroadcast: "Partial Broadcast",
+    executionUnlocked: "Execution Unlocked",
+    premiumLoopComplete: "Premium loop completed end to end",
+    partialSuccess: "{success} succeeded, {failed} failed",
+    broadcastingTx:
+      "Premium action unlocked, broadcasting X Layer transactions",
+    confidence: "Confidence",
+    confidenceDetail: "Strategist Agent confidence",
+    maxSlippage: "Max Slippage",
+    slippageDetail: "Risk Agent estimated ceiling",
+    txReady: "Tx Ready",
+    txReadyDetail: "Execution Agent readiness",
+    routes: "Routes",
+    routesDetail: "OKX visible route count",
+    agentDecisionLog: "Agent Decision Log",
+    executionProofBoard: "Execution Proof Board",
+    x402Settled: "x402 settled",
+    mainTx: "Main Tx",
+    reserveHold: "Reserve hold",
+    broadcasted: "Broadcasted",
+    execFailed: "Execution failed",
+    // Share section
+    shareTitle: "Share This Result",
+    shareDesc:
+      "One image captures the three-agent verdict, OKX routing execution, and x402 unlock proof.",
+    retryFailed: "Retry Failed Transactions",
+    downloadImage: "Download Result Image",
+    copied: "Copied",
+    copyImageLink: "Copy Image Link",
+    openImage: "Open Image",
+    viewWallet: "View Wallet",
+  },
+  zh: {
+    heroSubtitle: "Miraix Rotation Desk",
+    heroHeadline: "三个 Agent，一次 Rotation\n全链上执行",
+    heroDesc:
+      "Strategist 提出篮子方案。Risk Agent 可以 OVERRIDE。Execution Agent 在 X Layer 广播。每一步由 OKX OnchainOS 驱动，x402 微支付门控。",
+    hackathonBadge: "X Layer Onchain OS AI Hackathon",
+    archFlowTitle: "Agent 协作架构",
+    archStep1: "OKX Market API",
+    archStep2: "Strategist Agent",
+    archStep3: "Risk Agent",
+    archStep4: "Execution Agent",
+    archStep5: "X Layer 广播",
+    archOverride: "可 OVERRIDE",
+    archDexRoute: "OKX DEX Aggregator",
+    archPayment: "x402 支付门控",
+    scoreIntegration: "集成度",
+    scoreUtility: "实用性",
+    scoreInnovation: "创新性",
+    scoreReproducibility: "可复现性",
+    techXLayer: "X Layer (Chain 196)",
+    techOnchainOS: "OKX OnchainOS",
+    techX402: "x402 Protocol",
+    techLangGraph: "LangGraph Multi-Agent",
+    budget: "预算",
+    budgetMin: "最低 1 USDT。",
+    budgetMinApplied: "已自动按 1 USDT 起算。",
+    riskMode: "风险模式",
+    riskSafe: "保守",
+    riskSafeDetail: "优先留缓冲仓",
+    riskBalanced: "平衡",
+    riskBalancedDetail: "两条进攻腿 + 一条对冲腿",
+    riskDegen: "激进",
+    riskDegenDetail: "更高部署率，不留稳定币仓",
+    horizon: "周期",
+    horizonToday: "今天",
+    horizon3d: "3 天",
+    horizon7d: "7 天",
+    generatePreview: "生成免费预览",
+    walletAndRail: "钱包与链路",
+    notConnected: "未连接",
+    waitingPreview: "等待预览生成",
+    loginPrivy: "登录并连接 Privy 钱包",
+    openWalletExplorer: "打开 X Layer 钱包地址",
+    previewEmptyTitle: "先生成免费预览",
+    previewEmptyDesc:
+      "这里会先显示策略方向、agent 分工和链路结构，再进入付费解锁与执行。",
+    freePreview: "Free Preview",
+    payNowTitle: "立即支付并执行",
+    payNowDesc: "先走 x402 支付解锁，再用同一个 EVM 钱包在 X Layer 上广播。",
+    preExecCheck: "执行前检查",
+    walletBalanceLabel: "X Layer 钱包当前有",
+    insufficientBalance: "执行钱包余额不足，先补足后再支付。",
+    loginAndPay: "登录并支付",
+    executingLabel: "执行中...",
+    fundFirst: "先补足",
+    payAndExecute: "支付 {price} 并执行",
+    railWaiting: "等待 rail 选择",
+    railPayExec: "{network} 付款 → X Layer 执行",
+    txCompleted: "交易已完成",
+    partialBroadcast: "部分广播",
+    executionUnlocked: "已解锁执行",
+    premiumLoopComplete: "premium loop 已经完整跑通",
+    partialSuccess: "{success} 笔成功，{failed} 笔失败",
+    broadcastingTx: "premium action 已解锁，正在广播 X Layer 交易",
+    confidence: "Confidence",
+    confidenceDetail: "策略 Agent 置信度",
+    maxSlippage: "Max Slippage",
+    slippageDetail: "Risk Agent 预估上限",
+    txReady: "Tx Ready",
+    txReadyDetail: "Execution Agent 就绪度",
+    routes: "Routes",
+    routesDetail: "OKX 可见路由数",
+    agentDecisionLog: "Agent 决策日志",
+    executionProofBoard: "执行证据板",
+    x402Settled: "x402 已结算",
+    mainTx: "主交易",
+    reserveHold: "保留稳定仓",
+    broadcasted: "已广播",
+    execFailed: "执行失败",
+    shareTitle: "分享这次结果",
+    shareDesc: "一张图直接带出三层 agent 判断、OKX 路由执行和 x402 解锁证明。",
+    retryFailed: "重试未完成交易",
+    downloadImage: "下载结果图",
+    copied: "已复制",
+    copyImageLink: "复制图片链接",
+    openImage: "打开图片",
+    viewWallet: "查看钱包",
+  },
+};
+
+function tt(
+  dict: Record<string, string>,
+  key: string,
+  vars?: Record<string, string | number>,
+) {
+  let str = dict[key] || key;
+  if (vars) {
+    for (const [k, v] of Object.entries(vars)) {
+      str = str.replace(`{${k}}`, String(v));
+    }
+  }
+  return str;
+}
+
 const xLayerClient = createPublicClient({
   chain: xLayer,
   transport: http(),
 });
 
 function truncateMiddle(value: string | null | undefined, start = 6, end = 4) {
-  if (!value) return "未连接";
+  if (!value) return "—";
   if (value.length <= start + end + 3) return value;
   return `${value.slice(0, start)}...${value.slice(-end)}`;
 }
@@ -272,7 +487,11 @@ function normalizeTypedDataValue(value: unknown, path: string[] = []): unknown {
     return value.toString();
   }
 
-  if (fieldName === "chainId" && typeof value === "string" && /^\d+$/.test(value)) {
+  if (
+    fieldName === "chainId" &&
+    typeof value === "string" &&
+    /^\d+$/.test(value)
+  ) {
     const numericValue = Number(value);
     return Number.isSafeInteger(numericValue) ? numericValue : value;
   }
@@ -340,7 +559,8 @@ function findPaymentReference(payment: unknown): string | null {
 
   while (queue.length > 0) {
     const current = queue.shift();
-    if (!current || typeof current !== "object" || visited.has(current)) continue;
+    if (!current || typeof current !== "object" || visited.has(current))
+      continue;
 
     visited.add(current);
     const record = current as Record<string, unknown>;
@@ -432,6 +652,33 @@ function agentStatusLabel(status: AgentStatus) {
   if (status === "ready") return "Ready";
   if (status === "watch") return "Watch";
   return "Pending";
+}
+
+function agentVerdictTone(verdict: string) {
+  const v = verdict.toLowerCase();
+  if (v.startsWith("reduced") || v.startsWith("overr")) {
+    return {
+      badge: "border-orange-200 bg-orange-50 text-orange-700",
+      label: "OVERRIDE",
+    };
+  }
+  if (
+    v.startsWith("vetoed") ||
+    v.startsWith("veto") ||
+    v.startsWith("blocked")
+  ) {
+    return {
+      badge: "border-rose-200 bg-rose-50 text-rose-700",
+      label: "VETOED",
+    };
+  }
+  if (v.startsWith("cleared") || v.startsWith("basket")) {
+    return {
+      badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      label: "CLEARED",
+    };
+  }
+  return null;
 }
 
 function agentStatusTone(status: AgentStatus) {
@@ -526,7 +773,10 @@ async function switchWalletChain(wallet: any, chainId: number) {
   });
 }
 
-async function sendEvmTransaction(wallet: any, transaction: ExecutionTransaction) {
+async function sendEvmTransaction(
+  wallet: any,
+  transaction: ExecutionTransaction,
+) {
   const provider = await wallet.getEthereumProvider();
   const hash = (await provider.request({
     method: "eth_sendTransaction",
@@ -536,7 +786,9 @@ async function sendEvmTransaction(wallet: any, transaction: ExecutionTransaction
         to: transaction.to,
         data: ensureHexData(transaction.data),
         value: toRpcQuantity(transaction.value) || "0x0",
-        ...(toRpcQuantity(transaction.gas) ? { gas: toRpcQuantity(transaction.gas) } : {}),
+        ...(toRpcQuantity(transaction.gas)
+          ? { gas: toRpcQuantity(transaction.gas) }
+          : {}),
         ...(toRpcQuantity(transaction.gasPrice)
           ? { gasPrice: toRpcQuantity(transaction.gasPrice) }
           : {}),
@@ -544,7 +796,11 @@ async function sendEvmTransaction(wallet: any, transaction: ExecutionTransaction
           ? { maxFeePerGas: toRpcQuantity(transaction.maxFeePerGas) }
           : {}),
         ...(toRpcQuantity(transaction.maxPriorityFeePerGas)
-          ? { maxPriorityFeePerGas: toRpcQuantity(transaction.maxPriorityFeePerGas) }
+          ? {
+              maxPriorityFeePerGas: toRpcQuantity(
+                transaction.maxPriorityFeePerGas,
+              ),
+            }
           : {}),
       },
     ],
@@ -558,6 +814,10 @@ async function sendEvmTransaction(wallet: any, transaction: ExecutionTransaction
 }
 
 export default function FomoCopilotPage() {
+  const [lang, setLang] = useState<Lang>("en");
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    tt(i18n[lang], key, vars);
+
   const [budgetUsd, setBudgetUsd] = useState(100);
   const [riskMode, setRiskMode] = useState<RiskMode>("balanced");
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>("3d");
@@ -575,7 +835,9 @@ export default function FomoCopilotPage() {
   const [executionResults, setExecutionResults] = useState<ExecutionResult[]>(
     [],
   );
-  const [fundingStatus, setFundingStatus] = useState<FundingStatus | null>(null);
+  const [fundingStatus, setFundingStatus] = useState<FundingStatus | null>(
+    null,
+  );
   const [evmSigner, setEvmSigner] = useState<EvmTypedDataSigner | null>(null);
 
   const { ready, authenticated, login } = usePrivy();
@@ -633,7 +895,11 @@ export default function FomoCopilotPage() {
 
   useEffect(() => {
     if (!paymentOptions.length) return;
-    if (!paymentOptions.some((option) => option.assetSymbol === selectedPaymentAsset)) {
+    if (
+      !paymentOptions.some(
+        (option) => option.assetSymbol === selectedPaymentAsset,
+      )
+    ) {
       setSelectedPaymentAsset(paymentOptions[0].assetSymbol);
     }
   }, [paymentOptions, selectedPaymentAsset]);
@@ -680,8 +946,9 @@ export default function FomoCopilotPage() {
 
   const selectedPaymentOption = useMemo(
     () =>
-      paymentOptions.find((option) => option.assetSymbol === selectedPaymentAsset) ||
-      null,
+      paymentOptions.find(
+        (option) => option.assetSymbol === selectedPaymentAsset,
+      ) || null,
     [paymentOptions, selectedPaymentAsset],
   );
 
@@ -705,8 +972,7 @@ export default function FomoCopilotPage() {
       riskMode,
       timeHorizon,
       provider: premiumPlan.provider || "OKX OnchainOS",
-      paymentLabel:
-        premiumPlan.plan.paymentRail.displayPrice || paymentLabel,
+      paymentLabel: premiumPlan.plan.paymentRail.displayPrice || paymentLabel,
       theme: premiumPlan.plan.theme,
       title: premiumPlan.plan.shareCard.title,
       caption: premiumPlan.plan.shareCard.caption,
@@ -715,8 +981,9 @@ export default function FomoCopilotPage() {
       estimatedSlippagePct: premiumPlan.plan.estimatedSlippagePct,
       estimatedFeesUsd: premiumPlan.plan.estimatedFeesUsd,
       preparedSwapCount: premiumPlan.plan.executionReadiness.preparedSwapCount,
-      executedSwapCount: executionResults.filter((item) => item.status === "success")
-        .length,
+      executedSwapCount: executionResults.filter(
+        (item) => item.status === "success",
+      ).length,
       totalSwapCount: premiumPlan.plan.executionReadiness.totalSwapCount,
       paymentReference,
       paymentExplorerUrl,
@@ -776,12 +1043,12 @@ export default function FomoCopilotPage() {
         normalizedBudgetUsd - fundingStatus.stableBalance,
       );
       missingParts.push(
-        `补 ${stableGap.toFixed(2)} ${fundingStatus.stableSymbol}`,
+        `+${stableGap.toFixed(2)} ${fundingStatus.stableSymbol}`,
       );
     }
     if (!fundingStatus.hasEnoughOkb) {
       const okbGap = Math.max(0, MIN_OKB_GAS_BUFFER - fundingStatus.okbBalance);
-      missingParts.push(`补 ${okbGap.toFixed(4)} ${XLAYER_GAS_SYMBOL}`);
+      missingParts.push(`+${okbGap.toFixed(4)} ${XLAYER_GAS_SYMBOL}`);
     }
 
     if (!missingParts.length) return null;
@@ -841,9 +1108,11 @@ export default function FomoCopilotPage() {
         body: JSON.stringify(requestPayload),
       });
 
-      const data = (await response.json()) as PreviewResponse & { error?: string };
+      const data = (await response.json()) as PreviewResponse & {
+        error?: string;
+      };
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "生成免费预览失败");
+        throw new Error(data.error || "Failed to generate preview");
       }
 
       setPreview(data);
@@ -852,10 +1121,12 @@ export default function FomoCopilotPage() {
       }
 
       if (embeddedEvmWallet?.address) {
-        await refreshFundingStatus(stableSymbolForPaymentAsset(selectedPaymentAsset));
+        await refreshFundingStatus(
+          stableSymbolForPaymentAsset(selectedPaymentAsset),
+        );
       }
     } catch (requestError: any) {
-      setError(requestError?.message || "生成免费预览失败");
+      setError(requestError?.message || "Failed to generate preview");
     } finally {
       setPreviewLoading(false);
     }
@@ -866,12 +1137,14 @@ export default function FomoCopilotPage() {
     options?: { retryOnly?: boolean },
   ) => {
     if (!embeddedEvmWallet) {
-      throw new Error("需要 EVM 钱包才能完成 X Layer 交易执行");
+      throw new Error("EVM wallet required for X Layer trade execution");
     }
 
     const retryOnly = options?.retryOnly ?? false;
     const currentResults = retryOnly ? [...executionResults] : [];
-    const resultMap = new Map(currentResults.map((item) => [item.symbol, item]));
+    const resultMap = new Map(
+      currentResults.map((item) => [item.symbol, item]),
+    );
     const tradableLegs = plan.plan.allocation.filter(
       (leg) => leg.symbol !== tradeInputAsset,
     );
@@ -897,7 +1170,7 @@ export default function FomoCopilotPage() {
         resultMap.set(leg.symbol, {
           symbol: leg.symbol,
           status: "error",
-          error: leg.quote.txReason || "未拿到可执行交易",
+          error: leg.quote.txReason || "No executable transaction",
         });
         setExecutionResults(Array.from(resultMap.values()));
         continue;
@@ -913,7 +1186,10 @@ export default function FomoCopilotPage() {
           approvalHashes.push(approvalHash);
         }
 
-        const hash = await sendEvmTransaction(embeddedEvmWallet, mainTransaction);
+        const hash = await sendEvmTransaction(
+          embeddedEvmWallet,
+          mainTransaction,
+        );
         resultMap.set(leg.symbol, {
           symbol: leg.symbol,
           status: "success",
@@ -925,7 +1201,7 @@ export default function FomoCopilotPage() {
         resultMap.set(leg.symbol, {
           symbol: leg.symbol,
           status: "error",
-          error: executionError?.message || "执行失败",
+          error: executionError?.message || "Execution failed",
         });
         setExecutionResults(Array.from(resultMap.values()));
       }
@@ -939,8 +1215,8 @@ export default function FomoCopilotPage() {
     if (failedCount > 0) {
       throw new Error(
         failedCount === tradableLegs.length
-          ? "支付已完成，但 X Layer 交易执行失败"
-          : "支付已完成，但部分 X Layer 交易执行失败",
+          ? "Payment completed but X Layer trade execution failed"
+          : "Payment completed but some X Layer trades failed",
       );
     }
   };
@@ -954,17 +1230,18 @@ export default function FomoCopilotPage() {
     }
 
     if (!ready) {
-      setError("钱包系统还没准备好，请稍后再试");
+      setError("Wallet not ready, please try again");
       return;
     }
 
     if (!embeddedEvmWallet?.address) {
-      setError("需要 EVM 钱包来完成付款和执行");
+      setError("EVM wallet required for payment and execution");
       return;
     }
 
     try {
-      const tradeStableSymbol = stableSymbolForPaymentAsset(selectedPaymentAsset);
+      const tradeStableSymbol =
+        stableSymbolForPaymentAsset(selectedPaymentAsset);
       const paymentAmount = parseDisplayPriceAmount(paymentLabel);
       const requiredStableBeforePayment =
         selectedPaymentOption?.network === XLAYER_NAME &&
@@ -982,17 +1259,15 @@ export default function FomoCopilotPage() {
           0,
           requiredStableBeforePayment - status.stableBalance,
         );
-        missingParts.push(`补 ${stableGap.toFixed(2)} ${status.stableSymbol}`);
+        missingParts.push(`+${stableGap.toFixed(2)} ${status.stableSymbol}`);
       }
       if (status && !status.hasEnoughOkb) {
         const okbGap = Math.max(0, MIN_OKB_GAS_BUFFER - status.okbBalance);
-        missingParts.push(`补 ${okbGap.toFixed(4)} ${XLAYER_GAS_SYMBOL}`);
+        missingParts.push(`+${okbGap.toFixed(4)} ${XLAYER_GAS_SYMBOL}`);
       }
 
       if (missingParts.length > 0) {
-        throw new Error(
-          `先给 X Layer 交易钱包补足 ${missingParts.join(" + ")}。`,
-        );
+        throw new Error(`Fund X Layer wallet: ${missingParts.join(" + ")}`);
       }
 
       const paymentChainId = chainIdForPaymentNetwork(
@@ -1008,19 +1283,21 @@ export default function FomoCopilotPage() {
       );
 
       if (!result.success || !result.data?.success) {
-        throw new Error(result.error || result.data?.error || "支付失败");
+        throw new Error(result.error || result.data?.error || "Payment failed");
       }
 
       const plan = result.data as PremiumPlanResponse;
       setPremiumPlan(plan);
-      await refreshFundingStatus(plan.plan.tradeRail?.inputAssetSymbol || "USDT");
+      await refreshFundingStatus(
+        plan.plan.tradeRail?.inputAssetSymbol || "USDT",
+      );
       await executePreparedSwaps(plan);
     } catch (requestError: any) {
       setExecuting(false);
       setError(
         requestError?.message ||
           paymentError ||
-          "支付或执行过程中发生错误，请重试",
+          "Payment or execution error, please retry",
       );
     }
   };
@@ -1032,7 +1309,7 @@ export default function FomoCopilotPage() {
       setError(null);
       await executePreparedSwaps(premiumPlan, { retryOnly: true });
     } catch (requestError: any) {
-      setError(requestError?.message || "重试未完成交易失败");
+      setError(requestError?.message || "Retry failed");
     }
   };
 
@@ -1044,7 +1321,7 @@ export default function FomoCopilotPage() {
 
     try {
       const response = await fetch(shareImagePath);
-      if (!response.ok) throw new Error("生成分享图失败");
+      if (!response.ok) throw new Error("Failed to generate share image");
 
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
@@ -1056,7 +1333,7 @@ export default function FomoCopilotPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     } catch (requestError: any) {
-      setError(requestError?.message || "生成分享图失败");
+      setError(requestError?.message || "Failed to generate share image");
     } finally {
       setShareImageLoading(false);
     }
@@ -1070,7 +1347,7 @@ export default function FomoCopilotPage() {
       setShareCopied(true);
       window.setTimeout(() => setShareCopied(false), 1800);
     } catch (requestError: any) {
-      setError(requestError?.message || "复制分享图链接失败");
+      setError(requestError?.message || "Failed to copy share link");
     }
   };
 
@@ -1079,56 +1356,126 @@ export default function FomoCopilotPage() {
   return (
     <main className="min-h-screen bg-[#f6f8fb] text-slate-950">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:py-8">
-        <section className="overflow-hidden rounded-[30px] bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.3),_transparent_28%),radial-gradient(circle_at_80%_20%,_rgba(45,212,191,0.22),_transparent_24%),linear-gradient(180deg,#020617_0%,#0f172a_65%,#111827_100%)] px-6 py-7 text-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] sm:px-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-100">
-            <Zap className="h-3.5 w-3.5" />
-            Miraix Rotation Desk
+        <section className="relative overflow-hidden rounded-[30px] bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.3),_transparent_28%),radial-gradient(circle_at_80%_20%,_rgba(45,212,191,0.22),_transparent_24%),radial-gradient(circle_at_50%_80%,_rgba(139,92,246,0.15),_transparent_30%),linear-gradient(180deg,#020617_0%,#0f172a_65%,#111827_100%)] px-6 py-8 text-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] sm:px-8 sm:py-10">
+          {/* Top bar: hackathon badge + language toggle */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200">
+              <Zap className="h-3.5 w-3.5 text-amber-300" />
+              {t("hackathonBadge")}
+            </div>
+            <button
+              type="button"
+              onClick={() => setLang(lang === "en" ? "zh" : "en")}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 transition hover:bg-white/20"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              {lang === "en" ? "中文" : "EN"}
+            </button>
           </div>
-          <div className="mt-5 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+
+          {/* Headline + architecture grid */}
+          <div className="mt-6 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
-                我有 100U，今天在 X Layer 上怎么做
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-100">
+                <Sparkles className="h-3.5 w-3.5" />
+                {t("heroSubtitle")}
+              </div>
+              <h1 className="mt-4 whitespace-pre-line text-3xl font-bold tracking-tight sm:text-[2.8rem] sm:leading-[1.15]">
+                {t("heroHeadline")}
               </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-                不再是“给我一个币”。这页会把你的预算拆成策略、风控、执行三层
-                agent，先给免费预览，再通过 x402 解锁 OKX 的精确篮子和
-                X Layer 可广播 payload。
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-[15px]">
+                {t("heroDesc")}
               </p>
+
+              {/* Scoring criteria pills */}
               <div className="mt-6 flex flex-wrap gap-2">
-                {[
-                  "Strategist Agent",
-                  "Risk Agent",
-                  "Execution Agent",
-                ].map((label) => (
+                {(
+                  [
+                    ["scoreIntegration", "×0.25"],
+                    ["scoreUtility", "×0.25"],
+                    ["scoreInnovation", "×0.30"],
+                    ["scoreReproducibility", "×0.20"],
+                  ] as const
+                ).map(([key, weight]) => (
                   <div
-                    key={label}
-                    className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-slate-100"
+                    key={key}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                      key === "scoreInnovation"
+                        ? "border-amber-400/40 bg-amber-400/15 text-amber-200"
+                        : "border-white/10 bg-white/8 text-slate-200"
+                    }`}
                   >
-                    {label}
+                    {t(key)}{" "}
+                    <span className="ml-1 text-[10px] text-slate-400">
+                      {weight}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tech stack badges */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {(
+                  [
+                    "techXLayer",
+                    "techOnchainOS",
+                    "techX402",
+                    "techLangGraph",
+                  ] as const
+                ).map((key) => (
+                  <div
+                    key={key}
+                    className="rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-[11px] font-medium text-sky-200"
+                  >
+                    {t(key)}
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Architecture flow card */}
             <div className="rounded-[26px] border border-white/10 bg-white/5 p-5 backdrop-blur">
               <div className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-200">
-                Submission Loop
+                {t("archFlowTitle")}
               </div>
-              <div className="mt-4 grid gap-3 text-sm text-slate-200">
-                {[
-                  "1. 免费预览策略和风控",
-                  "2. x402 支付解锁 premium action",
-                  "3. OKX OnchainOS 返回执行 payload",
-                  "4. 同一钱包在 X Layer 上广播",
-                  "5. proof board + share image",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
-                  >
-                    {item}
-                  </div>
-                ))}
+              <div className="mt-4 grid gap-2">
+                {/* Step 1: Market API */}
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                  <span className="mr-2 text-sky-400">1.</span>
+                  {t("archStep1")}
+                  <span className="ml-2 text-[10px] text-slate-500">
+                    → live prices
+                  </span>
+                </div>
+                {/* Step 2: Strategist */}
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                  <span className="mr-2 text-emerald-400">2.</span>
+                  {t("archStep2")}
+                  <span className="ml-2 text-[10px] text-slate-500">
+                    → basket proposal
+                  </span>
+                </div>
+                {/* Step 3: Risk Agent with OVERRIDE highlight */}
+                <div className="rounded-2xl border border-orange-400/30 bg-orange-400/8 px-4 py-3 text-sm text-slate-200">
+                  <span className="mr-2 text-orange-400">3.</span>
+                  {t("archStep3")}
+                  <span className="ml-2 inline-flex items-center rounded border border-orange-400/40 bg-orange-400/15 px-1.5 py-0.5 text-[10px] font-bold text-orange-300">
+                    {t("archOverride")}
+                  </span>
+                </div>
+                {/* Step 4: Execution Agent */}
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                  <span className="mr-2 text-violet-400">4.</span>
+                  {t("archStep4")}
+                  <span className="ml-2 text-[10px] text-slate-500">
+                    → {t("archDexRoute")}
+                  </span>
+                </div>
+                {/* Step 5: x402 + Broadcast */}
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                  <span className="mr-2 text-teal-400">5.</span>
+                  {t("archPayment")} → {t("archStep5")}
+                </div>
               </div>
             </div>
           </div>
@@ -1138,7 +1485,9 @@ export default function FomoCopilotPage() {
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="space-y-5">
               <div>
-                <div className="text-sm font-medium text-slate-700">预算</div>
+                <div className="text-sm font-medium text-slate-700">
+                  {t("budget")}
+                </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {budgetPresets.map((preset) => (
                     <button
@@ -1162,19 +1511,24 @@ export default function FomoCopilotPage() {
                       max={MAX_BUDGET_USD}
                       value={budgetUsd}
                       onChange={(event) =>
-                        setBudgetUsd(clampBudgetUsd(Number(event.target.value) || 0))
+                        setBudgetUsd(
+                          clampBudgetUsd(Number(event.target.value) || 0),
+                        )
                       }
                       className="w-full bg-transparent text-sm font-medium outline-none"
                     />
                   </div>
                 </div>
                 <div className="mt-2 text-xs text-slate-500">
-                  最低 1 USDT。{minimumBudgetApplied ? "已自动按 1 USDT 起算。" : ""}
+                  {t("budgetMin")}
+                  {minimumBudgetApplied ? ` ${t("budgetMinApplied")}` : ""}
                 </div>
               </div>
 
               <div>
-                <div className="text-sm font-medium text-slate-700">风险模式</div>
+                <div className="text-sm font-medium text-slate-700">
+                  {t("riskMode")}
+                </div>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3">
                   {riskOptions.map((option) => (
                     <button
@@ -1188,10 +1542,10 @@ export default function FomoCopilotPage() {
                       }`}
                     >
                       <div className="text-sm font-semibold text-slate-950">
-                        {option.label}
+                        {t(option.labelKey)}
                       </div>
                       <div className="mt-1 text-xs text-slate-500">
-                        {option.detail}
+                        {t(option.detailKey)}
                       </div>
                     </button>
                   ))}
@@ -1199,7 +1553,9 @@ export default function FomoCopilotPage() {
               </div>
 
               <div>
-                <div className="text-sm font-medium text-slate-700">周期</div>
+                <div className="text-sm font-medium text-slate-700">
+                  {t("horizon")}
+                </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {horizonOptions.map((option) => (
                     <button
@@ -1212,7 +1568,7 @@ export default function FomoCopilotPage() {
                           : "border-slate-200 bg-white text-slate-700"
                       }`}
                     >
-                      {option.label}
+                      {t(option.labelKey)}
                     </button>
                   ))}
                 </div>
@@ -1229,14 +1585,14 @@ export default function FomoCopilotPage() {
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                生成免费预览
+                {t("generatePreview")}
               </button>
             </div>
 
             <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
               <div className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
                 <Wallet className="h-4 w-4" />
-                钱包与链路
+                {t("walletAndRail")}
               </div>
               <div className="mt-4 space-y-3 text-sm">
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -1254,7 +1610,7 @@ export default function FomoCopilotPage() {
                   <div className="mt-2 font-medium text-slate-950">
                     {selectedPaymentOption
                       ? `${selectedPaymentOption.assetSymbol} · ${selectedPaymentOption.network}`
-                      : "等待预览生成"}
+                      : t("waitingPreview")}
                   </div>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -1272,7 +1628,7 @@ export default function FomoCopilotPage() {
                   onClick={login}
                   className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
                 >
-                  登录并连接 Privy 钱包
+                  {t("loginPrivy")}
                 </button>
               )}
               {walletExplorerUrl && (
@@ -1283,7 +1639,7 @@ export default function FomoCopilotPage() {
                   className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
                 >
                   <ArrowUpRight className="h-4 w-4" />
-                  打开 X Layer 钱包地址
+                  {t("openWalletExplorer")}
                 </a>
               )}
             </div>
@@ -1300,10 +1656,10 @@ export default function FomoCopilotPage() {
           {!preview ? (
             <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
               <div className="text-lg font-semibold text-slate-950">
-                先生成免费预览
+                {t("previewEmptyTitle")}
               </div>
               <div className="mt-2 text-sm text-slate-600">
-                这里会先显示策略方向、agent 分工和链路结构，再进入付费解锁与执行。
+                {t("previewEmptyDesc")}
               </div>
             </div>
           ) : (
@@ -1368,6 +1724,7 @@ export default function FomoCopilotPage() {
                 <div className="grid gap-3 lg:grid-cols-3">
                   {previewAgentLoop.map((agent) => {
                     const tone = agentStatusTone(agent.status);
+                    const verdictTone = agentVerdictTone(agent.verdict);
                     return (
                       <div
                         key={agent.id}
@@ -1382,10 +1739,19 @@ export default function FomoCopilotPage() {
                               {agent.role}
                             </div>
                           </div>
-                          <div
-                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${tone.badge}`}
-                          >
-                            {agentStatusLabel(agent.status)}
+                          <div className="flex items-center gap-2">
+                            {verdictTone && (
+                              <div
+                                className={`rounded-full border px-3 py-1 text-xs font-semibold ${verdictTone.badge}`}
+                              >
+                                {verdictTone.label}
+                              </div>
+                            )}
+                            <div
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${tone.badge}`}
+                            >
+                              {agentStatusLabel(agent.status)}
+                            </div>
                           </div>
                         </div>
                         <div className="mt-4 text-base font-semibold text-slate-950">
@@ -1447,10 +1813,10 @@ export default function FomoCopilotPage() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                       <div className="text-lg font-semibold text-slate-950">
-                        立即支付并执行
+                        {t("payNowTitle")}
                       </div>
                       <div className="mt-1 text-sm text-slate-600">
-                        先走 x402 支付解锁，再用同一个 EVM 钱包在 X Layer 上广播。
+                        {t("payNowDesc")}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -1458,7 +1824,9 @@ export default function FomoCopilotPage() {
                         <button
                           key={`${option.assetSymbol}-${option.network}`}
                           type="button"
-                          onClick={() => setSelectedPaymentAsset(option.assetSymbol)}
+                          onClick={() =>
+                            setSelectedPaymentAsset(option.assetSymbol)
+                          }
                           className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                             selectedPaymentAsset === option.assetSymbol
                               ? "border-slate-950 bg-slate-950 text-white"
@@ -1474,7 +1842,7 @@ export default function FomoCopilotPage() {
                   <div className="mt-4 grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
                       <div className="text-sm font-semibold text-slate-950">
-                        执行前检查
+                        {t("preExecCheck")}
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
                         <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
@@ -1484,20 +1852,23 @@ export default function FomoCopilotPage() {
                           Trade: X Layer
                         </div>
                         <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                          Wallet: {embeddedEvmWallet?.address ? "Connected" : "Missing"}
+                          Wallet:{" "}
+                          {embeddedEvmWallet?.address ? "Connected" : "Missing"}
                         </div>
                       </div>
 
                       {fundingStatus && (
                         <div className="mt-4 text-sm text-slate-600">
-                          X Layer 钱包当前有 {fundingStatus.stableBalance.toFixed(2)}{" "}
-                          {fundingStatus.stableSymbol} / {fundingStatus.okbBalance.toFixed(4)}{" "}
-                          {XLAYER_GAS_SYMBOL}。
+                          {t("walletBalanceLabel")}{" "}
+                          {fundingStatus.stableBalance.toFixed(2)}{" "}
+                          {fundingStatus.stableSymbol} /{" "}
+                          {fundingStatus.okbBalance.toFixed(4)}{" "}
+                          {XLAYER_GAS_SYMBOL}
                         </div>
                       )}
                       {fundingShortfallMessage && (
                         <div className="mt-2 text-sm font-medium text-amber-700">
-                          执行钱包余额不足，先补足后再支付。
+                          {t("insufficientBalance")}
                         </div>
                       )}
                     </div>
@@ -1515,17 +1886,19 @@ export default function FomoCopilotPage() {
                       )}
                       <div className="text-lg font-semibold">
                         {!authenticated
-                          ? "登录并支付"
+                          ? t("loginAndPay")
                           : executing
-                            ? "执行中..."
+                            ? t("executingLabel")
                             : fundingShortfallMessage
-                              ? `先补足 ${fundingShortfallMessage}`
-                              : `支付 ${paymentLabel} 并执行`}
+                              ? `${t("fundFirst")} ${fundingShortfallMessage}`
+                              : t("payAndExecute", { price: paymentLabel })}
                       </div>
                       <div className="text-sm text-slate-300">
                         {selectedPaymentOption
-                          ? `${selectedPaymentOption.network} 付款 -> X Layer 执行`
-                          : "等待 rail 选择"}
+                          ? t("railPayExec", {
+                              network: selectedPaymentOption.network,
+                            })
+                          : t("railWaiting")}
                       </div>
                     </button>
                   </div>
@@ -1550,10 +1923,10 @@ export default function FomoCopilotPage() {
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {allExecutionsCompleted
-                    ? "交易已完成"
+                    ? t("txCompleted")
                     : hasExecutionErrors
-                      ? "部分广播"
-                      : "已解锁执行"}
+                      ? t("partialBroadcast")
+                      : t("executionUnlocked")}
                 </div>
                 <h2 className="mt-3 text-2xl font-semibold text-slate-950">
                   {premiumPlan.plan.theme}
@@ -1564,7 +1937,7 @@ export default function FomoCopilotPage() {
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-right">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                  已广播
+                  {t("broadcasted")}
                 </div>
                 <div className="mt-1 text-2xl font-semibold text-slate-950">
                   {successfulExecutions}/{totalTradableLegs}
@@ -1585,10 +1958,13 @@ export default function FomoCopilotPage() {
                 <div>
                   <div className="text-sm font-semibold text-slate-950">
                     {allExecutionsCompleted
-                      ? "premium loop 已经完整跑通"
+                      ? t("premiumLoopComplete")
                       : hasExecutionErrors
-                        ? `${successfulExecutions} 笔成功，${failedExecutions} 笔失败`
-                        : "premium action 已解锁，正在广播 X Layer 交易"}
+                        ? t("partialSuccess", {
+                            success: successfulExecutions,
+                            failed: failedExecutions,
+                          })
+                        : t("broadcastingTx")}
                   </div>
                   <div className="mt-1 text-sm text-slate-600">
                     {premiumPlan.plan.proofBundle.summary}
@@ -1611,7 +1987,7 @@ export default function FomoCopilotPage() {
                       </a>
                     ) : (
                       <div className="rounded-full border border-white/70 bg-white/80 px-3 py-2">
-                        回执 {truncateMiddle(paymentReference, 10, 8)}
+                        Ref {truncateMiddle(paymentReference, 10, 8)}
                       </div>
                     ))}
                   <div className="rounded-full border border-white/70 bg-white/80 px-3 py-2">
@@ -1626,22 +2002,22 @@ export default function FomoCopilotPage() {
                 {
                   label: "Confidence",
                   value: `${premiumPlan.plan.confidence}%`,
-                  detail: "策略 Agent 置信度",
+                  detail: t("confidenceDetail"),
                 },
                 {
                   label: "Max Slippage",
                   value: `${premiumPlan.plan.estimatedSlippagePct}%`,
-                  detail: "Risk Agent 预估上限",
+                  detail: t("slippageDetail"),
                 },
                 {
                   label: "Tx Ready",
                   value: `${premiumPlan.plan.proofBundle.txReadyCount}/${premiumPlan.plan.proofBundle.totalTradableLegs}`,
-                  detail: "Execution Agent 就绪度",
+                  detail: t("txReadyDetail"),
                 },
                 {
                   label: "Routes",
                   value: `${premiumPlan.plan.proofBundle.routeCount}`,
-                  detail: "OKX 可见路由数",
+                  detail: t("routesDetail"),
                 },
               ].map((item) => (
                 <div
@@ -1665,11 +2041,12 @@ export default function FomoCopilotPage() {
               <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
                   <ShieldCheck className="h-4 w-4" />
-                  Agent 决策日志
+                  {t("agentDecisionLog")}
                 </div>
                 <div className="mt-4 space-y-3">
                   {(premiumPlan.plan.agentLoop || []).map((agent) => {
                     const tone = agentStatusTone(agent.status);
+                    const verdictTone = agentVerdictTone(agent.verdict);
                     return (
                       <div
                         key={agent.id}
@@ -1684,10 +2061,19 @@ export default function FomoCopilotPage() {
                               {agent.role}
                             </div>
                           </div>
-                          <div
-                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${tone.badge}`}
-                          >
-                            {agentStatusLabel(agent.status)}
+                          <div className="flex items-center gap-2">
+                            {verdictTone && (
+                              <div
+                                className={`rounded-full border px-3 py-1 text-xs font-semibold ${verdictTone.badge}`}
+                              >
+                                {verdictTone.label}
+                              </div>
+                            )}
+                            <div
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${tone.badge}`}
+                            >
+                              {agentStatusLabel(agent.status)}
+                            </div>
                           </div>
                         </div>
                         <div className="mt-3 text-base font-semibold text-slate-950">
@@ -1719,7 +2105,7 @@ export default function FomoCopilotPage() {
 
               <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
                 <div className="text-sm font-semibold text-slate-950">
-                  执行证据板
+                  {t("executionProofBoard")}
                 </div>
                 <div className="mt-3 grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -1754,7 +2140,7 @@ export default function FomoCopilotPage() {
                       )
                     ) : (
                       <div className="mt-2 font-medium text-emerald-700">
-                        x402 已结算
+                        {t("x402Settled")}
                       </div>
                     )}
                     <div className="mt-4 text-xs uppercase tracking-[0.18em] text-slate-500">
@@ -1775,13 +2161,16 @@ export default function FomoCopilotPage() {
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
                       <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                        Quote provider: {premiumPlan.plan.proofBundle.quoteProvider}
+                        Quote provider:{" "}
+                        {premiumPlan.plan.proofBundle.quoteProvider}
                       </div>
                       <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                        Payment network: {premiumPlan.plan.proofBundle.paymentRailNetwork}
+                        Payment network:{" "}
+                        {premiumPlan.plan.proofBundle.paymentRailNetwork}
                       </div>
                       <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                        Reserve: {premiumPlan.plan.proofBundle.reserveWeightPct}%
+                        Reserve: {premiumPlan.plan.proofBundle.reserveWeightPct}
+                        %
                       </div>
                       <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
                         Swaps: {successfulExecutions}/{totalTradableLegs}
@@ -1794,77 +2183,80 @@ export default function FomoCopilotPage() {
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  {(premiumPlan.plan.proofBundle.actions || []).map((action) => {
-                    const result = executionResults.find(
-                      (entry) => entry.symbol === action.symbol,
-                    );
+                  {(premiumPlan.plan.proofBundle.actions || []).map(
+                    (action) => {
+                      const result = executionResults.find(
+                        (entry) => entry.symbol === action.symbol,
+                      );
 
-                    return (
-                      <div
-                        key={`proof-${action.symbol}`}
-                        className="rounded-2xl border border-slate-200 bg-white p-4"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-slate-950">
-                              {action.symbol} · {usdFormatter.format(action.amountUsd)}
+                      return (
+                        <div
+                          key={`proof-${action.symbol}`}
+                          className="rounded-2xl border border-slate-200 bg-white p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-semibold text-slate-950">
+                                {action.symbol} ·{" "}
+                                {usdFormatter.format(action.amountUsd)}
+                              </div>
+                              <div className="mt-1 text-xs text-slate-500">
+                                {action.route}
+                              </div>
                             </div>
-                            <div className="mt-1 text-xs text-slate-500">
-                              {action.route}
-                            </div>
-                          </div>
-                          <div
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                              result?.status === "success"
-                                ? "bg-emerald-50 text-emerald-700"
+                            <div
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                                result?.status === "success"
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : result?.status === "error"
+                                    ? "bg-rose-50 text-rose-700"
+                                    : action.txReady
+                                      ? "bg-sky-50 text-sky-700"
+                                      : "bg-slate-100 text-slate-600"
+                              }`}
+                            >
+                              {result?.status === "success"
+                                ? "Broadcasted"
                                 : result?.status === "error"
-                                  ? "bg-rose-50 text-rose-700"
+                                  ? "Failed"
                                   : action.txReady
-                                    ? "bg-sky-50 text-sky-700"
-                                    : "bg-slate-100 text-slate-600"
-                            }`}
-                          >
-                            {result?.status === "success"
-                              ? "Broadcasted"
-                              : result?.status === "error"
-                                ? "Failed"
-                                : action.txReady
-                                  ? "Payload ready"
-                                  : "Quote only"}
+                                    ? "Payload ready"
+                                    : "Quote only"}
+                            </div>
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
+                            {result?.hash ? (
+                              <a
+                                href={toExplorerUrl(result.hash)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-700"
+                              >
+                                {t("mainTx")}
+                                <ArrowUpRight className="h-3.5 w-3.5" />
+                              </a>
+                            ) : (
+                              <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
+                                {result?.error || action.txReason}
+                              </div>
+                            )}
+                            {(result?.approvalHashes || []).map((hash) => (
+                              <a
+                                key={`${action.symbol}-${hash}`}
+                                href={toExplorerUrl(hash)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-700"
+                              >
+                                Approval
+                                <ArrowUpRight className="h-3.5 w-3.5" />
+                              </a>
+                            ))}
                           </div>
                         </div>
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
-                          {result?.hash ? (
-                            <a
-                              href={toExplorerUrl(result.hash)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-700"
-                            >
-                              主交易
-                              <ArrowUpRight className="h-3.5 w-3.5" />
-                            </a>
-                          ) : (
-                            <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                              {result?.error || action.txReason}
-                            </div>
-                          )}
-                          {(result?.approvalHashes || []).map((hash) => (
-                            <a
-                              key={`${action.symbol}-${hash}`}
-                              href={toExplorerUrl(hash)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-700"
-                            >
-                              Approval
-                              <ArrowUpRight className="h-3.5 w-3.5" />
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    },
+                  )}
                 </div>
               </div>
             </div>
@@ -1903,11 +2295,14 @@ export default function FomoCopilotPage() {
                       {item.quote.outputAmountFormatted} {item.symbol}
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      {item.quote.routeNames.slice(0, 2).join(" / ") || "OKX route"}
+                      {item.quote.routeNames.slice(0, 2).join(" / ") ||
+                        "OKX route"}
                     </div>
                     <div className="mt-3 text-xs">
                       {isBufferLeg ? (
-                        <span className="text-slate-500">保留稳定仓</span>
+                        <span className="text-slate-500">
+                          {t("reserveHold")}
+                        </span>
                       ) : legResult?.status === "success" ? (
                         <a
                           href={toExplorerUrl(legResult.hash!)}
@@ -1915,17 +2310,19 @@ export default function FomoCopilotPage() {
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 font-medium text-emerald-700"
                         >
-                          已广播
+                          {t("broadcasted")}
                           <ArrowUpRight className="h-3.5 w-3.5" />
                         </a>
                       ) : legResult?.status === "error" ? (
                         <span className="text-rose-600">
-                          {legResult.error || "执行失败"}
+                          {legResult.error || t("execFailed")}
                         </span>
                       ) : item.quote.txReady ? (
                         <span className="text-sky-700">Payload ready</span>
                       ) : (
-                        <span className="text-slate-500">{item.quote.txReason}</span>
+                        <span className="text-slate-500">
+                          {item.quote.txReason}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1937,10 +2334,10 @@ export default function FomoCopilotPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="text-lg font-semibold text-slate-950">
-                    分享这次结果
+                    {t("shareTitle")}
                   </div>
                   <div className="mt-1 text-sm text-slate-600">
-                    一张图直接带出三层 agent 判断、OKX 路由执行和 x402 解锁证明。
+                    {t("shareDesc")}
                   </div>
                 </div>
                 {hasExecutionErrors && (
@@ -1955,7 +2352,7 @@ export default function FomoCopilotPage() {
                     ) : (
                       <RefreshCcw className="h-4 w-4" />
                     )}
-                    重试未完成交易
+                    {t("retryFailed")}
                   </button>
                 )}
               </div>
@@ -1972,7 +2369,7 @@ export default function FomoCopilotPage() {
                   ) : (
                     <Download className="h-4 w-4" />
                   )}
-                  下载结果图
+                  {t("downloadImage")}
                 </button>
                 <button
                   type="button"
@@ -1980,7 +2377,7 @@ export default function FomoCopilotPage() {
                   className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
                 >
                   <Copy className="h-4 w-4" />
-                  {shareCopied ? "已复制" : "复制图片链接"}
+                  {shareCopied ? t("copied") : t("copyImageLink")}
                 </button>
                 {shareImageUrl && (
                   <a
@@ -1990,7 +2387,7 @@ export default function FomoCopilotPage() {
                     className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
                   >
                     <ArrowUpRight className="h-4 w-4" />
-                    打开图片
+                    {t("openImage")}
                   </a>
                 )}
                 {walletExplorerUrl && (
@@ -2001,7 +2398,7 @@ export default function FomoCopilotPage() {
                     className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
                   >
                     <ArrowUpRight className="h-4 w-4" />
-                    查看钱包
+                    {t("viewWallet")}
                   </a>
                 )}
               </div>
