@@ -1,6 +1,6 @@
-# Miraix Rotation Desk — X Layer Onchain OS AI Hackathon Phase 1
+# Miraix Rotation Desk — Three Agents, One Wallet, One X Layer Trade
 
-## Three Agents, One Desk: How We Turned "What Should I Do With 100U?" Into a Complete Trading Loop on X Layer
+## How We Turned "What Should I Do With 100U?" Into a Pay-and-Execute Onchain Loop with OKX OnchainOS
 
 ---
 
