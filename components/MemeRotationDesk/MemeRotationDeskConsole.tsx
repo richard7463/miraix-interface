@@ -29,7 +29,7 @@ import {
 } from "@/lib/memeRotationDesk";
 import { cn } from "@/lib/utils";
 
-const budgetPresets = [25, 50, 100, 250];
+const budgetPresets = [10, 25, 50, 100, 250];
 
 const riskOptions: Array<{
   value: DeskRiskMode;
@@ -78,9 +78,9 @@ const strategyOptions: Array<{
 const recommendedDemoPath = [
   "Use the sample wallet or a connected Solana wallet.",
   "Set the desk to 100 USDC, Balanced, Momentum.",
-  "Run the desk and inspect the four Rug Court candidates.",
-  "Open the approved trade card and read the quote state and invalidation.",
-  "Prepare the unsigned payload to show the human-in-the-loop execution step.",
+  "Run the desk and inspect the Rug Court shortlist.",
+  "Open the approved trade and review quote state plus invalidation.",
+  "Prepare the unsigned payload to show the wallet review step.",
 ] as const;
 
 function formatUsd(value: number) {
@@ -133,7 +133,7 @@ export function MemeRotationDeskConsole() {
   const copyToClipboard = useCopyToClipboard();
 
   const [walletAddress, setWalletAddress] = useState("");
-  const [budgetUsd, setBudgetUsd] = useState(50);
+  const [budgetUsd, setBudgetUsd] = useState(100);
   const [riskMode, setRiskMode] = useState<DeskRiskMode>("balanced");
   const [strategy, setStrategy] = useState<DeskStrategy>("momentum");
   const [loading, setLoading] = useState(false);
@@ -289,17 +289,16 @@ export function MemeRotationDeskConsole() {
             Submission Demo
           </div>
           <h2 className="mt-4 text-3xl font-semibold text-[#f8fbf8]">
-            Run the judge-ready demo.
+            Run the full product flow.
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[#c1cbbf] md:text-base">
-            Set the desk, run live Bitget-backed discovery, inspect Rug Court,
-            and finish with one approved trade plus an unsigned execution
-            payload the wallet can explicitly review.
+            Set the desk, run discovery, inspect Rug Court, and end with one
+            approved trade plus one unsigned payload for wallet review.
           </p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#d9e2d8]">
-          The demo path is simple: shortlist, veto, one trade, unsigned payload.
+          Shortlist, veto, one trade, unsigned payload.
         </div>
       </div>
 
@@ -384,7 +383,9 @@ export function MemeRotationDeskConsole() {
               onChange={(event) => setBudgetUsd(Number(event.target.value))}
               className="mt-4 w-full accent-emerald-400"
             />
-            <div className="mt-2 text-sm text-[#c1cbbf]">Selected: {formatUsd(budgetUsd)}</div>
+            <div className="mt-2 text-sm text-[#c1cbbf]">
+              Selected: {formatUsd(budgetUsd)}. Recommended demo setup starts at 100 USDC.
+            </div>
           </div>
 
           <div className="mt-6">
@@ -486,15 +487,15 @@ export function MemeRotationDeskConsole() {
           {!result ? (
             <div className="rounded-[28px] border border-dashed border-white/10 bg-black/20 p-6 text-sm leading-7 text-[#b7c0b6]">
               Run the desk to generate the full submission flow: live shortlist,
-              Rug Court verdicts, one approved trade, and the unsigned payload
-              step that proves human-in-the-loop execution.
+              Rug Court verdicts, one approved trade, and one unsigned payload
+              for wallet review.
             </div>
           ) : (
             <>
               <div className="rounded-[28px] border border-emerald-300/15 bg-black/20 p-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#c5fce3]">
-                    {result.dataMode === "live" ? "Live Bitget" : "Fallback preview"}
+                    {result.dataMode === "live" ? "Live Bitget" : "Preview mode"}
                   </span>
                   <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-[#dde4dc]">
                     Wallet {shortenWallet(result.walletAddress)}
@@ -786,7 +787,7 @@ export function MemeRotationDeskConsole() {
                           ) : (
                             <ShieldCheck className="h-4 w-4" />
                           )}
-                          {preparing ? "Preparing..." : "Prepare unsigned order"}
+                              {preparing ? "Preparing..." : "Prepare unsigned payload"}
                         </button>
                       </div>
 
@@ -876,7 +877,7 @@ export function MemeRotationDeskConsole() {
                   <div className="rounded-[28px] border border-sky-300/15 bg-black/20 p-5">
                     <div className="flex items-center gap-3 text-sky-100">
                       <AlertTriangle className="h-5 w-5" />
-                      <h3 className="text-xl font-semibold">Proof bundle</h3>
+                      <h3 className="text-xl font-semibold">Demo checklist</h3>
                     </div>
                     <p className="mt-4 text-sm leading-7 text-[#dce3dc]">
                       {result.proofBundle.note}

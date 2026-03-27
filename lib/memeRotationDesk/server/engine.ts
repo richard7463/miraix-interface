@@ -518,7 +518,7 @@ function buildAgents(
 ): DeskAgentStep[] {
   const vetoCount = candidates.filter((candidate) => candidate.verdict === "ban").length;
   const watchCount = candidates.filter((candidate) => candidate.verdict === "watch").length;
-  const sourceLabel = dataMode === "live" ? "Bitget live feed" : "fallback universe";
+  const sourceLabel = dataMode === "live" ? "Bitget live feed" : "preview market set";
 
   return [
     {
@@ -656,7 +656,7 @@ async function enrichLiveExecutionQuote(
     return {
       state: "preview" as const,
       mode: "demo" as const,
-      source: "Fallback quote unavailable",
+      source: "Preview quote unavailable",
       canPrepare: false,
       warnings: ["Approved token has no contract metadata attached."],
     };
@@ -727,14 +727,14 @@ async function enrichLiveExecutionQuote(
     const executionWarnings = [...warnings];
     executionWarnings.push(
       isBitgetNetworkError(error)
-        ? "Bitget quote endpoints are not reachable in the local sandbox. Quote generation falls back to preview mode."
+        ? "Live Bitget quote is unavailable in this environment. Execution is shown in preview mode."
         : `Bitget quote failed: ${error?.message || "unknown error"}`,
     );
 
     return {
       state: "preview" as const,
       mode: "demo" as const,
-      source: "Fallback preview",
+      source: "Preview execution state",
       canPrepare: false,
       warnings: executionWarnings,
     };
@@ -873,7 +873,7 @@ function buildFallbackDesk(
     ({
       ...candidates[0],
       verdict: "approve",
-      courtNote: "Forced approval in fallback preview mode to keep the demo operable.",
+      courtNote: "Preview mode approved the top surviving setup so the full flow remains reviewable.",
     } as DeskCandidate & { compositeScore: number });
   const approvedTrade = buildApprovedTrade(approved, budgetUsd, riskMode, strategy);
 
@@ -881,7 +881,7 @@ function buildFallbackDesk(
     ok: true,
     previewMode: true,
     dataMode: "fallback",
-    provider: "Miraix Meme Rotation Desk fallback engine",
+    provider: "Preview market set",
     generatedAt: new Date().toISOString(),
     walletAddress,
     budgetUsd,
@@ -889,8 +889,9 @@ function buildFallbackDesk(
     strategy,
     warnings: [warning],
     marketContext: {
-      title: `${formatStrategy(strategy)} desk in fallback preview mode`,
-      summary: `The local sandbox could not reach Bitget, so the desk dropped back to its deterministic Solana meme universe. The product flow still runs end-to-end without touching existing project backends.`,
+      title: `${formatStrategy(strategy)} desk in preview mode`,
+      summary:
+        "Live Bitget market access is unavailable in this environment, so the desk is showing the same Scout -> Rug Court -> Trader flow against a deterministic Solana market set.",
       confidence: Math.round(
         clamp((approved.compositeScore + approved.safetyScore) / 2, 48, 82),
       ),
@@ -918,12 +919,12 @@ function buildFallbackDesk(
     execution: {
       state: "preview",
       mode: "demo",
-      source: "Fallback preview",
+      source: "Preview execution state",
       canPrepare: false,
       warnings: [warning],
     },
     proofBundle: {
-      note: "Fallback mode keeps the sponsor-fit demo usable even when the local runtime cannot resolve Bitget endpoints.",
+      note: "Preview mode keeps the full product flow reviewable when live Bitget access is unavailable.",
       checklist: [
         `${MEME_UNIVERSE.length} Solana meme names scored`,
         `${candidates.filter((candidate) => candidate.verdict === "ban").length} Rug Court vetoes`,
@@ -1018,8 +1019,8 @@ export async function buildMemeRotationDesk(params: {
       riskMode,
       strategy,
       isBitgetNetworkError(error)
-        ? "Bitget endpoints are unreachable in the local sandbox, so the desk is running in isolated fallback mode."
-        : `Bitget live discovery failed and the desk fell back to preview mode: ${error?.message || "unknown error"}`,
+        ? "Preview mode is active because live Bitget data is unavailable in this environment."
+        : "Preview mode is active because live discovery could not complete in this environment.",
     );
   }
 }
@@ -1106,13 +1107,13 @@ export async function prepareMemeRotationDeskOrder(params: {
       prepared: {
         prepared: false,
         mode: params.mode,
-        source: "Fallback preview",
-        summary: "Unsigned order could not be created in the local sandbox.",
-        nextAction: "Run the same route in deployment or outside the restricted sandbox to hit Bitget order creation.",
+        source: "Preview execution state",
+        summary: "Unsigned payload is only available in live mode.",
+        nextAction: "Run the same route in a deployment with live Bitget access to generate the payload.",
         payloadPreview: [
           isBitgetNetworkError(error)
-            ? "Network to Bitget is blocked in the local sandbox."
-            : `Bitget order create failed: ${error?.message || "unknown error"}`,
+            ? "Preview mode is active because live Bitget execution is unavailable in this environment."
+            : "Live Bitget order creation did not complete.",
         ],
       } satisfies DeskPreparedExecution,
     };
@@ -1152,13 +1153,13 @@ export async function fetchMemeRotationDeskOrderStatus(orderId: string) {
       prepared: {
         prepared: false,
         mode: "order",
-        source: "Fallback preview",
-        summary: "Order status could not be fetched in the local sandbox.",
-        nextAction: "Re-run order status against a deployment that can reach Bitget, or verify that the orderId has been submitted.",
+        source: "Preview execution state",
+        summary: "Order status is only available in live mode.",
+        nextAction: "Re-run order status against a deployment with live Bitget access after submission.",
         payloadPreview: [
           isBitgetNetworkError(error)
-            ? "Network to Bitget is blocked in the local sandbox."
-            : `Bitget status failed: ${error?.message || "unknown error"}`,
+            ? "Preview mode is active because live Bitget execution is unavailable in this environment."
+            : "Live Bitget order status did not complete.",
         ],
       } satisfies DeskPreparedExecution,
     };

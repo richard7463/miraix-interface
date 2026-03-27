@@ -14,7 +14,7 @@ const agents = [
     title: "Scout Agent",
     label: "Discovery",
     description:
-      "Pull ranked Solana meme candidates, inspect momentum, and reduce the list to a small watchset worth reviewing.",
+      "Screens ranked Solana meme candidates and narrows the market to a short list.",
     accent: "from-emerald-400/20 via-emerald-300/10 to-transparent",
     border: "border-emerald-300/15",
   },
@@ -22,7 +22,7 @@ const agents = [
     title: "Risk Agent",
     label: "Rug Court",
     description:
-      "Run security audit, dev risk, liquidity, and concentration checks. If the evidence is weak, the trade dies here.",
+      "Vetoes weak setups on safety, liquidity, and holder quality before the wallet sees them.",
     accent: "from-amber-400/20 via-orange-300/10 to-transparent",
     border: "border-amber-300/15",
   },
@@ -30,7 +30,7 @@ const agents = [
     title: "Trader Agent",
     label: "Execution",
     description:
-      "Prepare one disciplined Solana meme trade, cap the position size, and hand the wallet a single clear action to sign.",
+      "Packages one approved trade with size, invalidation, exits, and a wallet review step.",
     accent: "from-sky-400/20 via-cyan-300/10 to-transparent",
     border: "border-sky-300/15",
   },
@@ -38,40 +38,40 @@ const agents = [
 
 const flow = [
   {
-    title: "Find one candidate",
-    body: "The desk screens ranked pairs and recent on-chain activity. It does not spam ten ideas. It narrows to one tradeable setup.",
+    title: "Screen the market",
+    body: "Scout pulls ranked Solana meme pairs and reduces them to a short review set.",
     icon: Radar,
   },
   {
-    title: "Put it on trial",
-    body: "Rug Court forces the asset through security, developer, liquidity, and concentration checks before any order is allowed.",
+    title: "Veto weak setups",
+    body: "Rug Court blocks names that fail safety, liquidity, or holder-quality checks.",
     icon: Gavel,
   },
   {
-    title: "Ship one disciplined order",
-    body: "The wallet sees one approved route, one position size, one invalidation, and one execution trail to verify afterward.",
+    title: "Hand off one trade",
+    body: "Trader prepares one approved route with size, invalidation, and proof of execution.",
     icon: Wallet,
   },
 ] as const;
 
 const rails = [
-  "Live Bitget-powered discovery, safety screening, and quote preparation for Solana meme trading.",
-  "Three agents. One wallet. One disciplined meme trade.",
-  "A submission-ready demo flow lives below: shortlist, Rug Court, one trade, unsigned payload.",
+  "Scout ranks and shortlists.",
+  "Rug Court vetoes weak setups.",
+  "Trader hands the wallet one disciplined action.",
 ] as const;
 
 const proofPoints = [
   {
-    title: "Why it stands out",
-    body: "Most meme bots chase speed. This desk optimizes for a defendable trade: discover, veto, then execute.",
+    title: "What it is",
+    body: "A focused Solana meme trading agent built around discover, veto, then execute.",
   },
   {
     title: "What the demo proves",
-    body: "One wallet, one shortlist, one approved Solana meme trade, one unsigned payload path for the wallet to review.",
+    body: "One wallet, one shortlist, one approved trade, and one unsigned payload path for review.",
   },
   {
-    title: "Why the scope is disciplined",
-    body: "The product stays narrow on purpose: single-chain Solana flow, human-in-the-loop execution, and no generic chat wrapper.",
+    title: "Why the scope is narrow",
+    body: "Single-chain Solana flow, human-in-the-loop execution, no generic chat wrapper.",
   },
 ] as const;
 
@@ -79,22 +79,22 @@ const demoFlow = [
   {
     step: "01",
     title: "Set the desk",
-    body: "Use the connected wallet or the sample wallet, choose budget, risk mode, and desk style.",
+    body: "Choose wallet, budget, risk mode, and desk style.",
   },
   {
     step: "02",
     title: "Run Rug Court",
-    body: "Scout narrows the market, Risk Agent vetoes weak setups, and the desk leaves exactly one approved trade.",
+    body: "Scout narrows the market and Risk Agent leaves one approved trade.",
   },
   {
     step: "03",
     title: "Review execution",
-    body: "Inspect the live quote state, route source, expected output, and the invalidation and take-profit ladder.",
+    body: "Check quote state, route source, invalidation, and exit ladder.",
   },
   {
     step: "04",
     title: "Prepare the payload",
-    body: "Generate the unsigned order or swap payload, then hand execution to the wallet for explicit signing.",
+    body: "Generate the unsigned payload and hand signing to the wallet.",
   },
 ] as const;
 
@@ -119,9 +119,9 @@ export default function MemeRotationDeskPage() {
               Three agents. One wallet. One disciplined meme trade.
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-[#c1cbbf] md:text-lg">
-              A Bitget-powered Solana meme trading agent that scouts ranked
-              opportunities, puts every candidate through Rug Court, and only
-              ships one defendable trade for the wallet to sign.
+              Scout finds ranked Solana meme candidates. Rug Court rejects weak
+              setups. Trader hands the wallet one approved trade and one
+              unsigned payload to review.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -129,7 +129,7 @@ export default function MemeRotationDeskPage() {
                 href="/meme-rotation-desk#desk-console"
                 className="inline-flex items-center gap-2 rounded-full bg-[#10b981] px-5 py-3 text-sm font-semibold text-[#04110c] transition hover:bg-[#34d399]"
               >
-                Run Submission Demo
+                Run Demo
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -160,7 +160,7 @@ export default function MemeRotationDeskPage() {
               </p>
             </div>
             <h2 className="mt-4 text-3xl font-semibold text-[#f8fbf8]">
-              What to do in the first 60 seconds
+              Judge path in 60 seconds
             </h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {demoFlow.map((item) => (
@@ -216,13 +216,12 @@ export default function MemeRotationDeskPage() {
                 </p>
               </div>
               <h2 className="mt-4 text-3xl font-semibold text-[#f8fbf8]">
-                Discovery alone is not a product.
+                What this page proves
               </h2>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-[#c1cbbf] md:text-base">
-                The differentiator is not that Miraix can find a meme coin. The
-                differentiator is that the system can reject a bad one before
-                it touches the wallet. This page is the clean product shell for
-                that Bitget-track story.
+                The point is not to find more meme coins. The point is to stop
+                weak ones before they touch the wallet and only hand off one
+                trade worth reviewing.
               </p>
 
               <div className="mt-8 grid gap-4">
@@ -260,10 +259,9 @@ export default function MemeRotationDeskPage() {
                   </p>
                 </div>
                 <p className="mt-4 text-sm leading-7 text-[#d3dbd3]">
-                  This submission is intentionally narrow: Bitget live market
+                  This submission stays narrow on purpose: Bitget market
                   discovery, Rug Court safety screening, and one human-approved
-                  Solana meme trade path. It is a focused trading agent, not a
-                  general chatbot.
+                  Solana meme trade path.
                 </p>
               </section>
 
