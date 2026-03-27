@@ -111,7 +111,7 @@ export default function MemeRotationDeskPage() {
                 Bitget Wallet Track
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[#d8dfd8]">
-                Miraix Meme Rotation Desk
+                Miraix Meme Court
               </span>
             </div>
 
@@ -126,7 +126,7 @@ export default function MemeRotationDeskPage() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/meme-rotation-desk#desk-console"
+                href="/meme-court#desk-console"
                 className="inline-flex items-center gap-2 rounded-full bg-[#10b981] px-5 py-3 text-sm font-semibold text-[#04110c] transition hover:bg-[#34d399]"
               >
                 Run Demo

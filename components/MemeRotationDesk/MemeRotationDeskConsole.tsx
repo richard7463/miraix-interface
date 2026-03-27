@@ -177,12 +177,12 @@ export function MemeRotationDeskConsole() {
       const payload = await response.json();
 
       if (!response.ok || !payload?.ok) {
-        throw new Error(payload?.error || "Failed to run meme rotation desk");
+        throw new Error(payload?.error || "Failed to run Meme Court");
       }
 
       setResult(payload as DeskResponse);
     } catch (requestError: any) {
-      setError(requestError?.message || "Failed to run meme rotation desk");
+      setError(requestError?.message || "Failed to run Meme Court");
       setResult(null);
     } finally {
       setLoading(false);
@@ -274,7 +274,7 @@ export function MemeRotationDeskConsole() {
   const chatHref = result
     ? `/chat?input=${encodeURIComponent(result.approvedTrade.command)}`
     : `/chat?input=${encodeURIComponent(
-        "Run Miraix Meme Rotation Desk and give me one approved Solana meme trade after Rug Court.",
+        "Run Miraix Meme Court and give me one approved Solana meme trade after Rug Court.",
       )}`;
 
   return (
@@ -452,7 +452,7 @@ export function MemeRotationDeskConsole() {
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#10b981] px-5 py-3 text-sm font-semibold text-[#04110c] transition hover:bg-[#34d399] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Radar className="h-4 w-4" />}
-            {loading ? "Running desk..." : "Run Meme Rotation Desk"}
+            {loading ? "Running..." : "Run Meme Court"}
           </button>
 
           {error ? (

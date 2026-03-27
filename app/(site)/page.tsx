@@ -15,10 +15,10 @@ const featuredPages = [
     text: "text-[#fff0b8]",
   },
   {
-    title: "Meme Rotation Desk",
+    title: "Meme Court",
     description:
       "Bitget Wallet 赛道版本：让 Scout、Risk、Trader 三个 agent 只批准一笔有纪律的 Solana meme trade。",
-    href: "/meme-rotation-desk",
+    href: "/meme-court",
     icon: TrendingUp,
     accent: "from-[#34d399]/16 via-[#10b981]/10 to-transparent",
     border: "border-emerald-300/18",
@@ -65,7 +65,7 @@ export default function Home() {
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-[#d3c09b] md:text-lg">
               这里放的是 Miraix
-              当前最能打的几条产品线：Bitget 赛道的 Meme Rotation Desk、
+              当前最能打的几条产品线：Bitget 赛道的 Meme Court、
               传播型钱包分析、可执行交易 copilots，以及专门为 Binance
               场景准备的 Agent Firewall。
             </p>
