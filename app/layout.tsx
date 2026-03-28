@@ -50,6 +50,9 @@ export const metadata = {
       ? 'A standalone onchain command system that compresses wallet intelligence into one approved daily order, one forbidden order, and one receipt-backed debrief.'
       : 'AI assistant powered by ChatGPT',
     images: ['/opengraph-image']
+  },
+  other: {
+    'base:app_id': '69c7823af832953fc6c8fd15'
   }
 }
 

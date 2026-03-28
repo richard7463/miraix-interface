@@ -75,9 +75,39 @@ Judge 只需要看四步：
 3. 查看唯一被批准的 Solana meme trade
 4. 生成 unsigned payload，展示钱包审核与签名这一步
 
+## How To Install And Use It
+
+Miraix Meme Court 也已经被打包成 ClawHub skill。
+
+安装命令：
+
+- `clawhub install miraix-meme-court`
+
+安装后可以直接这样调用：
+
+- `Use $miraix-meme-court to run Meme Court for 100 USDC, balanced risk, momentum style, and return one approved Solana meme trade.`
+- `Use $miraix-meme-court on wallet AYY3Bi6NSwH3F9Q5cy5xN9ZqRgnNYhm6TMkTwVBRVGeq with degen risk and shadow style.`
+- `Use $miraix-meme-court to prepare the approved trade if live payload generation is available.`
+
+skill 会返回和产品页一致的核心结构：
+
+- Scout shortlist
+- Rug Court verdicts
+- one approved trade
+- execution readiness
+- payload status
+
+如果想看可视化流程，可以直接打开：
+
+- `/meme-court`
+
+有一点需要如实说明：
+如果当前环境拿不到 live Bitget market access，Meme Court 仍然会以 preview mode 返回完整决策流程，但 unsigned payload generation 可能暂时不可用。
+
 ## Submission Links
 
 - GitHub: [REPO_URL]
+- ClawHub skill: `miraix-meme-court`
 - Demo: [DEPLOYED_URL]/meme-court
 - Video: [VIDEO_URL]
 

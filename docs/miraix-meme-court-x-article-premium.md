@@ -245,9 +245,39 @@ build a meme trading agent whose main job is not to hype the next trade, but to 
 
 That is the product we think is worth submitting.
 
+## 11. How To Install And Use It
+
+Miraix Meme Court is also packaged as a ClawHub skill.
+
+Install it with:
+
+- `clawhub install miraix-meme-court`
+
+Then run it with a prompt like:
+
+- `Use $miraix-meme-court to run Meme Court for 100 USDC, balanced risk, momentum style, and return one approved Solana meme trade.`
+- `Use $miraix-meme-court on wallet AYY3Bi6NSwH3F9Q5cy5xN9ZqRgnNYhm6TMkTwVBRVGeq with degen risk and shadow style.`
+- `Use $miraix-meme-court to prepare the approved trade if live payload generation is available.`
+
+The skill returns the same core structure shown in the product:
+
+- Scout shortlist
+- Rug Court verdicts
+- one approved trade
+- execution readiness
+- payload status
+
+For the visual product flow, open:
+
+- `/meme-court`
+
+One honest implementation detail matters:
+if live Bitget market access is unavailable in the current environment, Meme Court still runs in preview mode and returns the full decision flow, but unsigned payload generation may remain unavailable until live execution access is restored.
+
 ## Links
 
 - GitHub: https://github.com/richard7463/miraix-interface
+- ClawHub skill: `miraix-meme-court`
 - Product route: `/meme-court`
 - Demo video: attached in the submission thread
 
