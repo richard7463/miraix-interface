@@ -243,10 +243,10 @@ export const ChatSideBar = () => {
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2">
                     <FiZap className="h-4 w-4 text-sky-400" />
-                    <h1 className="text-sm font-semibold">100U FOMO Copilot</h1>
+                    <h1 className="text-sm font-semibold">FOMO Copilot</h1>
                   </div>
                   <span className="px-1.5 py-0.5 text-[10px] rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 font-medium">
-                    X Layer
+                    XL
                   </span>
                 </div>
               </button>
@@ -261,7 +261,7 @@ export const ChatSideBar = () => {
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-2">
                     <FiZap className="h-4 w-4 text-sky-400" />
-                    <h1 className="text-sm font-semibold">FOMO Copilot Base</h1>
+                    <h1 className="text-sm font-semibold">FOMO Copilot</h1>
                   </div>
                   <span className="px-1.5 py-0.5 text-[10px] rounded bg-green-500/20 text-green-400 border border-green-500/40 font-medium">
                     fxUSD
