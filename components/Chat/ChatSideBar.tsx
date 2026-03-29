@@ -246,7 +246,7 @@ export const ChatSideBar = () => {
                     <h1 className="text-sm font-semibold">FOMO Copilot</h1>
                   </div>
                   <span className="px-1.5 py-0.5 text-[10px] rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 font-medium">
-                    XL
+                    X Layer
                   </span>
                 </div>
               </button>
