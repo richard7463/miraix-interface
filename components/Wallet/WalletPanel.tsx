@@ -147,6 +147,24 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     // Fetch EVM token balances from multiple chains (mainnet, Base, X Layer)
     const fetchEvmBalances = async (address: string): Promise<Token[]> => {
       const tokens: Token[] = [];
+
+      // Token logo URLs from trusted sources (CoinGecko)
+      const TOKEN_LOGOS: Record<string, string> = {
+        'ETH': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+        'OKB': 'https://assets.coingecko.com/coins/images/10687/small/okb_hyped.png',
+        'USDC-1': 'https://assets.coingecko.com/coins/images/6319/usdc.png',
+        'USDT-1': 'https://assets.coingecko.com/coins/images/325/usdt.png',
+        'USDC-8453': 'https://assets.coingecko.com/coins/images/6319/usdc.png',
+        'USDT-8453': 'https://assets.coingecko.com/coins/images/325/usdt.png',
+        'USDC-2761': 'https://assets.coingecko.com/coins/images/6319/usdc.png',
+        'USDT-2761': 'https://assets.coingecko.com/coins/images/325/usdt.png',
+      };
+
+      const getTokenImage = (symbol: string, chainId: number): string => {
+        const key = `${symbol}-${chainId}`;
+        return TOKEN_LOGOS[key] || TOKEN_LOGOS[symbol] || '/favicon.png';
+      };
+
       const chains = [
         { client: mainnetClient, chainId: 1, name: 'Ethereum', nativeSymbol: 'ETH' },
         { client: baseClient, chainId: 8453, name: 'Base', nativeSymbol: 'ETH' },
@@ -162,7 +180,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
               mint: chain.chainId.toString(),
               balance: Number(formatUnits(nativeBalance, 18)),
               name: chain.nativeSymbol,
-              image: '/tokens/eth.png',
+              image: getTokenImage(chain.nativeSymbol, chain.chainId),
               symbol: chain.nativeSymbol,
               decimals: 18,
             });
@@ -191,7 +209,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     mint: `${chain.chainId}-${tokenAddress}`,
                     balance: Number(formatUnits(balance, Number(decimals))),
                     name: symbol,
-                    image: `/tokens/${symbol.toLowerCase()}.png`,
+                    image: getTokenImage(symbol, chain.chainId),
                     symbol: symbol,
                     decimals: Number(decimals),
                   });
@@ -454,14 +472,13 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
         try {
             if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
                 console.log('[WalletPanel] Manual refresh EVM tokens for address:', embeddedEvmWallets[0].address);
-                await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
-                    console.log('[WalletPanel] Manual refreshed EVM tokens:', tokens);
-                    const tokensWithBalance = tokens.filter(token => token.balance > 0);
-                    console.log('[WalletPanel] Manual refreshed EVM tokens with balance:', tokensWithBalance);
-                    setEvmTokens(tokens as Token[]);
-                });
+                const tokens = await fetchEvmBalances(embeddedEvmWallets[0].address);
+                console.log('[WalletPanel] Manual refreshed EVM tokens:', tokens);
+                const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                console.log('[WalletPanel] Manual refreshed EVM tokens with balance:', tokensWithBalance);
+                setEvmTokens(tokensWithBalance);
             }
-            
+
             if (embeddedSolanaWallets.length > 0 && embeddedSolanaWallets[0]?.address) {
                 console.log('[WalletPanel] Manual refresh Solana tokens for address:', embeddedSolanaWallets[0].address);
                 await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
@@ -471,7 +488,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     setSolanaTokens(tokens as Token[]);
                 });
             }
-            
+
             setToastMessage('Balances refreshed successfully');
             setToastType('success');
             setShowToast(true);
