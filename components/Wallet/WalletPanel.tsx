@@ -9,6 +9,8 @@ import { queryTokenListByAddress } from '../../src/utils/public';
 import { Toast } from '../Toast';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { FaArrowRight, FaRegCopy, FaExternalLinkAlt } from 'react-icons/fa';
+import { createPublicClient, http, erc20Abi, formatUnits } from 'viem';
+import { mainnet, base, xLayer } from 'viem/chains';
 
 interface WalletPanelProps {
     isOpen: boolean;
@@ -46,6 +48,38 @@ const getSolPrice = async (): Promise<number> => {
         console.error('Error fetching SOL price:', error);
         return 150.02; // 使用用户提供的价格作为fallback
     }
+};
+
+// EVM clients for different chains
+const mainnetClient = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+});
+
+const baseClient = createPublicClient({
+  chain: base,
+  transport: http(),
+});
+
+const xLayerClient = createPublicClient({
+  chain: xLayer,
+  transport: http(),
+});
+
+// Common ERC20 token addresses for each chain
+const CHAIN_TOKENS = {
+  1: { // Ethereum mainnet
+    'USDC': '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    'USDT': '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  },
+  8453: { // Base
+    'USDC': '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    'USDT': '0x50c5725949A6F0c72E6C4a2F1Ce9F22A238712d5',
+  },
+  2761: { // X Layer
+    'USDC': '0x74b7f16337b8972027f6196a17a631ac6de26d22',
+    'USDT': '0x779ded0c9e1022225f8e0630b35a9b54be713736',
+  }
 };
 
 export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => {
@@ -110,6 +144,71 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
         fetchSolPrice();
     }, []);
 
+    // Fetch EVM token balances from multiple chains (mainnet, Base, X Layer)
+    const fetchEvmBalances = async (address: string): Promise<Token[]> => {
+      const tokens: Token[] = [];
+      const chains = [
+        { client: mainnetClient, chainId: 1, name: 'Ethereum', nativeSymbol: 'ETH' },
+        { client: baseClient, chainId: 8453, name: 'Base', nativeSymbol: 'ETH' },
+        { client: xLayerClient, chainId: 2761, name: 'X Layer', nativeSymbol: 'OKB' },
+      ];
+
+      for (const chain of chains) {
+        try {
+          // Get native token balance
+          const nativeBalance = await chain.client.getBalance({ address: address as `0x${string}` });
+          if (Number(nativeBalance) > 0) {
+            tokens.push({
+              mint: chain.chainId.toString(),
+              balance: Number(formatUnits(nativeBalance, 18)),
+              name: chain.nativeSymbol,
+              image: '/tokens/eth.png',
+              symbol: chain.nativeSymbol,
+              decimals: 18,
+            });
+          }
+
+          // Get ERC20 token balances (USDC, USDT)
+          const chainTokens = CHAIN_TOKENS[chain.chainId as keyof typeof CHAIN_TOKENS];
+          if (chainTokens) {
+            for (const [symbol, tokenAddress] of Object.entries(chainTokens)) {
+              try {
+                const balance = await chain.client.readContract({
+                  address: tokenAddress as `0x${string}`,
+                  abi: erc20Abi,
+                  functionName: 'balanceOf',
+                  args: [address as `0x${string}`],
+                });
+                if (Number(balance) > 0) {
+                  // Get token decimals
+                  const decimals = await chain.client.readContract({
+                    address: tokenAddress as `0x${string}`,
+                    abi: erc20Abi,
+                    functionName: 'decimals',
+                    args: [],
+                  });
+                  tokens.push({
+                    mint: `${chain.chainId}-${tokenAddress}`,
+                    balance: Number(formatUnits(balance, Number(decimals))),
+                    name: symbol,
+                    image: `/tokens/${symbol.toLowerCase()}.png`,
+                    symbol: symbol,
+                    decimals: Number(decimals),
+                  });
+                }
+              } catch (err) {
+                // Token might not exist on this chain, skip
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching ${chain.name} balances:`, error);
+        }
+      }
+
+      return tokens;
+    };
+
     // 获取钱包余额
     useEffect(() => {
         const fetchBalances = async () => {
@@ -123,12 +222,11 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
             try {
                 if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
                     console.log('[WalletPanel] Fetching EVM tokens for address:', embeddedEvmWallets[0].address);
-                    await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
-                        console.log('[WalletPanel] Received EVM tokens:', tokens);
-                        const tokensWithBalance = tokens.filter(token => token.balance > 0);
-                        console.log('[WalletPanel] EVM tokens with balance:', tokensWithBalance);
-                        setEvmTokens(tokens as Token[]);
-                    });
+                    const tokens = await fetchEvmBalances(embeddedEvmWallets[0].address);
+                    console.log('[WalletPanel] Received EVM tokens:', tokens);
+                    const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                    console.log('[WalletPanel] EVM tokens with balance:', tokensWithBalance);
+                    setEvmTokens(tokensWithBalance);
                 } else {
                     setEvmTokens([]);
                 }
@@ -164,14 +262,13 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     try {
                         if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
                             console.log('[WalletPanel] Refreshing EVM tokens for address:', embeddedEvmWallets[0].address);
-                            await queryTokenListByAddress(embeddedEvmWallets[0].address, (tokens) => {
-                                console.log('[WalletPanel] Refreshed EVM tokens:', tokens);
-                                const tokensWithBalance = tokens.filter(token => token.balance > 0);
-                                console.log('[WalletPanel] Refreshed EVM tokens with balance:', tokensWithBalance);
-                                setEvmTokens(tokens as Token[]);
-                            });
+                            const tokens = await fetchEvmBalances(embeddedEvmWallets[0].address);
+                            console.log('[WalletPanel] Refreshed EVM tokens:', tokens);
+                            const tokensWithBalance = tokens.filter(token => token.balance > 0);
+                            console.log('[WalletPanel] Refreshed EVM tokens with balance:', tokensWithBalance);
+                            setEvmTokens(tokensWithBalance);
                         }
-                        
+
                         if (embeddedSolanaWallets.length > 0 && embeddedSolanaWallets[0]?.address) {
                             console.log('[WalletPanel] Refreshing Solana tokens for address:', embeddedSolanaWallets[0].address);
                             await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
@@ -202,7 +299,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     useEffect(() => {
         const calculateTotal = () => {
         let total = 0;
-            
+
             // 计算 EVM 钱包余额 - 只计算有余额的 token
             evmTokens
                 .filter(token => token.balance > 0)
@@ -212,6 +309,8 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     total += token.balance * 2000; // 假设 ETH 价格为 2000 USD
                 } else if (token.symbol === 'USDC' || token.symbol === 'USDT') {
                     total += token.balance;
+                } else if (token.symbol === 'OKB') {
+                    total += token.balance * 50; // OKB price ~50 USD
                 }
             });
 
@@ -241,6 +340,8 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
             return token.balance; // USDC/USDT 1:1 美元
         } else if (token.symbol === 'ETH') {
             return token.balance * 2000; // 假设 ETH 价格为 2000 USD
+        } else if (token.symbol === 'OKB') {
+            return token.balance * 50; // OKB price ~50 USD
         }
         return 0; // 其他 token 暂时不计算价值
     };
