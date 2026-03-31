@@ -234,15 +234,15 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
       const transactions: any[] = [];
 
       const chains = [
-        { client: mainnetClient, chainId: 1, name: 'Ethereum' },
-        { client: baseClient, chainId: 8453, name: 'Base' },
-        { client: xLayerClient, chainId: 2761, name: 'X Layer' },
+        { client: mainnetClient, chainId: 1, name: 'Ethereum', rpc: process.env.NEXT_PUBLIC_ETH_RPC || 'https://eth.merkle.io' },
+        { client: baseClient, chainId: 8453, name: 'Base', rpc: process.env.NEXT_PUBLIC_BASE_RPC || 'https://base.merkle.io' },
+        { client: xLayerClient, chainId: 2761, name: 'X Layer', rpc: process.env.NEXT_PUBLIC_XLAYER_RPC || 'https://rpc.xlayer.tech' },
       ];
 
       for (const chain of chains) {
         try {
           const currentBlock = await chain.client.getBlockNumber();
-          const fromBlock = currentBlock - BigInt(100); // Limit to last 100 blocks to avoid RPC limits
+          const fromBlock = currentBlock - BigInt(100);
 
           const logs = await chain.client.getLogs({
             address: address as `0x${string}`,
@@ -260,12 +260,10 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
             });
           }
         } catch (error) {
-          // Silently skip chains that fail - some RPCs don't support getLogs well
-          console.log(`[WalletPanel] Skipping ${chain.name} transactions:`, error instanceof Error ? error.message : 'error');
+          // Skip silently - transaction fetching may fail due to CORS on some RPCs
         }
       }
 
-      // Sort by block number descending
       transactions.sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber));
       return transactions.slice(0, 10);
     };
