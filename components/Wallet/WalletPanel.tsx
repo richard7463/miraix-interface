@@ -66,6 +66,22 @@ const xLayerClient = createPublicClient({
   transport: http(),
 });
 
+// Explorer API configs
+const EXPLORER_APIS = {
+  1: { // Ethereum
+    baseUrl: 'https://api.etherscan.io/api',
+    apiKey: process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY || '',
+  },
+  8453: { // Base
+    baseUrl: 'https://api.basescan.org/api',
+    apiKey: process.env.NEXT_PUBLIC_BASESCAN_API_KEY || '',
+  },
+  2761: { // X Layer
+    baseUrl: 'https://www.oklink.com/api/v5/explorer/address/transaction-list',
+    apiKey: process.env.NEXT_PUBLIC_OKLINK_API_KEY || '',
+  },
+};
+
 // Common ERC20 token addresses for each chain
 const CHAIN_TOKENS = {
   1: { // Ethereum mainnet
@@ -229,41 +245,86 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
       return tokens;
     };
 
-    // Fetch EVM transactions for a wallet address
+    // Fetch EVM transactions using explorer APIs
     const fetchEvmTransactions = async (address: string) => {
       const transactions: any[] = [];
+      const addressLower = address.toLowerCase();
 
-      const chains = [
-        { client: mainnetClient, chainId: 1, name: 'Ethereum', rpc: process.env.NEXT_PUBLIC_ETH_RPC || 'https://eth.merkle.io' },
-        { client: baseClient, chainId: 8453, name: 'Base', rpc: process.env.NEXT_PUBLIC_BASE_RPC || 'https://base.merkle.io' },
-        { client: xLayerClient, chainId: 2761, name: 'X Layer', rpc: process.env.NEXT_PUBLIC_XLAYER_RPC || 'https://rpc.xlayer.tech' },
-      ];
+      // Fetch from Ethereum Etherscan
+      try {
+        const ethConfig = EXPLORER_APIS[1];
+        let url = `${ethConfig.baseUrl}?module=account&action=txlist&address=${addressLower}&sort=desc&page=1&offset=10`;
+        if (ethConfig.apiKey) url += `&apikey=${ethConfig.apiKey}`;
 
-      for (const chain of chains) {
-        try {
-          const currentBlock = await chain.client.getBlockNumber();
-          const fromBlock = currentBlock - BigInt(100);
+        const res = await fetch(url);
+        const data = await res.json();
 
-          const logs = await chain.client.getLogs({
-            address: address as `0x${string}`,
-            fromBlock: fromBlock,
-            toBlock: 'latest',
-          });
-
-          for (const log of logs.slice(0, 5)) {
+        if (data.status === '1' && data.result) {
+          const txs = Array.isArray(data.result) ? data.result.slice(0, 5) : [];
+          for (const tx of txs) {
             transactions.push({
-              hash: log.transactionHash,
-              chainId: chain.chainId,
-              chainName: chain.name,
-              blockNumber: log.blockNumber,
-              blockHash: log.blockHash,
+              hash: tx.hash,
+              chainId: 1,
+              chainName: 'Ethereum',
+              blockNumber: tx.blockNumber,
             });
           }
-        } catch (error) {
-          // Skip silently - transaction fetching may fail due to CORS on some RPCs
         }
+      } catch (e) {
+        // Skip Etherscan errors
       }
 
+      // Fetch from Base Basetscan
+      try {
+        const baseConfig = EXPLORER_APIS[8453];
+        let url = `${baseConfig.baseUrl}?module=account&action=txlist&address=${addressLower}&sort=desc&page=1&offset=10`;
+        if (baseConfig.apiKey) url += `&apikey=${baseConfig.apiKey}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === '1' && data.result) {
+          const txs = Array.isArray(data.result) ? data.result.slice(0, 5) : [];
+          for (const tx of txs) {
+            transactions.push({
+              hash: tx.hash,
+              chainId: 8453,
+              chainName: 'Base',
+              blockNumber: tx.blockNumber,
+            });
+          }
+        }
+      } catch (e) {
+        // Skip BaseScan errors
+      }
+
+      // Fetch from OKLink for X Layer
+      try {
+        const xlayerConfig = EXPLORER_APIS[2761];
+        let url = `${xlayerConfig.baseUrl}?address=${addressLower}&type=transfers&page=1&limit=10`;
+        if (xlayerConfig.apiKey) url += `&apiKey=${xlayerConfig.apiKey}`;
+
+        const res = await fetch(url, {
+          headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.code === 0 && data.data?.[0]?.transactions) {
+          const txs = data.data[0].transactions.slice(0, 5);
+          for (const tx of txs) {
+            transactions.push({
+              hash: tx.txHash,
+              chainId: 2761,
+              chainName: 'X Layer',
+              blockNumber: tx.blockNumber,
+            });
+          }
+        }
+      } catch (e) {
+        // Skip OKLink errors
+      }
+
+      // Sort by block number descending
       transactions.sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber));
       return transactions.slice(0, 10);
     };
