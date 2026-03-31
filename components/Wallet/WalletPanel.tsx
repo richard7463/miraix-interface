@@ -9,7 +9,7 @@ import { queryTokenListByAddress } from '../../src/utils/public';
 import { Toast } from '../Toast';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { FaArrowRight, FaRegCopy, FaExternalLinkAlt } from 'react-icons/fa';
-import { createPublicClient, http, erc20Abi, formatUnits } from 'viem';
+import { createPublicClient, http, erc20Abi, formatUnits, getContract } from 'viem';
 import { mainnet, base, xLayer } from 'viem/chains';
 
 interface WalletPanelProps {
@@ -98,6 +98,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
     const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
     const [loadingTx, setLoadingTx] = useState(false);
+    const [evmTransactions, setEvmTransactions] = useState<any[]>([]);
     const [solPrice, setSolPrice] = useState<number>(0);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -228,6 +229,45 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
       return tokens;
     };
 
+    // Fetch EVM transactions for a wallet address
+    const fetchEvmTransactions = async (address: string) => {
+      const transactions: any[] = [];
+
+      const chains = [
+        { client: mainnetClient, chainId: 1, name: 'Ethereum' },
+        { client: baseClient, chainId: 8453, name: 'Base' },
+        { client: xLayerClient, chainId: 2761, name: 'X Layer' },
+      ];
+
+      for (const chain of chains) {
+        try {
+          // Get transaction history using getLogs (for token transfers) and getHistory (for native transfers)
+          // For simplicity, we'll fetch recent logs for the address
+          const logs = await chain.client.getLogs({
+            address: address as `0x${string}`,
+            fromBlock: BigInt(Math.max(0, Number(await chain.client.getBlockNumber()) - 1000)),
+            toBlock: 'latest',
+          });
+
+          for (const log of logs.slice(0, 5)) {
+            transactions.push({
+              hash: log.transactionHash,
+              chainId: chain.chainId,
+              chainName: chain.name,
+              blockNumber: log.blockNumber,
+              blockHash: log.blockHash,
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching ${chain.name} transactions:`, error);
+        }
+      }
+
+      // Sort by block number descending
+      transactions.sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber));
+      return transactions.slice(0, 10);
+    };
+
     // 获取钱包余额
     useEffect(() => {
         const fetchBalances = async () => {
@@ -260,6 +300,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                         const tokensWithBalance = tokens.filter(token => token.balance > 0);
                         console.log('[WalletPanel] Solana tokens with balance:', tokensWithBalance);
                         setSolanaTokens(tokens as Token[]);
+                        setHasLoadedTokens(true);
                     });
                 } else {
                     setSolanaTokens([]);
@@ -512,6 +553,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
     useEffect(() => {
         const fetchRecentTransactions = async () => {
+            // Handle Solana transactions
             if (activeTab === 'transactions' && selectedWallet.startsWith('solana-') && solanaWallet) {
                 setLoadingTx(true);
                 try {
@@ -527,12 +569,24 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     setRecentTransactions([]);
                 }
                 setLoadingTx(false);
+            } else if (activeTab === 'transactions' && selectedWallet.startsWith('evm-') && embeddedEvmWallets[0]) {
+                // Handle EVM transactions (X Layer, Base, Ethereum)
+                setLoadingTx(true);
+                try {
+                    const txs = await fetchEvmTransactions(embeddedEvmWallets[0].address);
+                    setEvmTransactions(txs);
+                } catch (e) {
+                    console.error('[WalletPanel] Failed to fetch EVM transactions:', e);
+                    setEvmTransactions([]);
+                }
+                setLoadingTx(false);
             } else {
                 setRecentTransactions([]);
+                setEvmTransactions([]);
             }
         };
         fetchRecentTransactions();
-    }, [activeTab, selectedWallet, solanaWallet]);
+    }, [activeTab, selectedWallet, solanaWallet, embeddedEvmWallets]);
 
     if (!isOpen || !mounted) return null;
 
@@ -682,7 +736,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                     {activeTab === 'tokens' ? (
                                         <div className="space-y-3">
                                             {/* Loading spinner */}
-                                            {isLoadingTokens && (
+                                            {(isLoadingTokens || (!hasLoadedTokens && evmTokens.length === 0 && solanaTokens.length === 0)) && (
                                                 <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                     <svg className="animate-spin h-6 w-6 mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
                                                     Loading tokens...
@@ -809,10 +863,49 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                         </table>
                                                     </div>
                                                 )
+                                            ) : selectedWallet.startsWith('evm-') ? (
+                                                loadingTx ? (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
+                                                        <svg className="animate-spin h-6 w-6 mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                                        Loading recent transactions...
+                                                    </div>
+                                                ) : evmTransactions.length === 0 ? (
+                                                    <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
+                                                        <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" /></svg>
+                                                        No recent transactions
+                                                    </div>
+                                                ) : (
+                                                    <div className="overflow-x-auto rounded-lg border border-[#52525b] bg-[#3f3f46] shadow-sm">
+                                                        <table className="min-w-full text-xs text-left">
+                                                            <thead className="bg-[#52525b]">
+                                                                <tr>
+                                                                    <th className="px-4 py-2 font-semibold text-[#e0e0e6]">Txn Hash</th>
+                                                                    <th className="px-4 py-2 font-semibold text-[#e0e0e6]">Chain</th>
+                                                                    <th className="px-4 py-2 font-semibold text-[#e0e0e6]">Block</th>
+                                                                    <th className="px-4 py-2"></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {evmTransactions.map((tx, idx) => (
+                                                                    <tr key={tx.hash || idx} className="hover:bg-[#52525b] transition-colors">
+                                                                        <td className="px-4 py-2 max-w-[140px] truncate flex items-center gap-2 group">
+                                                                            <span className="truncate text-[#e0e0e6]">{tx.hash.slice(0, 8)}...{tx.hash.slice(-6)}</span>
+                                                                            <button title="Copy" onClick={() => navigator.clipboard.writeText(tx.hash)} className="opacity-60 group-hover:opacity-100 transition"><FaRegCopy size={14} /></button>
+                                                                            <a href={`https://${tx.chainId === 1 ? '' : tx.chainId === 8453 ? 'base.' : 'x.'}scanner.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" title="View on Scanner" className="opacity-60 group-hover:opacity-100 transition"><FaExternalLinkAlt size={14} /></a>
+                                                                        </td>
+                                                                        <td className="px-4 py-2 text-[#a1a1aa]">{tx.chainName}</td>
+                                                                        <td className="px-4 py-2 text-[#a1a1aa]">{tx.blockNumber?.toString()}</td>
+                                                                        <td className="px-4 py-2 text-[#a1a1aa]"><FaArrowRight /></td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )
                                             ) : (
                                                 <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                     <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" /></svg>
-                                                    EVM transaction history is not supported yet
+                                                    Select a wallet to view transactions
                                                 </div>
                                             )}
                                         </div>
