@@ -32,8 +32,8 @@ const getSolPrice = async (): Promise<number> => {
         // 添加超时控制
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
-        
-        const response = await fetch('https://sol-wallet-theta.vercel.app/api/sol-price', {
+
+        const response = await fetch('/api/sol-price', {
             signal: controller.signal
         });
         

@@ -339,8 +339,8 @@ export const queryTokenListByAddress = async (
   if (!address) return;
 
   try {
-    // Fetch token list from API
-    const response = await fetch(`https://sol-wallet-theta.vercel.app/api/tokens?walletAddress=${address}`);
+    // Use local API route to avoid CORS issues
+    const response = await fetch(`/api/tokens?walletAddress=${address}`);
     
     if (!response.ok) {
       console.error('API request failed:', response.status, response.statusText);
@@ -447,8 +447,8 @@ export const queryTokenListByAddressPromise = async (
   if (!address) return;
 
   try {
-    // Fetch token list from API
-    const response = await fetch(`https://sol-wallet-theta.vercel.app/api/tokens?walletAddress=${address}`);
+    // Use local API route to avoid CORS issues
+    const response = await fetch(`/api/tokens?walletAddress=${address}`);
     
     if (!response.ok) {
       console.error('API request failed:', response.status, response.statusText);
