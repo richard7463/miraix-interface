@@ -90,6 +90,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const [activeTab, setActiveTab] = useState<'tokens' | 'transactions'>('tokens');
     const [evmTokens, setEvmTokens] = useState<Token[]>([]);
     const [solanaTokens, setSolanaTokens] = useState<Token[]>([]);
+    const [hasLoadedTokens, setHasLoadedTokens] = useState(false);
     const [isLoadingTokens, setIsLoadingTokens] = useState(false);
     const [totalBalance, setTotalBalance] = useState<number>(0);
     const [showToast, setShowToast] = useState(false);
@@ -158,7 +159,11 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
       };
 
       const getTokenImage = (symbol: string): string => {
-        return TOKEN_LOGOS[symbol] || '/favicon.png';
+        console.log('[WalletPanel] getTokenImage called with symbol:', symbol, 'type:', typeof symbol);
+        console.log('[WalletPanel] TOKEN_LOGOS:', TOKEN_LOGOS);
+        const url = TOKEN_LOGOS[symbol] || '/favicon.png';
+        console.log('[WalletPanel] getTokenImage result:', symbol, '->', url);
+        return url;
       };
 
       const chains = [
@@ -243,6 +248,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     const tokensWithBalance = tokens.filter(token => token.balance > 0);
                     console.log('[WalletPanel] EVM tokens with balance:', tokensWithBalance);
                     setEvmTokens(tokensWithBalance);
+                    setHasLoadedTokens(true);
                 } else {
                     setEvmTokens([]);
                 }
@@ -696,7 +702,11 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                             alt={token.symbol}
                                                             className="w-8 h-8 rounded-full border border-[#52525b] bg-[#27272a]"
                                                             onError={(e) => {
+                                                                console.log('[WalletPanel] Image load error for:', token.symbol, 'URL:', e.currentTarget.src);
                                                                 e.currentTarget.src = '/favicon.png';
+                                                            }}
+                                                            onLoad={() => {
+                                                                console.log('[WalletPanel] Image loaded:', token.symbol, 'URL:', token.image);
                                                             }}
                                                         />
                                                         <div>
@@ -722,7 +732,11 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                             alt={token.symbol}
                                                             className="w-8 h-8 rounded-full border border-[#52525b] bg-[#27272a]"
                                                             onError={(e) => {
+                                                                console.log('[WalletPanel] Image load error for:', token.symbol, 'URL:', e.currentTarget.src);
                                                                 e.currentTarget.src = '/favicon.png';
+                                                            }}
+                                                            onLoad={() => {
+                                                                console.log('[WalletPanel] Image loaded:', token.symbol, 'URL:', token.image);
                                                             }}
                                                         />
                                                         <div>
@@ -737,7 +751,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                             ))}
                                             
                                             {/* 如果没有有余额的 token，显示提示信息 */}
-                                            {!isLoadingTokens && ((selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && evmTokens.filter(token => token.balance > 0).length === 0) &&
+                                            {!isLoadingTokens && hasLoadedTokens && ((selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && evmTokens.filter(token => token.balance > 0).length === 0) &&
                                              ((selectedWallet === 'all' || selectedWallet.startsWith('solana-')) && solanaTokens.filter(token => token.balance > 0).length === 0) && (
                                                 <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                     <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
