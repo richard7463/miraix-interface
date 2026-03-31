@@ -241,11 +241,12 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
       for (const chain of chains) {
         try {
-          // Get transaction history using getLogs (for token transfers) and getHistory (for native transfers)
-          // For simplicity, we'll fetch recent logs for the address
+          const currentBlock = await chain.client.getBlockNumber();
+          const fromBlock = currentBlock - BigInt(100); // Limit to last 100 blocks to avoid RPC limits
+
           const logs = await chain.client.getLogs({
             address: address as `0x${string}`,
-            fromBlock: BigInt(Math.max(0, Number(await chain.client.getBlockNumber()) - 1000)),
+            fromBlock: fromBlock,
             toBlock: 'latest',
           });
 
@@ -259,7 +260,8 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
             });
           }
         } catch (error) {
-          console.error(`Error fetching ${chain.name} transactions:`, error);
+          // Silently skip chains that fail - some RPCs don't support getLogs well
+          console.log(`[WalletPanel] Skipping ${chain.name} transactions:`, error instanceof Error ? error.message : 'error');
         }
       }
 
