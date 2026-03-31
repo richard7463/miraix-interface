@@ -149,12 +149,12 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const fetchEvmBalances = async (address: string): Promise<Token[]> => {
       const tokens: Token[] = [];
 
-      // Token logo URLs from cryptologos.cc
+      // Token logo URLs from local icons folder
       const TOKEN_LOGOS: Record<string, string> = {
-        'ETH': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-        'OKB': 'https://cryptologos.cc/logos/okb-okb-logo.png',
-        'USDC': 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
-        'USDT': 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+        'ETH': '/icons/ethereum-eth-logo.png',
+        'OKB': '/icons/okb-okb-logo.png',
+        'USDC': '/tokens/usdc.png',
+        'USDT': '/tokens/usdt.png',
       };
 
       const getTokenImage = (symbol: string): string => {
