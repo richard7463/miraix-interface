@@ -155,7 +155,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
         'ETH': '/icons/ethereum-eth-logo.png',
         'OKB': '/icons/okb-okb-logo.png',
         'USDC': '/tokens/usdc.png',
-        'USDT': '/tokens/usdt.png',
+        'USDT': '/icons/tether-usdt-logo.png',
       };
 
       const getTokenImage = (symbol: string): string => {
