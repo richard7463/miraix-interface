@@ -149,21 +149,16 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const fetchEvmBalances = async (address: string): Promise<Token[]> => {
       const tokens: Token[] = [];
 
-      // Token logo URLs from trusted sources (CoinGecko)
+      // Token logo URLs from cryptologos.cc
       const TOKEN_LOGOS: Record<string, string> = {
-        'ETH': 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
-        'OKB': 'https://assets.coingecko.com/coins/images/10687/small/okb_hyped.png',
-        'USDC-1': 'https://assets.coingecko.com/coins/images/6319/usdc.png',
-        'USDT-1': 'https://assets.coingecko.com/coins/images/325/usdt.png',
-        'USDC-8453': 'https://assets.coingecko.com/coins/images/6319/usdc.png',
-        'USDT-8453': 'https://assets.coingecko.com/coins/images/325/usdt.png',
-        'USDC-2761': 'https://assets.coingecko.com/coins/images/6319/usdc.png',
-        'USDT-2761': 'https://assets.coingecko.com/coins/images/325/usdt.png',
+        'ETH': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
+        'OKB': 'https://cryptologos.cc/logos/okb-okb-logo.png',
+        'USDC': 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
+        'USDT': 'https://cryptologos.cc/logos/tether-usdt-logo.png',
       };
 
-      const getTokenImage = (symbol: string, chainId: number): string => {
-        const key = `${symbol}-${chainId}`;
-        return TOKEN_LOGOS[key] || TOKEN_LOGOS[symbol] || '/favicon.png';
+      const getTokenImage = (symbol: string): string => {
+        return TOKEN_LOGOS[symbol] || '/favicon.png';
       };
 
       const chains = [
@@ -181,7 +176,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
               mint: chain.chainId.toString(),
               balance: Number(formatUnits(nativeBalance, 18)),
               name: chain.nativeSymbol,
-              image: getTokenImage(chain.nativeSymbol, chain.chainId),
+              image: getTokenImage(chain.nativeSymbol),
               symbol: chain.nativeSymbol,
               decimals: 18,
             });
@@ -210,7 +205,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                     mint: `${chain.chainId}-${tokenAddress}`,
                     balance: Number(formatUnits(balance, Number(decimals))),
                     name: symbol,
-                    image: getTokenImage(symbol, chain.chainId),
+                    image: getTokenImage(symbol),
                     symbol: symbol,
                     decimals: Number(decimals),
                   });
