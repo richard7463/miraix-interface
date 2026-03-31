@@ -90,6 +90,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     const [activeTab, setActiveTab] = useState<'tokens' | 'transactions'>('tokens');
     const [evmTokens, setEvmTokens] = useState<Token[]>([]);
     const [solanaTokens, setSolanaTokens] = useState<Token[]>([]);
+    const [isLoadingTokens, setIsLoadingTokens] = useState(false);
     const [totalBalance, setTotalBalance] = useState<number>(0);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
@@ -237,6 +238,8 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                 return;
             }
 
+            setIsLoadingTokens(true);
+
             try {
                 if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
                     console.log('[WalletPanel] Fetching EVM tokens for address:', embeddedEvmWallets[0].address);
@@ -248,7 +251,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                 } else {
                     setEvmTokens([]);
                 }
-                
+
                 if (embeddedSolanaWallets.length > 0 && embeddedSolanaWallets[0]?.address) {
                     console.log('[WalletPanel] Fetching Solana tokens for address:', embeddedSolanaWallets[0].address);
                     await queryTokenListByAddress(embeddedSolanaWallets[0].address, (tokens) => {
@@ -264,6 +267,8 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                 console.error('Error fetching token balances:', error);
                 setEvmTokens([]);
                 setSolanaTokens([]);
+            } finally {
+                setIsLoadingTokens(false);
             }
         };
 
@@ -469,6 +474,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
     // 手动刷新余额
     const handleRefreshBalances = async () => {
         setIsRefreshing(true);
+        setIsLoadingTokens(true);
         try {
             if (embeddedEvmWallets.length > 0 && embeddedEvmWallets[0]?.address) {
                 console.log('[WalletPanel] Manual refresh EVM tokens for address:', embeddedEvmWallets[0].address);
@@ -499,6 +505,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
             setShowToast(true);
         } finally {
             setIsRefreshing(false);
+            setIsLoadingTokens(false);
         }
     };
 
@@ -673,8 +680,16 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
 
                                     {activeTab === 'tokens' ? (
                                         <div className="space-y-3">
+                                            {/* Loading spinner */}
+                                            {isLoadingTokens && (
+                                                <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
+                                                    <svg className="animate-spin h-6 w-6 mb-2 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                                    Loading tokens...
+                                                </div>
+                                            )}
+
                                             {/* EVM Wallet */}
-                                            {(selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && 
+                                            {(selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && !isLoadingTokens &&
                                                 evmTokens
                                                     .filter(token => token.balance > 0) // 只显示有余额的 token
                                                     .sort((a, b) => b.balance - a.balance) // 按余额降序排列
@@ -700,7 +715,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                                 </div>
                                             ))}
                                             {/* Solana Wallet */}
-                                            {(selectedWallet === 'all' || selectedWallet.startsWith('solana-')) && 
+                                            {(selectedWallet === 'all' || selectedWallet.startsWith('solana-')) && !isLoadingTokens &&
                                                 solanaTokens
                                                     .filter(token => token.balance > 0) // 只显示有余额的 token
                                                     .sort((a, b) => b.balance - a.balance) // 按余额降序排列
@@ -727,7 +742,7 @@ export const WalletPanel: React.FC<WalletPanelProps> = ({ isOpen, onClose }) => 
                                             ))}
                                             
                                             {/* 如果没有有余额的 token，显示提示信息 */}
-                                            {((selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && evmTokens.filter(token => token.balance > 0).length === 0) &&
+                                            {!isLoadingTokens && ((selectedWallet === 'all' || selectedWallet.startsWith('evm-')) && evmTokens.filter(token => token.balance > 0).length === 0) &&
                                              ((selectedWallet === 'all' || selectedWallet.startsWith('solana-')) && solanaTokens.filter(token => token.balance > 0).length === 0) && (
                                                 <div className="flex flex-col items-center justify-center py-8 text-[#a1a1aa]">
                                                     <svg className="h-10 w-10 mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
