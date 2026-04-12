@@ -11,6 +11,7 @@ import Thoughts from './Thoughts'
 import NewSwap from '@/components/DeFi/NewSwap'
 import NewBridge from '@/components/DeFi/NewBridge'
 import StakingYield from '@/components/DeFi/StakingYield'
+import EarnVaultCards from '@/components/DeFi/EarnVaultCards'
 import Market from '@/components/DeFi/Market'
 import TokenCreation from '@/components/DeFi/TokenCreation'
 import TokenListTable from './TokenListTable';
@@ -32,6 +33,7 @@ import {
   createTransferCheckedInstruction,
   TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
+import { isEarnVaultPrompt } from '@/lib/earn'
 
 interface ChatIdConversationProps {
   chatId: string;
@@ -857,6 +859,7 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       
       // 检查是否是staking yields请求
       const isStakingYieldsRequest = lastMessage.toLowerCase().includes('staking yields') || lastMessage.toLowerCase().trim() === 'find me the best staking yields';
+      const isEarnVaultsRequest = isEarnVaultPrompt(lastMessage);
       
       // 检查是否是Token创建请求
       const isTokenCreationRequest = lastMessage.toLowerCase().includes('create token') || 
@@ -882,6 +885,35 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
       const API_BASE_URL = process.env.NODE_ENV === 'production'
         ? 'https://langgraph-defai.vercel.app'
         : 'http://localhost:3009';
+
+      if (isEarnVaultsRequest) {
+        const earnResponse = await fetch('/api/earn/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: lastMessage,
+          }),
+        });
+
+        const earnData = await earnResponse.json();
+        if (!earnResponse.ok || !earnData?.success) {
+          throw new Error(earnData?.error || 'Failed to discover LI.FI Earn vaults');
+        }
+
+        return {
+          role: 'assistant' as const,
+          content: earnData.message || 'I found USDC vaults you can deposit into.',
+          timestamp: new Date().toISOString(),
+          id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          thoughts: earnData.thoughts || [],
+          quote: null,
+          swapEntities: null,
+          responseData: earnData,
+        };
+      }
+
       // 调用 /api/chat-new 获取 AI 回复
       const response = await fetch(`${API_BASE_URL}/api/chat-new`, {
         method: 'POST',
@@ -1486,6 +1518,10 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                  message.responseData?.data?.data?.trendingTokens ||
                  (message.responseData?.success === true && message.responseData?.data?.data?.trendingTokens));
 
+              const isEarnVaultOperation = message.role === 'assistant' &&
+                (message.responseData?.data?.intent === 'earnVaults' ||
+                 message.responseData?.quote?.vaults);
+
               // 检查是否是 token creation 操作
               const isTokenCreationOperation = message.role === 'assistant' && 
                 (message.responseData?.data?.intent === 'createToken' || 
@@ -1530,13 +1566,14 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
               // 对于stake intent，如果有quote数据，应该显示NewSwap组件
               const isStakeIntent = message.responseData?.data?.intent === 'stake';
               
-              const isSwapInitiation = message.role === 'assistant' && (hasRealSwapData || (isStakeIntent && message.quote)) && !isBridgeOperation && !isStakingOperation && !isMarketOperation && !isTokenCreationOperation;
+              const isSwapInitiation = message.role === 'assistant' && (hasRealSwapData || (isStakeIntent && message.quote)) && !isBridgeOperation && !isStakingOperation && !isMarketOperation && !isTokenCreationOperation && !isEarnVaultOperation;
               
               // 恢复swap组件显示，但使用更严格的判断
               const shouldShowSwapComponent = true;
               const shouldShowBridgeComponent = true;
               const shouldShowStakingComponent = true;
               const shouldShowMarketComponent = true;
+              const shouldShowEarnVaultComponent = true;
 
               console.log('[ChatIdConversation] Operation analysis:', {
                 isBridgeOperation,
@@ -1617,6 +1654,15 @@ export default function ChatIdConversation({ chatId, hideActions = false }: Chat
                       </div>
                     );
                   })()}
+
+                  {isEarnVaultOperation && shouldShowEarnVaultComponent && (
+                    <div className="earn-vaults-wrapper md:ml-[76px] flex justify-center md:justify-start">
+                      <div className="w-full max-w-[560px]">
+                        <Thoughts thoughts={message.thoughts || []} />
+                        <EarnVaultCards responseData={message.responseData} />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Render TokenCreation if this is the token creation reply */}
                   {isTokenCreationOperation && (() => {

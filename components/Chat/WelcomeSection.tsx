@@ -9,6 +9,7 @@ import GradientHero from './GradientHero';
 import IconWithLabel from './IconWithLabel';
 import InfiniteScrollText from './InfiniteScrollText';
 import { motion } from 'framer-motion';
+import { ENABLE_LIFI_EARN_CHAT } from '@/lib/config';
 
 interface WelcomeSectionProps {
   setMessage?: (message: string) => void;
@@ -27,6 +28,9 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           break;
         case 'stake':
           message = 'Find me the best staking yields';
+          break;
+        case 'earn':
+          message = 'Put 1 USDC into the safest vault on Base';
           break;
         case 'createToken':
           message = 'Create a token named abcpump';
@@ -79,7 +83,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="hidden lg:grid grid-cols-4 gap-4 w-full max-w-6xl"
+          className={`hidden lg:grid gap-4 w-full max-w-6xl ${ENABLE_LIFI_EARN_CHAT ? 'grid-cols-5' : 'grid-cols-4'}`}
         >
           {/* Swap Card */}
           <motion.div 
@@ -136,6 +140,33 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
               </div>
             </div>
           </motion.div>
+
+          {ENABLE_LIFI_EARN_CHAT && (
+            <motion.div 
+              whileHover={{ scale: 1.02, y: -2 }}
+              onClick={() => handleAskThis('earn')}
+              className="w-full px-3 py-3 bg-white/5 rounded-xl relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+            >
+              <div className="p-1.5 bg-white/5 rounded-lg flex flex-col justify-center items-center overflow-hidden w-8 h-8 absolute top-3 left-3">
+                <PiBookOpenTextBold className="w-5 h-5 text-emerald-300" />
+              </div>
+              <div className="pt-12 pb-2">
+                <div className="self-stretch justify-start">
+                  <span className="text-white/90 text-base font-normal font-['Anonymous_Pro']">Earn with vaults</span>
+                  <span className="text-white text-base font-normal font-['Anonymous_Pro']"> </span>
+                  <span className="text-white/30 text-base font-normal font-['Anonymous_Pro']">ask the agent to pick a vault and open a Composer deposit flow</span>
+                </div>
+                <div className="inline-flex justify-start items-center gap-1 mt-2">
+                  <div className="justify-start text-white/60 text-sm font-normal font-['Anonymous_Pro'] underline hover:text-white/80 transition-colors">
+                    Ask this
+                  </div>
+                  <div className="w-3.5 h-3.5 relative">
+                    <FiZap className="w-3.5 h-3.5 text-white/60" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Stake Card */}
           <motion.div 
@@ -199,7 +230,7 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="lg:hidden grid grid-cols-2 gap-3 w-full max-w-md"
+          className={`lg:hidden grid gap-3 w-full max-w-md ${ENABLE_LIFI_EARN_CHAT ? 'grid-cols-3' : 'grid-cols-2'}`}
         >
           {/* Swap Card - Mobile */}
           <motion.div 
@@ -224,6 +255,19 @@ export default function WelcomeSection({ setMessage }: WelcomeSectionProps) {
               <span className="text-white/90 text-sm font-medium">Bridge</span>
             </div>
           </motion.div>
+
+          {ENABLE_LIFI_EARN_CHAT && (
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              onClick={() => handleAskThis('earn')}
+              className="px-3 py-2 bg-white/5 rounded-lg relative cursor-pointer transition-all duration-200 hover:bg-white/10"
+            >
+              <div className="flex items-center gap-2">
+                <PiBookOpenTextBold className="w-4 h-4 text-emerald-300" />
+                <span className="text-white/90 text-sm font-medium">Earn</span>
+              </div>
+            </motion.div>
+          )}
 
           {/* Stake Card - Mobile */}
           <motion.div 

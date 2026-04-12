@@ -5,6 +5,8 @@ import { GiStakesFence } from 'react-icons/gi'; // Stake
 import { HiOutlineArrowUp } from 'react-icons/hi'; // Withdraw
 import { MdTrendingUp } from 'react-icons/md'; // Trending
 import { RiExchangeDollarLine } from 'react-icons/ri'; // Bridge
+import { PiBookOpenTextBold } from 'react-icons/pi';
+import { ENABLE_LIFI_EARN_CHAT } from '@/lib/config';
 
 const actions = [
   {
@@ -78,6 +80,14 @@ export default function SwapBridgeStakeActionButtons({
       border: 'border-purple-600/30',
     },
     {
+      key: 'earn',
+      label: 'Earn',
+      icon: <PiBookOpenTextBold size={16} className="text-emerald-400" />,
+      message: 'Find the best USDC vaults on Arbitrum/Base/Ethereum',
+      bg: 'bg-emerald-900/20',
+      border: 'border-emerald-600/30',
+    },
+    {
       key: 'stake',
       label: 'Stake',
       icon: <GiStakesFence size={16} className="text-green-500" />,
@@ -95,7 +105,9 @@ export default function SwapBridgeStakeActionButtons({
     },
   ];
 
-  const actions = customActions || defaultActions;
+  const actions = (customActions || defaultActions).filter((action) =>
+    ENABLE_LIFI_EARN_CHAT ? true : action.key !== 'earn',
+  );
 
   const handleAction = (action: { key: string; message?: string }) => {
     if (action.message) {
