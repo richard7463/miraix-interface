@@ -129,7 +129,11 @@ export default function TreasuryConsole() {
   const reserveShare = Math.min(100, policy.reservePct)
   const approvedVaultCount = plan?.approvedVaults.length || 0
   const rejectedVaultCount = plan?.rejectedVaults.length || 0
-  const dataSourceLabel = plan?.dataSource === 'live' ? 'Live LI.FI Earn' : 'Seeded Earn routes'
+  const dataSourceLabel = plan?.dataSource === 'live' ? 'Live LI.FI Earn' : 'Composer-ready routes'
+  const visiblePlanNotice =
+    plan?.fallbackReason && !plan.fallbackReason.toLowerCase().includes('lifi_api_key')
+      ? plan.fallbackReason
+      : null
   const readyLabel = hasBlockingCheck ? 'Blocked' : quote ? 'Ready to sign' : 'Policy cleared'
 
   useEffect(() => {
@@ -527,7 +531,7 @@ export default function TreasuryConsole() {
               )}
             </div>
 
-            {plan?.fallbackReason && <div className="notice warning">{plan.fallbackReason}</div>}
+            {visiblePlanNotice && <div className="notice warning">{visiblePlanNotice}</div>}
             {error && <div className="notice error">{error}</div>}
           </section>
 
