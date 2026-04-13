@@ -89,8 +89,8 @@ README, screenshots, demo script, and submission answers are already prepared.
 
 ## Links To Fill Before Final Submission
 
-- Repository URL: `TBD after push`
-- Pull Request URL: `TBD after PR creation`
+- Repository URL: `https://github.com/richard7463/miraix-interface/tree/codex/pacifica-risk-room/projects/pacifica-risk-room`
+- Pull Request URL: `https://github.com/richard7463/miraix-interface/pull/1`
 - Demo Video URL: `add your uploaded video link`
 - Live Demo URL: `http://localhost:3000/pacifica-risk-room` or deployed URL if you ship it
 
