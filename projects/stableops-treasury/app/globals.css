@@ -820,6 +820,42 @@ p {
   min-width: 150px;
 }
 
+.tx-alert {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  border-radius: 20px;
+  padding: 14px;
+  line-height: 1.42;
+}
+
+.tx-alert.failed {
+  border: 1px solid rgba(205, 61, 50, 0.24);
+  background: var(--red-soft);
+}
+
+.tx-alert strong {
+  color: var(--red);
+}
+
+.tx-alert p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.tx-alert a {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.72);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
 .ops-grid {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;

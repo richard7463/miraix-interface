@@ -47,6 +47,16 @@ type ComposerQuote = {
   }
 }
 
+class TransactionRevertedError extends Error {
+  hash: string
+
+  constructor(hash: string) {
+    super('Deposit transaction was confirmed but reverted on-chain. Open the explorer link to inspect the failure, then lower the amount or refresh the Composer quote.')
+    this.name = 'TransactionRevertedError'
+    this.hash = hash
+  }
+}
+
 const publicClients = {
   1: createPublicClient({ chain: mainnet, transport: http() }),
   8453: createPublicClient({ chain: base, transport: http() }),
@@ -94,6 +104,7 @@ export default function TreasuryConsole() {
   const [quote, setQuote] = useState<ComposerQuote | null>(null)
   const [approvalHash, setApprovalHash] = useState<string | null>(null)
   const [txHash, setTxHash] = useState<string | null>(null)
+  const [failedTxHash, setFailedTxHash] = useState<string | null>(null)
   const [isPlanning, setIsPlanning] = useState(false)
   const [isQuoting, setIsQuoting] = useState(false)
   const [isExecuting, setIsExecuting] = useState(false)
@@ -135,6 +146,7 @@ export default function TreasuryConsole() {
     setPolicy((current) => ({ ...current, ...patch }))
     setQuote(null)
     setTxHash(null)
+    setFailedTxHash(null)
     setApprovalHash(null)
   }
 
@@ -152,6 +164,7 @@ export default function TreasuryConsole() {
     setError(null)
     setQuote(null)
     setTxHash(null)
+    setFailedTxHash(null)
     setApprovalHash(null)
 
     try {
@@ -218,7 +231,11 @@ export default function TreasuryConsole() {
       ],
     })) as `0x${string}`
 
-    await publicClients[chainId as keyof typeof publicClients].waitForTransactionReceipt({ hash })
+    const receipt = await publicClients[chainId as keyof typeof publicClients].waitForTransactionReceipt({ hash })
+    if (receipt.status !== 'success') {
+      throw new TransactionRevertedError(hash)
+    }
+
     return hash
   }
 
@@ -231,6 +248,7 @@ export default function TreasuryConsole() {
     setIsQuoting(true)
     setError(null)
     setQuote(null)
+    setFailedTxHash(null)
 
     try {
       const account = walletAddress || (await connectWallet())
@@ -268,6 +286,8 @@ export default function TreasuryConsole() {
 
     setIsExecuting(true)
     setError(null)
+    setTxHash(null)
+    setFailedTxHash(null)
 
     try {
       await switchChain(selectedVault.chainId)
@@ -275,7 +295,23 @@ export default function TreasuryConsole() {
       const approvalAddress = quote.estimate.approvalAddress
       const fromTokenAddress = quote.action.fromToken.address
       const fromAmountRaw = quote.action.fromAmount
+      const fromAmount = BigInt(fromAmountRaw)
       const client = publicClients[selectedVault.chainId as keyof typeof publicClients]
+
+      if (fromTokenAddress) {
+        const balance = (await client.readContract({
+          address: fromTokenAddress as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args: [walletAddress as `0x${string}`],
+        })) as bigint
+
+        if (balance < fromAmount) {
+          throw new Error(
+            `Insufficient ${quote.action.fromToken.symbol} on ${selectedVault.chainName}. Need ${Number(formatUnits(fromAmount, quote.action.fromToken.decimals)).toFixed(4)} ${quote.action.fromToken.symbol}, wallet has ${Number(formatUnits(balance, quote.action.fromToken.decimals)).toFixed(4)} ${quote.action.fromToken.symbol}. Add funds or lower Deploy USDC.`,
+          )
+        }
+      }
 
       if (approvalAddress && fromTokenAddress) {
         const allowance = (await client.readContract({
@@ -285,11 +321,11 @@ export default function TreasuryConsole() {
           args: [walletAddress as `0x${string}`, approvalAddress as `0x${string}`],
         })) as bigint
 
-        if (allowance < BigInt(fromAmountRaw)) {
+        if (allowance < fromAmount) {
           const data = encodeFunctionData({
             abi: erc20Abi,
             functionName: 'approve',
-            args: [approvalAddress as `0x${string}`, BigInt(fromAmountRaw)],
+            args: [approvalAddress as `0x${string}`, fromAmount],
           })
 
           const hash = await sendTransaction(selectedVault.chainId, {
@@ -304,6 +340,9 @@ export default function TreasuryConsole() {
       const hash = await sendTransaction(selectedVault.chainId, quote.transactionRequest)
       setTxHash(hash)
     } catch (executeError) {
+      if (executeError instanceof TransactionRevertedError) {
+        setFailedTxHash(executeError.hash)
+      }
       setError(formatWalletError(executeError))
     } finally {
       setIsExecuting(false)
@@ -478,6 +517,7 @@ export default function TreasuryConsole() {
                       setSelectedVaultId(vault.id)
                       setQuote(null)
                       setTxHash(null)
+                      setFailedTxHash(null)
                       setApprovalHash(null)
                     }}
                   />
@@ -552,6 +592,16 @@ export default function TreasuryConsole() {
                 {isExecuting ? 'Executing...' : 'Execute deposit'}
               </button>
             </div>
+
+            {failedTxHash && explorerBaseUrl && (
+              <div className="tx-alert failed">
+                <strong>Deposit failed on-chain</strong>
+                <p>The transaction was mined but reverted. Your funds were not deposited.</p>
+                <a href={`${explorerBaseUrl}/tx/${failedTxHash}`} target="_blank" rel="noreferrer">
+                  View failed tx {failedTxHash.slice(0, 10)}...
+                </a>
+              </div>
+            )}
           </aside>
         </section>
 
