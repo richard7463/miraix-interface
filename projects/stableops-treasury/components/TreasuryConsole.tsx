@@ -9,6 +9,7 @@ import {
   DEFAULT_POLICY,
   formatRate,
   formatUsd,
+  type PolicyCheck,
   type StableOpsRiskMode,
   type StableOpsVault,
   type TreasuryPlan,
@@ -54,8 +55,10 @@ const publicClients = {
 const riskModes: Array<{ value: StableOpsRiskMode; label: string; detail: string }> = [
   { value: 'conservative', label: 'Conservative', detail: 'Safe vaults only' },
   { value: 'balanced', label: 'Balanced', detail: 'Safe plus measured yield' },
-  { value: 'open', label: 'Open', detail: 'Show every executable vault' },
+  { value: 'open', label: 'Open', detail: 'Every executable vault' },
 ]
+
+const workflowLabels = ['Mandate', 'Discover', 'Gate', 'Quote', 'Execute', 'Report']
 
 function ensureHex(value?: string) {
   if (!value) return '0x'
@@ -106,6 +109,10 @@ export default function TreasuryConsole() {
 
   const selectedChain = selectedVault ? CHAIN_BY_ID[selectedVault.chainId] : null
   const explorerBaseUrl = selectedChain?.explorer || null
+  const checksPassed = plan?.checks.filter((check) => check.status === 'pass').length || 0
+  const checksTotal = plan?.checks.length || 5
+  const hasBlockingCheck = Boolean(plan?.checks.some((check) => check.status === 'block'))
+  const deployableCapacity = Math.max(0, policy.treasurySizeUsd * (1 - policy.reservePct / 100))
 
   useEffect(() => {
     void runPlan(DEFAULT_POLICY)
@@ -302,74 +309,102 @@ export default function TreasuryConsole() {
       : null
 
   return (
-    <main className="app-shell">
-      <section className="hero">
-        <div className="hero-card">
-          <div className="eyebrow">StableOps Treasury · LI.FI Earn</div>
-          <h1>Agentic treasury execution for stablecoin teams.</h1>
-          <p className="hero-copy">
-            StableOps turns a team treasury mandate into a governed LI.FI Earn action: discover
-            USDC vaults, reject policy violations, prepare a Composer deposit, execute with a
-            wallet, then produce a receipt-token report.
+    <main className="ops-shell">
+      <div className="atmosphere" aria-hidden="true">
+        <span className="orbit orbit-one" />
+        <span className="orbit orbit-two" />
+        <span className="signal-grid" />
+      </div>
+
+      <header className="topbar">
+        <div className="brand-lockup">
+          <span className="brand-mark">S/O</span>
+          <div>
+            <div className="brand-name">StableOps Treasury</div>
+            <div className="brand-subtitle">Agentic treasury execution with LI.FI Earn</div>
+          </div>
+        </div>
+        <div className="topbar-actions">
+          <span className="status-pill">
+            <span className="status-dot" />
+            {plan?.dataSource === 'live' ? 'Live Earn API' : 'Seeded review mode'}
+          </span>
+          <button className="ghost-button" type="button" onClick={connectWallet}>
+            {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connect wallet'}
+          </button>
+        </div>
+      </header>
+
+      <section className="hero-grid">
+        <div className="hero-main reveal">
+          <div className="deck-label">Treasury Ops Room / LI.FI Earn</div>
+          <h1>
+            Treasury rules in. Yield execution out.
+          </h1>
+          <p>
+            StableOps is a control desk for small teams, DAOs, and builders: set the treasury
+            mandate, discover USDC vaults, block policy violations, prepare a Composer route, and
+            ship a receipt-token report.
           </p>
-          <div className="stat-row">
-            <div className="stat">
-              <div className="stat-label">Policy</div>
-              <div className="stat-value">Reserve first</div>
-            </div>
-            <div className="stat">
-              <div className="stat-label">Infra</div>
-              <div className="stat-value">LI.FI Earn</div>
-            </div>
-            <div className="stat">
-              <div className="stat-label">Execution</div>
-              <div className="stat-value">Composer</div>
-            </div>
+          <div className="hero-cta-row">
+            <button className="primary-button" type="button" onClick={() => runPlan()} disabled={isPlanning}>
+              {isPlanning ? 'Building policy route...' : 'Run StableOps plan'}
+            </button>
+            <button className="outline-button" type="button" onClick={prepareQuote} disabled={!selectedVault || isQuoting}>
+              {isQuoting ? 'Preparing Composer...' : 'Prepare Composer quote'}
+            </button>
           </div>
         </div>
 
-        <div className="panel">
-          <div className="eyebrow">Treasury Mandate</div>
-          <h2 className="panel-title">Rules before routing</h2>
-          <p className="panel-copy">
-            Set treasury constraints first. The app only prepares a Composer transaction after
-            reserve, execution cap, chain allowlist, TVL floor, and vault execution checks pass.
-          </p>
-          <div className="button-row" style={{ marginTop: 18 }}>
-            <button className="primary" onClick={() => runPlan()} disabled={isPlanning}>
-              {isPlanning ? 'Building plan...' : 'Run StableOps plan'}
-            </button>
-            <button className="secondary" onClick={prepareQuote} disabled={!selectedVault || isQuoting}>
-              {isQuoting ? 'Preparing quote...' : 'Prepare Composer quote'}
-            </button>
+        <aside className="mandate-card reveal reveal-delay-1">
+          <div className="mandate-head">
+            <span>Current Mandate</span>
+            <strong>{hasBlockingCheck ? 'Blocked' : 'Authorized'}</strong>
           </div>
-        </div>
+          <div className="mandate-amount">{formatUsd(policy.deployAmountUsd)}</div>
+          <div className="mandate-copy">
+            Deploy USDC while preserving {policy.reservePct}% reserves and capping each execution at{' '}
+            {formatUsd(policy.maxPerExecutionUsd)}.
+          </div>
+          <div className="mandate-metrics">
+            <Metric label="Capacity" value={formatUsd(deployableCapacity)} />
+            <Metric label="Checks" value={`${checksPassed}/${checksTotal}`} />
+            <Metric label="Routes" value={String(plan?.approvedVaults.length || 0)} />
+          </div>
+          <div className="workflow-strip" aria-label="StableOps workflow">
+            {workflowLabels.map((label, index) => (
+              <span key={label} className={index <= (quote ? 3 : plan ? 2 : 0) ? 'active' : ''}>
+                {label}
+              </span>
+            ))}
+          </div>
+        </aside>
       </section>
 
-      <section className="main-grid">
-        <div className="panel">
-          <div className="eyebrow">Policy Input</div>
-          <h2 className="panel-title">Small-team treasury rules</h2>
+      <section className="ops-grid">
+        <section className="policy-console reveal reveal-delay-2" aria-label="Treasury policy input">
+          <div className="section-kicker">Policy Console</div>
+          <div className="section-head">
+            <h2>Mandate rulebook</h2>
+            <p>Every field below becomes a guardrail before LI.FI Composer is allowed to prepare a transaction.</p>
+          </div>
 
-          <div className="policy-grid">
-            <label className="field">
-              <span className="field-label">Treasury name</span>
+          <div className="field-grid">
+            <Field label="Treasury name">
               <input
                 value={policy.treasuryName}
                 onChange={(event) => updatePolicy({ treasuryName: event.target.value })}
               />
-            </label>
-            <label className="field">
-              <span className="field-label">Treasury size</span>
+            </Field>
+            <Field label="Treasury size">
               <input
                 type="number"
                 min="1"
                 value={policy.treasurySizeUsd}
                 onChange={(event) => updatePolicy({ treasurySizeUsd: Number(event.target.value) })}
               />
-            </label>
-            <label className="field">
-              <span className="field-label">Deploy amount</span>
+            </Field>
+            <Field label="Deploy USDC">
               <input
                 type="number"
                 min="0.01"
@@ -377,9 +412,8 @@ export default function TreasuryConsole() {
                 value={policy.deployAmountUsd}
                 onChange={(event) => updatePolicy({ deployAmountUsd: Number(event.target.value) })}
               />
-            </label>
-            <label className="field">
-              <span className="field-label">Max per execution</span>
+            </Field>
+            <Field label="Max per action">
               <input
                 type="number"
                 min="0.01"
@@ -387,9 +421,8 @@ export default function TreasuryConsole() {
                 value={policy.maxPerExecutionUsd}
                 onChange={(event) => updatePolicy({ maxPerExecutionUsd: Number(event.target.value) })}
               />
-            </label>
-            <label className="field">
-              <span className="field-label">Reserve target %</span>
+            </Field>
+            <Field label="Reserve target %">
               <input
                 type="number"
                 min="0"
@@ -397,182 +430,242 @@ export default function TreasuryConsole() {
                 value={policy.reservePct}
                 onChange={(event) => updatePolicy({ reservePct: Number(event.target.value) })}
               />
-            </label>
-            <label className="field">
-              <span className="field-label">Minimum vault TVL</span>
+            </Field>
+            <Field label="Minimum vault TVL">
               <input
                 type="number"
                 min="0"
                 value={policy.minTvlUsd}
                 onChange={(event) => updatePolicy({ minTvlUsd: Number(event.target.value) })}
               />
-            </label>
+            </Field>
           </div>
 
-          <div style={{ marginTop: 18 }}>
-            <div className="field-label">Allowed chains</div>
-            <div className="chain-row" style={{ marginTop: 8 }}>
+          <div className="control-block">
+            <div className="control-label">Allowed execution zones</div>
+            <div className="segmented-row">
               {CHAINS.map((chain) => (
                 <button
                   key={chain.id}
                   type="button"
-                  className={`toggle ${policy.allowedChainIds.includes(chain.id) ? 'active' : ''}`}
+                  className={policy.allowedChainIds.includes(chain.id) ? 'segment active' : 'segment'}
                   onClick={() => toggleChain(chain.id)}
                 >
-                  {chain.label}
+                  <span>{chain.label}</span>
+                  <small>{chain.nativeToken} gas</small>
                 </button>
               ))}
             </div>
           </div>
 
-          <div style={{ marginTop: 18 }}>
-            <div className="field-label">Risk mode</div>
-            <div className="mode-row" style={{ marginTop: 8 }}>
+          <div className="control-block">
+            <div className="control-label">Risk mode</div>
+            <div className="segmented-row risk-row">
               {riskModes.map((mode) => (
                 <button
                   key={mode.value}
                   type="button"
-                  className={`toggle ${policy.riskMode === mode.value ? 'active' : ''}`}
+                  className={policy.riskMode === mode.value ? 'segment active' : 'segment'}
                   onClick={() => updatePolicy({ riskMode: mode.value })}
-                  title={mode.detail}
                 >
-                  {mode.label}
+                  <span>{mode.label}</span>
+                  <small>{mode.detail}</small>
                 </button>
               ))}
             </div>
           </div>
 
-          {plan?.fallbackReason && <div className="fallback-box">{plan.fallbackReason}</div>}
-          {error && <div className="error-box">{error}</div>}
-        </div>
+          {plan?.fallbackReason && <div className="notice warning">{plan.fallbackReason}</div>}
+          {error && <div className="notice error">{error}</div>}
+        </section>
 
-        <div className="hero-stack">
-          {plan && (
-            <div className="panel">
-              <div className="eyebrow">Agentic Workflow</div>
-              <h2 className="panel-title">Treasury agents produce an execution decision</h2>
-              <div className="agent-grid">
-                {plan.agents.map((agent) => (
-                  <div className="agent-card" key={agent.id}>
-                    <div className="agent-role">{agent.role}</div>
-                    <div className={`agent-verdict status-${agent.status}`}>{agent.verdict}</div>
-                    <div className="agent-detail">{agent.detail}</div>
-                  </div>
-                ))}
+        <section className="decision-console reveal reveal-delay-3">
+          {plan ? (
+            <>
+              <div className="section-kicker">Execution Decision</div>
+              <div className="section-head split">
+                <div>
+                  <h2>Execution rail</h2>
+                  <p>Specialized operators turn policy into a signed execution path.</p>
+                </div>
+                <span className={hasBlockingCheck ? 'decision-badge blocked' : 'decision-badge'}>
+                  {hasBlockingCheck ? 'Policy blocked' : 'Ready for Composer'}
+                </span>
               </div>
-            </div>
-          )}
-
-          {plan && (
-            <div className="panel">
-              <div className="eyebrow">Policy Checks</div>
-              <h2 className="panel-title">Execution guardrails</h2>
-              <div className="hero-stack" style={{ marginTop: 14 }}>
-                {plan.checks.map((check) => (
-                  <div className="stat" key={check.id}>
-                    <div className="stat-label">{check.label}</div>
-                    <div className={`metric-value status-${check.status}`}>{check.status.toUpperCase()}</div>
-                    <div className="agent-detail">{check.detail}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {plan?.approvedVaults.map((vault) => (
-            <VaultCard
-              key={vault.id}
-              vault={vault}
-              selected={selectedVault?.id === vault.id}
-              onSelect={() => {
-                setSelectedVaultId(vault.id)
-                setQuote(null)
-                setTxHash(null)
-                setApprovalHash(null)
-              }}
-            />
-          ))}
-
-          {plan && plan.rejectedVaults.length > 0 && (
-            <div className="panel">
-              <div className="eyebrow">Rejected by Policy</div>
-              <div className="hero-stack" style={{ marginTop: 12 }}>
-                {plan.rejectedVaults.slice(0, 4).map((vault) => (
-                  <div className="stat" key={`${vault.vaultId}-${vault.reason}`}>
-                    <div className="stat-label">
-                      {vault.name} · {vault.chainName}
+              <div className="agent-lane">
+                {plan.agents.map((agent, index) => (
+                  <article className={`agent-node status-${agent.status}`} key={agent.id}>
+                    <div className="node-index">{String(index + 1).padStart(2, '0')}</div>
+                    <div>
+                      <div className="node-role">{agent.role}</div>
+                      <h3>{agent.verdict}</h3>
+                      <p>{agent.detail}</p>
                     </div>
-                    <div className="agent-detail">{vault.reason}</div>
-                  </div>
+                  </article>
                 ))}
               </div>
+            </>
+          ) : (
+            <div className="empty-state">
+              <span>Awaiting mandate</span>
+              <p>Run StableOps to discover LI.FI Earn vaults and assemble a treasury decision.</p>
             </div>
           )}
-
-          {quote && selectedVault && (
-            <div className="quote-box">
-              <div className="eyebrow">LI.FI Composer Quote</div>
-              <div className="quote-grid" style={{ marginTop: 12 }}>
-                <div>
-                  <div className="metric-label">Route</div>
-                  <div className="metric-value">
-                    {quote.action.fromToken.symbol} to {quote.action.toToken.symbol}
-                  </div>
-                </div>
-                <div>
-                  <div className="metric-label">Estimated receipt</div>
-                  <div className="metric-value">
-                    {estimatedReceipt != null
-                      ? `${estimatedReceipt.toFixed(4)} ${quote.action.toToken.symbol}`
-                      : quote.action.toToken.symbol}
-                  </div>
-                </div>
-                <div>
-                  <div className="metric-label">Approval target</div>
-                  <div className="metric-value">
-                    {quote.estimate.approvalAddress
-                      ? `${quote.estimate.approvalAddress.slice(0, 10)}...`
-                      : 'No approval'}
-                  </div>
-                </div>
-              </div>
-              <div className="button-row" style={{ marginTop: 16 }}>
-                <button className="primary" onClick={executeQuote} disabled={isExecuting}>
-                  {isExecuting ? 'Executing...' : 'Execute treasury deposit'}
-                </button>
-                <button className="secondary" onClick={connectWallet}>
-                  {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connect wallet'}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {txHash && selectedVault && (
-            <div className="report-card">
-              <div className="eyebrow">Treasury Report</div>
-              <h2 className="panel-title">Execution complete</h2>
-              <p className="panel-copy">
-                Deployed {formatUsd(plan?.policy.deployAmountUsd || policy.deployAmountUsd)} USDC
-                into {selectedVault.name} on {selectedVault.chainName}. The treasury wallet now
-                holds {quote?.action.toToken.symbol || selectedVault.symbol}, the vault receipt
-                token representing this position.
-              </p>
-              <div className="tag-row">
-                {approvalHash && (
-                  <a className="tag" href={`${explorerBaseUrl}/tx/${approvalHash}`} target="_blank" rel="noreferrer">
-                    Approval {approvalHash.slice(0, 10)}...
-                  </a>
-                )}
-                <a className="tag" href={`${explorerBaseUrl}/tx/${txHash}`} target="_blank" rel="noreferrer">
-                  Deposit {txHash.slice(0, 10)}...
-                </a>
-                <span className="tag">Receipt token: {quote?.action.toToken.symbol || selectedVault.symbol}</span>
-              </div>
-            </div>
-          )}
-        </div>
+        </section>
       </section>
+
+      {plan && (
+        <section className="route-grid">
+          <div className="checks-board reveal">
+            <div className="section-kicker">Policy Gates</div>
+            <div className="section-head">
+              <h2>{checksPassed}/{checksTotal} guardrails passed</h2>
+              <p>Composer quote remains gated until reserve, action cap, chain, TVL, and executability pass.</p>
+            </div>
+            <div className="check-list">
+              {plan.checks.map((check) => (
+                <PolicyCheckCard check={check} key={check.id} />
+              ))}
+            </div>
+          </div>
+
+          <div className="vault-board reveal reveal-delay-1">
+            <div className="section-kicker">LI.FI Earn Routes</div>
+            <div className="section-head split">
+              <div>
+                <h2>Approved vaults</h2>
+                <p>Select the treasury route before requesting a Composer quote.</p>
+              </div>
+              <span className="source-chip">{plan.dataSource === 'live' ? 'Live discovery' : 'Seeded examples'}</span>
+            </div>
+            <div className="vault-stack">
+              {plan.approvedVaults.map((vault) => (
+                <VaultCard
+                  key={vault.id}
+                  vault={vault}
+                  selected={selectedVault?.id === vault.id}
+                  onSelect={() => {
+                    setSelectedVaultId(vault.id)
+                    setQuote(null)
+                    setTxHash(null)
+                    setApprovalHash(null)
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {plan && plan.rejectedVaults.length > 0 && (
+        <section className="rejection-strip reveal">
+          <div>
+            <div className="section-kicker">Rejected by Policy</div>
+            <h2>Vaults that did not reach treasury standard</h2>
+          </div>
+          <div className="rejection-list">
+            {plan.rejectedVaults.slice(0, 4).map((vault) => (
+              <article key={`${vault.vaultId}-${vault.reason}`}>
+                <strong>{vault.name}</strong>
+                <span>{vault.chainName}</span>
+                <p>{vault.reason}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {quote && selectedVault && (
+        <section className="quote-panel reveal">
+          <div className="quote-ribbon">LI.FI Composer Quote</div>
+          <div className="quote-content">
+            <div>
+              <h2>Composer route prepared for treasury execution.</h2>
+              <p>
+                Route {quote.action.fromToken.symbol} into {quote.action.toToken.symbol} on {selectedVault.chainName}.
+                Approval and deposit are executed from the connected treasury wallet.
+              </p>
+            </div>
+            <div className="quote-metrics">
+              <Metric label="Route" value={`${quote.action.fromToken.symbol} -> ${quote.action.toToken.symbol}`} />
+              <Metric
+                label="Estimated receipt"
+                value={
+                  estimatedReceipt != null
+                    ? `${estimatedReceipt.toFixed(4)} ${quote.action.toToken.symbol}`
+                    : quote.action.toToken.symbol
+                }
+              />
+              <Metric
+                label="Approval target"
+                value={quote.estimate.approvalAddress ? `${quote.estimate.approvalAddress.slice(0, 10)}...` : 'None'}
+              />
+            </div>
+          </div>
+          <div className="hero-cta-row">
+            <button className="primary-button" type="button" onClick={executeQuote} disabled={isExecuting}>
+              {isExecuting ? 'Executing treasury deposit...' : 'Execute treasury deposit'}
+            </button>
+            <button className="outline-button" type="button" onClick={connectWallet}>
+              {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connect wallet'}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {txHash && selectedVault && (
+        <section className="report-panel reveal">
+          <div className="section-kicker">Treasury Report</div>
+          <h2>Execution complete. Receipt token accounted for.</h2>
+          <p>
+            Deployed {formatUsd(plan?.policy.deployAmountUsd || policy.deployAmountUsd)} USDC into{' '}
+            {selectedVault.name} on {selectedVault.chainName}. The treasury wallet now holds{' '}
+            {quote?.action.toToken.symbol || selectedVault.symbol}, the receipt token representing this vault position.
+          </p>
+          <div className="receipt-row">
+            {approvalHash && (
+              <a href={`${explorerBaseUrl}/tx/${approvalHash}`} target="_blank" rel="noreferrer">
+                Approval {approvalHash.slice(0, 10)}...
+              </a>
+            )}
+            <a href={`${explorerBaseUrl}/tx/${txHash}`} target="_blank" rel="noreferrer">
+              Deposit {txHash.slice(0, 10)}...
+            </a>
+            <span>Receipt token: {quote?.action.toToken.symbol || selectedVault.symbol}</span>
+          </div>
+        </section>
+      )}
     </main>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      {children}
+    </label>
+  )
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="metric">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  )
+}
+
+function PolicyCheckCard({ check }: { check: PolicyCheck }) {
+  return (
+    <article className={`check-card status-${check.status}`}>
+      <div>
+        <span>{check.label}</span>
+        <strong>{check.status.toUpperCase()}</strong>
+      </div>
+      <p>{check.detail}</p>
+    </article>
   )
 }
 
@@ -586,43 +679,30 @@ function VaultCard({
   onSelect: () => void
 }) {
   return (
-    <button type="button" className={`vault-card ${selected ? 'selected' : ''}`} onClick={onSelect}>
-      <div className="vault-head">
+    <button type="button" className={`vault-ticket ${selected ? 'selected' : ''}`} onClick={onSelect}>
+      <div className="ticket-top">
         <div>
-          <div className="eyebrow">
-            {vault.protocolName} · {vault.chainName}
-          </div>
-          <div className="vault-name">{vault.name}</div>
-          <div className="vault-sub">
-            Treasury asset: {vault.assetSymbol} · Receipt token: {vault.symbol}
-          </div>
+          <span className="ticket-route">{vault.protocolName} / {vault.chainName}</span>
+          <h3>{vault.name}</h3>
+          <p>
+            Treasury asset {vault.assetSymbol}. Receipt token after deposit: {vault.symbol}.
+          </p>
         </div>
-        <div className="stat" style={{ minWidth: 110 }}>
-          <div className="stat-label">APY</div>
-          <div className="stat-value">{formatRate(vault.apy)}</div>
+        <div className="apy-dial">
+          <span>APY</span>
+          <strong>{formatRate(vault.apy)}</strong>
         </div>
       </div>
 
-      <div className="vault-metrics">
-        <div>
-          <div className="metric-label">30d avg</div>
-          <div className="metric-value">{formatRate(vault.apy30d)}</div>
-        </div>
-        <div>
-          <div className="metric-label">TVL</div>
-          <div className="metric-value">{formatUsd(vault.tvlUsd)}</div>
-        </div>
-        <div>
-          <div className="metric-label">Risk</div>
-          <div className="metric-value">{vault.risk}</div>
-        </div>
+      <div className="ticket-metrics">
+        <Metric label="30d avg" value={formatRate(vault.apy30d)} />
+        <Metric label="TVL" value={formatUsd(vault.tvlUsd)} />
+        <Metric label="Risk" value={vault.risk} />
       </div>
 
-      <div className="tag-row" style={{ marginTop: 16 }}>
+      <div className="reason-row">
         {vault.reasons.map((reason) => (
-          <span className="tag" key={reason}>
-            {reason}
-          </span>
+          <span key={reason}>{reason}</span>
         ))}
       </div>
     </button>
