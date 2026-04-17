@@ -122,8 +122,8 @@ export function usePremiumActionX402(config: PremiumActionConfig = {}) {
           preferredAsset === 'USDC'
             ? ['USD Coin', 'USDC']
             : preferredAsset === 'USDT'
-              ? ['Tether USD', 'USDT', 'Tether']
-            : ['FxUSD', 'fxUSD'];
+              ? ['Tether USD', 'USDT', 'Tether', 'USD₮0']
+              : ['FxUSD', 'fxUSD'];
 
         return (
           accepts.find((requirement: any) => {

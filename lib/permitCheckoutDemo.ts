@@ -2,6 +2,7 @@ export type JourneyStage = "market" | "checkout" | "permit" | "receipt";
 export type GuardVerdict = "execute" | "resize" | "block";
 export type ReceiptMode = "executed" | "resized" | "blocked";
 export type TimelineStatus = "pending" | "active" | "complete" | "blocked";
+export type PermitCheckoutPaymentAsset = "USDT" | "USDC";
 
 export type PermitCheckoutStrategy = {
   id: string;
@@ -97,7 +98,7 @@ export type PermitCheckoutReceipt = {
   permitId: string;
   ticketId: string;
   result: string;
-  settlementMode: "demo" | "live" | "mock";
+  settlementMode: "demo" | "live";
   executionRef: string | null;
   txHash: string | null;
   explorerUrl: string | null;
@@ -105,6 +106,14 @@ export type PermitCheckoutReceipt = {
   settlementNote: string;
   proofBundle: Record<string, unknown>;
 };
+
+export const permitCheckoutPaymentOptions: Array<{
+  asset: PermitCheckoutPaymentAsset;
+  amountLabel: string;
+}> = [
+  { asset: "USDT", amountLabel: "0.05 USDT" },
+  { asset: "USDC", amountLabel: "0.05 USDC" },
+];
 
 export type PermitCheckoutRun = {
   runId: string;
@@ -142,7 +151,7 @@ export const permitCheckoutStrategies: PermitCheckoutStrategy[] = [
     creatorLogo: "/agent-logos/todays-orders.svg",
     description:
       "One bounded stable swap for X Layer users who want execution, not full wallet delegation.",
-    priceLabel: "0.05 USDT",
+    priceLabel: "0.05 USDT or 0.05 USDC",
     maxAmountLabel: "10 USDC",
     usageLabel: "1 run",
     expiryLabel: "24 hours",
@@ -179,7 +188,7 @@ export const permitCheckoutStrategies: PermitCheckoutStrategy[] = [
     creatorLogo: "/agent-logos/warden-bufett.svg",
     description:
       "A guarded treasury action that can shrink itself before execution when route quality degrades.",
-    priceLabel: "0.05 USDT",
+    priceLabel: "0.05 USDT or 0.05 USDC",
     maxAmountLabel: "20 USDC",
     usageLabel: "1 run",
     expiryLabel: "12 hours",
@@ -217,7 +226,7 @@ export const permitCheckoutStrategies: PermitCheckoutStrategy[] = [
     creatorLogo: "/agent-logos/kaibot.svg",
     description:
       "A one-shot entry permit that can be stopped before execution when route or policy quality falls outside the envelope.",
-    priceLabel: "0.05 USDT",
+    priceLabel: "0.05 USDT or 0.05 USDC",
     maxAmountLabel: "15 USDC",
     usageLabel: "1 run",
     expiryLabel: "6 hours",

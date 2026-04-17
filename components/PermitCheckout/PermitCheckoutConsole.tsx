@@ -20,12 +20,14 @@ import {
 import {
   GuardVerdict,
   JourneyStage,
+  PermitCheckoutPaymentAsset,
   PermitCheckoutFeedEvent,
   PermitCheckoutReceipt,
   PermitCheckoutRun,
   PermitCheckoutStatePayload,
   PermitCheckoutStrategy,
   ReceiptMode,
+  permitCheckoutPaymentOptions,
   permitCheckoutWalletStatus,
 } from "@/lib/permitCheckoutDemo";
 import { usePremiumActionX402 } from "@/src/usePremiumActionX402";
@@ -244,7 +246,7 @@ export default function PermitCheckoutConsole() {
   const [loadingState, setLoadingState] = useState<"state" | "checkout" | "guard" | "receipt" | null>("state");
   const [notice, setNotice] = useState<string | null>(null);
   const [evmSigner, setEvmSigner] = useState<EvmTypedDataSigner | null>(null);
-  const [mockMode, setMockMode] = useState(false);
+  const [selectedPaymentAsset, setSelectedPaymentAsset] = useState<PermitCheckoutPaymentAsset>("USDT");
 
   const { ready, authenticated, login } = usePrivy();
   const { wallets } = useWallets();
@@ -265,22 +267,24 @@ export default function PermitCheckoutConsole() {
     setEvmSigner(null);
   }, [embeddedEvmWallet?.address, signTypedData]);
 
-  useEffect(() => {
-    setMockMode(new URLSearchParams(window.location.search).get("mock") === "1");
-  }, []);
-
   const {
     unlockWithPayment,
     isLoading: paymentLoading,
     error: paymentError,
   } = usePremiumActionX402({
     evmSigner: evmSigner || undefined,
-    preferredAsset: "USDT",
+    preferredAsset: selectedPaymentAsset,
   });
 
   const selectedStrategy = useMemo(
     () => strategies.find((strategy) => strategy.id === selectedId) ?? strategies[0] ?? null,
     [selectedId, strategies],
+  );
+  const selectedPaymentOption = useMemo(
+    () =>
+      permitCheckoutPaymentOptions.find((option) => option.asset === selectedPaymentAsset) ||
+      permitCheckoutPaymentOptions[0],
+    [selectedPaymentAsset],
   );
   const workbenchTitle = selectedStrategy?.name ?? "Permit Checkout";
   const workbenchNetwork = selectedStrategy?.networkLabel ?? "X Layer 196";
@@ -290,6 +294,17 @@ export default function PermitCheckoutConsole() {
   );
   const currentUsageLeft = String(currentRun?.usageLeft ?? 1);
   const completedReceipts = recentEvents.length;
+
+  const formatCheckoutError = (error: unknown) => {
+    const message = error instanceof Error ? error.message : "x402 checkout failed.";
+
+    if (message.includes("invalid_exact_evm_insufficient_balance")) {
+      const alternateAsset = selectedPaymentAsset === "USDT" ? "USDC" : "USDT";
+      return `Selected ${selectedPaymentAsset} balance is not enough for x402 settlement. Top up ${selectedPaymentAsset} on X Layer, keep some OKB for gas, or switch to ${alternateAsset}.`;
+    }
+
+    return message;
+  };
 
   const hydrateState = (payload: PermitCheckoutStatePayload) => {
     setStrategies(payload.strategies);
@@ -403,44 +418,6 @@ export default function PermitCheckoutConsole() {
   const handleIssuePermit = async () => {
     if (!selectedStrategy) return;
 
-    if (mockMode) {
-      setLoadingState("checkout");
-      setNotice(null);
-
-      try {
-        const response = await fetch("/api/permit-checkout/x402-checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            strategyId: selectedStrategy.id,
-            walletAddress: embeddedEvmWallet?.address || "0x8c2f4d6a90b13ef740d382a2c29b7c621bf81234",
-            mock: true,
-          }),
-        });
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload?.error || "x402 checkout failed.");
-        }
-
-        const paymentToken = payload?.checkout?.paymentToken;
-        if (!paymentToken) {
-          throw new Error("x402 settled but the checkout token was missing.");
-        }
-
-        await issuePermitAfterPayment(
-          paymentToken,
-          payload?.payment?.paymentReference,
-          "x402 settled. Permit issued.",
-        );
-      } catch (error) {
-        setNotice(error instanceof Error ? error.message : "x402 checkout failed.");
-      } finally {
-        setLoadingState(null);
-      }
-      return;
-    }
-
     if (!ready) {
       setNotice("Wallet is still loading.");
       return;
@@ -463,6 +440,7 @@ export default function PermitCheckoutConsole() {
       const paymentResult = await unlockWithPayment("/api/permit-checkout/x402-checkout", {
         strategyId: selectedStrategy.id,
         walletAddress: embeddedEvmWallet.address,
+        paymentAsset: selectedPaymentAsset,
       });
 
       if (!paymentResult.success) {
@@ -488,7 +466,7 @@ export default function PermitCheckoutConsole() {
 
       await issuePermitAfterPayment(paymentToken, paymentReference);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "x402 checkout failed.");
+      setNotice(formatCheckoutError(error));
     } finally {
       setLoadingState(null);
     }
@@ -524,7 +502,7 @@ export default function PermitCheckoutConsole() {
       const response = await fetch("/api/permit-checkout/live-execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ permitId: currentRun.permitId, mock: mockMode }),
+        body: JSON.stringify({ permitId: currentRun.permitId }),
       });
       const payload = await response.json();
 
@@ -870,8 +848,33 @@ export default function PermitCheckoutConsole() {
                         Checkout
                       </p>
                       <p className="mt-2 text-base font-semibold text-white">
-                        {selectedStrategy.priceLabel}
+                        {selectedPaymentOption.amountLabel}
                       </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-white">Pay with</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {permitCheckoutPaymentOptions.map((option) => {
+                        const active = option.asset === selectedPaymentAsset;
+                        return (
+                          <button
+                            key={option.asset}
+                            type="button"
+                            onClick={() => setSelectedPaymentAsset(option.asset)}
+                            className={[
+                              "rounded-md border px-4 py-3 text-left transition",
+                              active
+                                ? "border-[#49b9a9] bg-[#10263a] text-white"
+                                : "border-[#22324c] bg-[#0f1728] text-[#c9d7ea] hover:border-[#345074]",
+                            ].join(" ")}
+                          >
+                            <p className="text-sm font-semibold">{option.asset}</p>
+                            <p className="mt-1 text-sm text-[#9fb0c8]">{option.amountLabel}</p>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -916,7 +919,7 @@ export default function PermitCheckoutConsole() {
                   >
                     {loadingState === "checkout" || paymentLoading
                       ? "Paying x402..."
-                      : authenticated || mockMode
+                      : authenticated
                         ? "Pay x402 and issue permit"
                         : "Connect and pay x402"}
                     <ArrowRight className="h-4 w-4" />

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { randomBytes } from "crypto";
 import { executePermitWithAgenticWallet } from "@/lib/permitCheckoutLiveExecution";
 import {
   getActivePermitCheckoutRun,
@@ -21,21 +20,6 @@ export async function POST(request: Request) {
     const run = getActivePermitCheckoutRun(permitId);
     if (!run) {
       return NextResponse.json({ error: "No active permit run was found." }, { status: 404 });
-    }
-
-    if (body?.mock === true) {
-      const txHash = `0x${randomBytes(32).toString("hex")}`;
-      return NextResponse.json(
-        storePermitCheckoutLiveReceipt(permitId, {
-          txHash,
-          explorerUrl: `https://www.oklink.com/xlayer/tx/${txHash}`,
-          executionStatus: "success",
-          proof: {
-            permitId,
-            note: "Agentic Wallet execution receipt recorded.",
-          },
-        }),
-      );
     }
 
     const execution = await executePermitWithAgenticWallet(run);

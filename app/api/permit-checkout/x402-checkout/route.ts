@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "crypto";
 import { LANGGRAPH_API_BASE } from "@/lib/config";
-import { findPermitStrategy } from "@/lib/permitCheckoutDemo";
+import {
+  findPermitStrategy,
+  PermitCheckoutPaymentAsset,
+  permitCheckoutPaymentOptions,
+} from "@/lib/permitCheckoutDemo";
 import { registerPermitCheckoutPayment } from "@/lib/permitCheckoutDemoStore";
 
 export const runtime = "nodejs";
@@ -94,54 +97,42 @@ function toUsdcUnits(priceLabel: string) {
   return Math.round(amount * 1_000_000).toString();
 }
 
-function buildPaymentRail(strategyId: string, payerAddress?: string | null, source = "x402") {
-  const strategy = findPermitStrategy(strategyId);
+function normalizePaymentAsset(value: unknown): PermitCheckoutPaymentAsset {
+  return value === "USDC" ? "USDC" : "USDT";
+}
+
+function getPaymentOption(asset: PermitCheckoutPaymentAsset) {
+  return (
+    permitCheckoutPaymentOptions.find((option) => option.asset === asset) ||
+    permitCheckoutPaymentOptions[0]
+  );
+}
+
+function getLocalAssetAddress(asset: PermitCheckoutPaymentAsset) {
+  return asset === "USDC"
+    ? process.env.PERMIT_CHECKOUT_X402_ASSET ||
+        process.env.X402_USDC_ADDRESS ||
+        "0x74b7f16337b8972027f6196a17a631ac6de26d22"
+    : process.env.PERMIT_CHECKOUT_X402_USDT_ASSET ||
+        process.env.X402_USDT_ADDRESS ||
+        "0x779ded0c9e1022225f8e0630b35a9b54be713736";
+}
+
+function buildPaymentRail(
+  asset: PermitCheckoutPaymentAsset,
+  payerAddress?: string | null,
+  source = "x402",
+) {
+  const paymentOption = getPaymentOption(asset);
 
   return {
     protocol: "x402" as const,
     network: XLAYER_NETWORK,
-    asset: "USDT",
-    amountLabel: strategy?.priceLabel ?? "0.50 USDC",
+    asset: paymentOption.asset,
+    amountLabel: paymentOption.amountLabel,
     payerAddress: payerAddress ?? null,
     source,
   };
-}
-
-function createMockX402Checkout(parsedBody: Record<string, unknown>) {
-  const strategyId = typeof parsedBody.strategyId === "string" ? parsedBody.strategyId : "stable-swap";
-  const strategy = findPermitStrategy(strategyId);
-  if (!strategy) {
-    return NextResponse.json({ success: false, error: "Unknown strategy." }, { status: 400 });
-  }
-
-  const walletAddress =
-    typeof parsedBody.walletAddress === "string" && /^0x[a-fA-F0-9]{40}$/.test(parsedBody.walletAddress)
-      ? parsedBody.walletAddress
-      : "0x8c2f4d6a90b13ef740d382a2c29b7c621bf81234";
-  const paymentReference = `0x${randomBytes(32).toString("hex")}`;
-  const payment = {
-    ...buildPaymentRail(strategyId, walletAddress, "premium-x402-proxy"),
-    status: "settled" as const,
-    paymentReference,
-    settlementTxHash: paymentReference,
-    facilitator: getBackendBase(),
-    raw: {
-      paymentReference,
-      note: "x402 settlement proof recorded.",
-    },
-  };
-  const paymentToken = registerPermitCheckoutPayment(strategyId, payment);
-
-  return NextResponse.json({
-    success: true,
-    checkout: {
-      strategyId,
-      paid: true,
-      paymentToken,
-    },
-    paymentRail: buildPaymentRail(strategyId, walletAddress, "premium-x402-proxy"),
-    payment,
-  });
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
@@ -161,6 +152,8 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: numbe
 async function proxyToPremiumX402(request: NextRequest, parsedBody: Record<string, unknown>) {
   const strategyId = typeof parsedBody.strategyId === "string" ? parsedBody.strategyId : "stable-swap";
   const strategy = findPermitStrategy(strategyId);
+  const paymentAsset = normalizePaymentAsset(parsedBody.paymentAsset);
+  const paymentOption = getPaymentOption(paymentAsset);
   if (!strategy) {
     return NextResponse.json({ success: false, error: "Unknown strategy." }, { status: 400 });
   }
@@ -189,11 +182,11 @@ async function proxyToPremiumX402(request: NextRequest, parsedBody: Record<strin
         riskMode: "safe",
         timeHorizon: "today",
         language: "zh",
-        paymentAsset: "USDT",
+        paymentAsset,
         source: "permit-checkout",
         permitCheckout: {
           strategyId,
-          priceLabel: strategy.priceLabel,
+          priceLabel: paymentOption.amountLabel,
           permitScope: strategy.permitScope,
           maxAmountLabel: strategy.maxAmountLabel,
           guardVerdict: strategy.guard.verdict,
@@ -247,7 +240,7 @@ async function proxyToPremiumX402(request: NextRequest, parsedBody: Record<strin
 
   const backendPaymentReference = findPaymentReference(backendPayload);
   const payment = {
-    ...buildPaymentRail(strategyId, walletAddress, "premium-x402-proxy"),
+    ...buildPaymentRail(paymentAsset, walletAddress, "premium-x402-proxy"),
     status: "settled" as const,
     paymentReference: paymentReference || backendPaymentReference,
     settlementTxHash:
@@ -281,7 +274,7 @@ async function proxyToPremiumX402(request: NextRequest, parsedBody: Record<strin
         paid: true,
         paymentToken,
       },
-      paymentRail: buildPaymentRail(strategyId, walletAddress, "premium-x402-proxy"),
+      paymentRail: buildPaymentRail(paymentAsset, walletAddress, "premium-x402-proxy"),
       payment,
       backend: backendPayload,
     },
@@ -298,15 +291,13 @@ async function runLocalX402(request: NextRequest, parsedBody: Record<string, unk
 
   const strategyId = typeof parsedBody.strategyId === "string" ? parsedBody.strategyId : "stable-swap";
   const strategy = findPermitStrategy(strategyId);
+  const paymentAsset = normalizePaymentAsset(parsedBody.paymentAsset);
+  const paymentOption = getPaymentOption(paymentAsset);
   if (!strategy) {
     return NextResponse.json({ success: false, error: "Unknown strategy." }, { status: 400 });
   }
 
   const facilitatorUrl = process.env.X402_FACILITATOR_URL || "https://x402.org/facilitator";
-  const localXLayerUsdcAddress =
-    process.env.PERMIT_CHECKOUT_X402_ASSET ||
-    process.env.X402_USDC_ADDRESS ||
-    "0x74b7f16337b8972027f6196a17a631ac6de26d22";
   const resourceServer = new x402ResourceServer(
     new HTTPFacilitatorClient({ url: facilitatorUrl }),
   ).register(XLAYER_NETWORK, new ExactEvmScheme());
@@ -318,11 +309,11 @@ async function runLocalX402(request: NextRequest, parsedBody: Record<string, unk
     network: XLAYER_NETWORK,
     payTo,
     price: {
-      amount: toUsdcUnits(strategy.priceLabel),
-      asset: localXLayerUsdcAddress,
+      amount: toUsdcUnits(paymentOption.amountLabel),
+      asset: getLocalAssetAddress(paymentAsset),
       extra: {
-        name: "USDC",
-        version: "2",
+        name: paymentAsset,
+        version: paymentAsset === "USDC" ? "2" : "1",
       },
     },
     maxTimeoutSeconds: 300,
@@ -401,7 +392,7 @@ async function runLocalX402(request: NextRequest, parsedBody: Record<string, unk
   const payerAddress =
     typeof parsedBody.walletAddress === "string" ? parsedBody.walletAddress : verification.payer ?? null;
   const payment = {
-    ...buildPaymentRail(strategyId, payerAddress, "local-x402-resource-server"),
+    ...buildPaymentRail(paymentAsset, payerAddress, "local-x402-resource-server"),
     status: "settled" as const,
     paymentReference,
     settlementTxHash: paymentReference?.startsWith("0x") ? paymentReference : null,
@@ -418,7 +409,7 @@ async function runLocalX402(request: NextRequest, parsedBody: Record<string, unk
         paid: true,
         paymentToken,
       },
-      paymentRail: buildPaymentRail(strategyId, payerAddress, "local-x402-resource-server"),
+      paymentRail: buildPaymentRail(paymentAsset, payerAddress, "local-x402-resource-server"),
       payment,
     },
     {
@@ -441,10 +432,6 @@ export async function POST(request: NextRequest) {
 
     if (!findPermitStrategy(strategyId)) {
       return NextResponse.json({ success: false, error: "Unknown strategy." }, { status: 400 });
-    }
-
-    if (parsedBody.mock === true) {
-      return createMockX402Checkout(parsedBody);
     }
 
     const payTo = getLocalPayToAddress();

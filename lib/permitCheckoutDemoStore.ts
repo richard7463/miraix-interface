@@ -192,7 +192,7 @@ export function createPermitCheckoutRun(strategyId: string, payment: PermitCheck
     stage: "permit",
     createdAt: nowIso,
     walletLabel: permitCheckoutWalletStatus.label,
-    priceLabel: strategy.priceLabel,
+    priceLabel: payment.amountLabel,
     networkLabel: strategy.networkLabel,
     permitScope: strategy.permitScope,
     maxAmountLabel: strategy.maxAmountLabel,
@@ -204,7 +204,7 @@ export function createPermitCheckoutRun(strategyId: string, payment: PermitCheck
     ticketIssuedAt: nowIso,
     guard: createIdleGuard(),
     receipt: null,
-    timeline: createTimeline(nowIso, strategy.name, strategy.priceLabel, permitId),
+    timeline: createTimeline(nowIso, strategy.name, payment.amountLabel, permitId),
   };
 
   const store = getStore();
